@@ -167,15 +167,15 @@ public class GEAT{
 	 
   public static void main(String[] args) throws Exception {	
 	  
-	  //String fileSeparator = System.getProperties().getProperty("file.separator");
-	  //String workDir = System.getProperties().getProperty("user.dir");
+	 //String fileSeparator = System.getProperties().getProperty("file.separator");
+	 //String workDir = System.getProperties().getProperty("user.dir");
 	 homeDir=getClassPath();
 	 dataDir=homeDir+"/data";
 	 workingDir=homeDir+"/working";
 	 String timeStamp=new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
 	 tmpDir=homeDir+"/tmp/"+timeStamp;
 	
-	 System.out.println(homeDir);
+	 //System.out.println(homeDir);
 	 File dir=new File(dataDir);
 	 if(!dir.exists()) FileOperate.newFolder(dataDir);	
 	 
@@ -189,54 +189,53 @@ public class GEAT{
 	 dir=null;
 	   
 	 Map<String, List<String>> params=getCommandLineParams(args);
-	   
+	 
+	 taskName="SeqOperate";
+	 
 	 if(params.get("task")!=null){		
-	
 		if(params.get("task").size()>0){
 			taskName=params.get("task").get(0).trim();		 
-		}else{
-		   System.err.println("Error: '-task' is invalid");				
 		}
-	  }
+	 }
 	   
 	 
-	  if(taskName.equalsIgnoreCase("SeqExtract")){
+	 if(taskName.equalsIgnoreCase("SeqExtract")){
 		 CallSeqExtract.setHomeDir(homeDir);
 		 CallSeqExtract.setTmpDir(tmpDir);
 		 CallSeqExtract.setWorkingDir(workingDir);
 		 CallSeqExtract.doWork(args);	     
 	    	
-      }else if(taskName.equalsIgnoreCase("SeqMut")){
+     }else if(taskName.equalsIgnoreCase("SeqMut")){
 		 CallSeqMut.setHomeDir(homeDir);
 		 CallSeqMut.setTmpDir(tmpDir);
 		 CallSeqMut.setWorkingDir(workingDir); 
 		 CallSeqMut.doWork(args);		 
 	    	
-	  }else if(taskName.equalsIgnoreCase("SeqOffTarget")){
+	 }else if(taskName.equalsIgnoreCase("SeqOffTarget")){
 		 CallSeqOffTarget.setHomeDir(homeDir);
 		 CallSeqOffTarget.setTmpDir(tmpDir);
 		 CallSeqOffTarget.setWorkingDir(workingDir);
 	     CallSeqOffTarget.doWork(args);	     
 	    	
-	  }else if(taskName.equalsIgnoreCase("SeqQCFilter")){
+	 }else if(taskName.equalsIgnoreCase("SeqQCFilter")){
 		 CallSeqQCFilter.setHomeDir(homeDir);
 		 CallSeqQCFilter.setTmpDir(tmpDir);
 		 CallSeqQCFilter.setWorkingDir(workingDir);
 		 CallSeqQCFilter.doWork(args);	     
 		    	
-	  }else if(taskName.equalsIgnoreCase("Fq2Fa")){
+	 }else if(taskName.equalsIgnoreCase("Fq2Fa")){
 			 CallFq2Fa.setHomeDir(homeDir);
 			 CallFq2Fa.setTmpDir(tmpDir);
 			 CallFq2Fa.setWorkingDir(workingDir);
 			 CallFq2Fa.doWork(args);	     
 			    	
-	  }else if(taskName.equalsIgnoreCase("SeqDupFilter")){
+	 }else if(taskName.equalsIgnoreCase("SeqDupFilter")){
 			 CallSeqDupFilter.setHomeDir(homeDir);
 			 CallSeqDupFilter.setTmpDir(tmpDir);
 			 CallSeqDupFilter.setWorkingDir(workingDir);
 			 CallSeqDupFilter.doWork(args);	     
 		    	
-	  }else if(taskName.equalsIgnoreCase("SeqOperate")){	
+	 }else if(taskName.equalsIgnoreCase("SeqOperate")){	
 		   
 		   if(params.get("fastq")!=null){
 				 isFastqOK=false;
@@ -595,16 +594,16 @@ public class GEAT{
 		   //=======================start to split seq===========================
 		   if(doSplitSeq &&(isFastqOK || isFastaOK)){
 				splitedSeqFiles=null;
-				String seqFile="";
+				String inSeqFile="";
 				//Check seq format, and then split seq into multiple subfiles................
 				System.out.println(".........Spliting forward seq..........");
 				if(isFastqOK){
-			    	seqFile=fastq;
+					inSeqFile=fastq;
 				}else if(isFastaOK){	
-					seqFile=fasta;
+					inSeqFile=fasta;
 		    	}				
 				//System.out.println("Total Seq Num: "+SeqOperation.getSeqNum(inSeqFile));
-	      	    splitedSeqFiles=SeqOperation.splitSeqFile(seqFile,splitStep,
+	      	    splitedSeqFiles=SeqOperation.splitSeqFile(inSeqFile,splitStep,
 	      	    		splitedSeqOut);
 		 				
 				if(splitedSeqFiles==null || splitedSeqFiles.size()==0){
@@ -635,7 +634,7 @@ public class GEAT{
 				}				
 		   }			   
 		   
-		   //####### extract sub seq from given seq name file ########
+		   //####### extract seq by given seq name in file(s) ########
 		   if(params.get("subSeq")!=null){
 			 doSubSeqExtraction=false;
 			 String seqFile = null;	
@@ -708,10 +707,10 @@ public class GEAT{
 			 if(!doSubSeqExtraction) System.out.println("Warning: '-subSeq' parameter is illeagl. We skiped it!!!");
 		   }
 		   
-		   //####### exclude sub seq from given seq name file########
+		   //####### exclude seq by given seq name in file(s) ########
 		   if(params.get("excludeSeq")!=null){
 			 doSubSeqExclusion=false;
-			 String seqFile = null;
+			 String inSeqFile = null;
 			 List<String> subSeqNameList=new ArrayList<String>();
 			 if(params.get("excludeSeq").size()>1 && (params.get("excludeSeq").size() % 2 == 0)){
 			   System.out.println("================Excluding sub sequences according your -excludeSeq parameter===================");
@@ -730,9 +729,9 @@ public class GEAT{
 			    	  seqNameColIdx=Integer.parseInt(seqNameCol)-1;
 			    	
 			        if(isFastaOK){
-			    	  seqFile=fasta;
+			        	inSeqFile=fasta;
 			    	}else if(isFastqOK){
-			    	  seqFile=fastq;
+			    		inSeqFile=fastq;
 			    	}
 			    	
 			    	if(doSubSeqExclusion){		   
@@ -742,25 +741,25 @@ public class GEAT{
 			     }
 			   }//for
 			   if(subSeqNameList.size()>0){
-				    seqObjList=SeqOperation.excludeSeq(seqFile,subSeqNameList);
+				    seqObjList=SeqOperation.excludeSeq(inSeqFile,subSeqNameList);
 				    subSeqNameList=null;
 				 if(seqObjList.size()>0){
 		    	    System.out.println("Successfully excluded "+seqObjList.size()+
-		    	    		" sequences in ["+subSeqNameFile+"] from ["+seqFile+"]");
+		    	    		" sequences in ["+subSeqNameFile+"] from ["+inSeqFile+"]");
 			     
-			   	    if(outDir==null) outDir=seqFile.substring(0,seqFile.lastIndexOf("/"));
-			        String outSeqFile=outDir+"/"+seqFile.substring(
-			    		   seqFile.lastIndexOf("/")+1,seqFile.lastIndexOf(".")
+			   	    if(outDir==null) outDir=inSeqFile.substring(0,inSeqFile.lastIndexOf("/"));
+			        String outSeqFile=outDir+"/"+inSeqFile.substring(
+			        		inSeqFile.lastIndexOf("/")+1,inSeqFile.lastIndexOf(".")
 			    		 )+".excluded.fna";
 			        SeqOperation.saveSeqList(seqObjList, outSeqFile);
 			        seqObjList=null;
 			        isFastaOK=true;
 			        fasta=outSeqFile;
 				 }else{
-				    System.err.println("No sequence exists for exclusion from "+seqFile);
+				    System.err.println("No sequence exists for exclusion from "+inSeqFile);
 				 }
 			   }else{
-				 System.err.println("No excluded sequences from "+seqFile);
+				 System.err.println("No excluded sequences from "+inSeqFile);
 				 return;
 			   }
 			 }else{
