@@ -1082,7 +1082,7 @@ public class SeqMut {
 		  }
 		  mutTag=mutTag.substring(0,mutTag.lastIndexOf("|"));
 		  perRow=new ArrayList<String>();
-		  perRow.add("Average BaseMutFrequency:"+mutTag);
+		  perRow.add("Average BMF:"+mutTag);
 	      for(SeqMutInfo mut:mutList){
 	    	 perRow.add(Double.toString(mut.avgTarMutRate));
 		  }
@@ -1090,7 +1090,7 @@ public class SeqMut {
 		  perRow=null;
 			
 	      perRow=new ArrayList<String>();
-	      perRow.add("Average BaseMutFrequency:Other");
+	      perRow.add("Average BMF:Other");
 	      for(SeqMutInfo mut:mutList){
 	    	 perRow.add(Double.toString(mut.avgOtherMutRate));
 		  }
@@ -1099,7 +1099,7 @@ public class SeqMut {
 		}		
 		
 	    perRow=new ArrayList<String>();
-	    perRow.add("Average BaseMutFrequency:All");
+	    perRow.add("Average BMF:All");
 	    for(SeqMutInfo mut:mutList){
 	      perRow.add(Double.toString(mut.avgMutRate));
 		}
@@ -1158,7 +1158,7 @@ public class SeqMut {
 		  }
 		  mutTag=mutTag.substring(0,mutTag.lastIndexOf("|"));
 		  perRow=new ArrayList<String>();
-		  perRow.add("Forward Average BaseMutFrequency:"+mutTag);
+		  perRow.add("Forward Average BMF:"+mutTag);
 	      for(SeqMutInfo mut:mutList){
 	    	 perRow.add(Double.toString(mut.avgTarMutRate));
 		  }
@@ -1166,7 +1166,7 @@ public class SeqMut {
 		  perRow=null;
 			
 	      perRow=new ArrayList<String>();
-	      perRow.add("Forward Average BaseMutFrequency:Other");
+	      perRow.add("Forward Average BMF:Other");
 	      for(SeqMutInfo mut:mutList){
 	    	 perRow.add(Double.toString(mut.avgOtherMutRate));
 		  }
@@ -1175,7 +1175,7 @@ public class SeqMut {
 		}		
 		
 	    perRow=new ArrayList<String>();
-	    perRow.add("Forward Average BaseMutFrequency:All");
+	    perRow.add("Forward Average BMF:All");
 	    for(SeqMutInfo mut:mutList){
 	      perRow.add(Double.toString(mut.avgMutRate));
 		}
@@ -1200,7 +1200,7 @@ public class SeqMut {
 		   }
 	 	   mutTag=mutTag.substring(0,mutTag.lastIndexOf("|"));
 		   perRow=new ArrayList<String>();
-		   perRow.add("Reverse Average BaseMutFrequency:"+mutTag);
+		   perRow.add("Reverse Average BMF:"+mutTag);
 		   for(SeqMutInfo mut2:mutList2){
 			  perRow.add(Double.toString(mut2.avgTarMutRate));
 		   }
@@ -1208,7 +1208,7 @@ public class SeqMut {
 		   perRow=null;
 					
 		   perRow=new ArrayList<String>();
-		   perRow.add("Reverse Average BaseMutFrequency:Other");
+		   perRow.add("Reverse Average BMF:Other");
 		   for(SeqMutInfo mut2:mutList2){
 		   	 perRow.add(Double.toString(mut2.avgOtherMutRate));
 		   }
@@ -1217,7 +1217,7 @@ public class SeqMut {
 		}		
 				
 		perRow=new ArrayList<String>();
-		perRow.add("Reverse Average BaseMutFrequency:All");
+		perRow.add("Reverse Average BMF:All");
 		for(SeqMutInfo mut2:mutList2){
 		    perRow.add(Double.toString(mut2.avgMutRate));
 		}
@@ -1234,7 +1234,7 @@ public class SeqMut {
 			  }
 			  mutTag=mutTag.substring(0,mutTag.lastIndexOf("|"));
 			  perRow=new ArrayList<String>();
-			  perRow.add("Forward-Reverse Average BaseMutFrequency:"+mutTag);
+			  perRow.add("Forward-Reverse Average BMF:"+mutTag);
 			  avgMutRate=0.0d;
 		      for(int i=0;i<mutList.size();i++){
 		    	 avgMutRate=mutList.get(i).sumTarMutRate+mutList2.get(i).sumTarMutRate;
@@ -1245,7 +1245,7 @@ public class SeqMut {
 			  perRow=null;
 					
 		      perRow=new ArrayList<String>();
-		      perRow.add("Forward-Reverse Average BaseMutFrequency:Other");
+		      perRow.add("Forward-Reverse Average BMF:Other");
 		      avgMutRate=0.0d;
 		      for(int i=0;i<mutList.size();i++){
 		    	 avgMutRate=mutList.get(i).sumOtherMutRate+mutList2.get(i).sumOtherMutRate;
@@ -1257,20 +1257,12 @@ public class SeqMut {
 		}		
 				
 		perRow=new ArrayList<String>();
-		perRow.add("Forward-Reverse Average BaseMutFrequency:All");
+		perRow.add("Forward-Reverse Average BMF:All");
 		avgMutRate=0.0d;
 	    for(int i=0;i<mutList.size();i++){
 	    	 avgMutRate=mutList.get(i).sumMutRate+mutList2.get(i).sumMutRate;
 	    	 avgMutRate=avgMutRate/(mutList.get(i).baseNum+mutList2.get(i).baseNum);
 	    	 perRow.add(Double.toString(avgMutRate));
-		}
-		out.add(perRow);
-		perRow=null;
-			
-		perRow=new ArrayList<String>();
-		perRow.add("Forward-Reverse Average BaseMutFrequency:All");
-		for(SeqMutInfo mut:mutList){
-		    perRow.add(Double.toString(mut.avgMutRate));
 		}
 		out.add(perRow);
 		perRow=null;
