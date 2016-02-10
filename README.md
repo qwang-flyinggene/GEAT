@@ -5,7 +5,7 @@ GEAT is a java-based **G**enomic **E**vents **A**nalysis **T**ool aimed to perfo
 
 ##Download & Install
 
-```$ git clone "https://github.com/geatools/geat.git/```
+```$ git clone "https://github.com/geatools/geat.git/"```
 
 ##Requirements / Dependencies##
 - **Java**    
