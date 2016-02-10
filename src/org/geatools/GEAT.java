@@ -98,7 +98,7 @@ public class GEAT{
 	 protected static boolean doSubSeqExtraction=false;
 	 protected static boolean doSubSeqExclusion=false;
 	 protected static boolean doSplitSeq=true;	
-	 protected static int splitStep=500000;
+	 protected static int splitStep=100000;
 	 protected static List<String> splitedSeqFiles = null;
 	 protected static List<String> splitedSeqFiles2 = null;
 	 protected static String combinedSeqOut=null;	   
