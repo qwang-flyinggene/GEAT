@@ -43,7 +43,7 @@ import org.geatools.operation.FileOperate;
 public class SeqOperation{
 
  public static int nameColIdx=0;
- public static int nameStartRowIdx=1;
+ public static int nameStartRowIdx=0;
  public static final String SEQTYPE_SINGLEEND="SingleEnd";
  public static final String SEQTYPE_PAIREND="PairEnd";
  
@@ -98,272 +98,328 @@ public class SeqOperation{
  }
  
  public static  List<SeqInfo> getFASTASeqObj(String seqFile){
- 
-    List<SeqInfo> seqObjList=new ArrayList<SeqInfo>();
-	SeqInfo seqObj;
-	int seqNum=0;
-	try{    
-        BufferedReader br;              
-        br = new BufferedReader(new FileReader(seqFile));
-	    String line;
-		String seqIdentifier;
-		String seqName;
-		String seqLine;
-		String [] itemSplited;
-			
-		seqNum=0;
-		line = br.readLine();				
-		while(true){           
-	       if (line == null) break;
-	       line=line.trim();
-		   if(line.indexOf(">")==0){
-		     
-			 seqIdentifier=line.substring(1,line.length());			 
-			 itemSplited=seqIdentifier.split("\\s+");
-			 seqName=itemSplited[0].trim();	
-			 
-			 line=br.readLine();
-			 seqLine="";
-			 if (line == null) break;
-			 while(line.indexOf(">")<0){
-		      seqLine = seqLine+line.trim();
-			  line=br.readLine();
-			  if (line == null) break;
-			 }
-			 seqLine=seqLine.replaceAll("N","n");
-             seqObj=new SeqInfo();
-             seqObj.seqIdentifier=seqIdentifier;
-             seqObj.seqName=seqName;
-			 seqObj.seqLength=seqLine.length();
-             seqObj.seq=seqLine.toUpperCase();
-             seqObjList.add(seqObj);
-             seqObj=null;
-             
-             seqNum=seqNum+1;
-             
-		   }
-			 
-		}           		   
-		br.close();
-	
-	}catch(IOException e){
-        System.out.println(e);
-    }
-	
-	return seqObjList;
-   
- }
- 
- public static List<SeqInfo> getFASTASeqObj(String seqFile, int start, int end){
 	 
 	    List<SeqInfo> seqObjList=new ArrayList<SeqInfo>();
-	    SeqInfo perSeq=new SeqInfo();
+		SeqInfo seqObj;
 		int seqNum=0;
-		
 		try{    
-	       	BufferedReader br;              
+	        BufferedReader br;              
 	        br = new BufferedReader(new FileReader(seqFile));
 		    String line;
-			String seqIdentifier="";
-			String seqLine = "";
-			String seqName="";			
-			String [] itemSplited;
+			String seqIdentifier;
+			String seqName;
+			String seqLine;
+			String [] itemSplited;			
 			seqNum=0;
-			line = br.readLine();	
-			while(true){  
-	         		
+			line = br.readLine();
+			while(line.length()==0 || line.matches("\\s*")){
+			   line = br.readLine();
+			   if (line == null){ 
+				   br.close();
+				   return seqObjList;
+			   }
+			}
+			while(true){           
 		       if (line == null) break;
-		       if(seqNum>=end) break;
 		       line=line.trim();
-			   if(line.indexOf(">")==0){			    
-				 seqIdentifier=line.substring(1,line.length());				 
-				 line=br.readLine();				
-				 if (line == null) break;
+			   if(line.indexOf(">")==0){
+			     
+				 seqIdentifier=line.substring(1,line.length());			 
+				 itemSplited=seqIdentifier.split("\\s+");
+				 seqName=itemSplited[0].trim();	
+				 
+				 line=br.readLine();
 				 seqLine="";
+				 if (line == null) break;
 				 while(line.indexOf(">")<0){
-			       seqLine = seqLine+line.trim();
-				   line=br.readLine();
-				   if (line == null) break;
+			      seqLine = seqLine+line.trim();
+				  line=br.readLine();
+				  if (line == null) break;
 				 }
-				 
-				 if(seqNum>=start && seqNum<end){					   
-					 itemSplited=seqIdentifier.split("\\s+");
-					 seqName=itemSplited[0].trim();					
-					 seqLine=seqLine.replaceAll("N","n");
-					 perSeq=new SeqInfo();				  
-					 perSeq.seqIdentifier=seqIdentifier;
-					 perSeq.seqName=seqName;
-					 perSeq.seqLength=seqLine.length();
-					 perSeq.seq=seqLine.toUpperCase();
-			         seqObjList.add(perSeq);
-			         perSeq=null;	
-				 }
-				 
-				 seqNum=seqNum+1;
+				 seqLine=seqLine.replaceAll("N","n");
+	             seqObj=new SeqInfo();
+	             seqObj.seqIdentifier=seqIdentifier;
+	             seqObj.seqName=seqName;
+				 seqObj.seqLength=seqLine.length();
+	             seqObj.seq=seqLine.toUpperCase();
+	             seqObjList.add(seqObj);
+	             seqObj=null;
+	             
+	             seqNum=seqNum+1;
 	             
 			   }
+				 
 			}           		   
 			br.close();
 		
-	    	line=null;
-	    	seqIdentifier=null;		
-			seqLine=null;
-			seqName=null;
-			itemSplited=null;
 		}catch(IOException e){
 	        System.out.println(e);
 	    }
-
-	    return seqObjList; 
+		
+		return seqObjList;
+	   
  }
- 
+	 
+ public static List<SeqInfo> getFASTASeqObj(String seqFile, int start, int end){
+		 
+		    List<SeqInfo> seqObjList=new ArrayList<SeqInfo>();
+		    SeqInfo perSeq=new SeqInfo();
+			int seqNum=0;
+			
+			try{    
+		       	BufferedReader br;              
+		        br = new BufferedReader(new FileReader(seqFile));
+			    String line;
+				String seqIdentifier="";
+				String seqLine = "";
+				String seqName="";			
+				String [] itemSplited;
+				seqNum=0;
+				line = br.readLine();
+				while(line.length()==0 || line.matches("\\s*")){
+				   line = br.readLine();
+				   if (line == null){ 
+					   br.close();
+				       return seqObjList;
+				   }
+				}
+				while(true){  
+		         		
+			       if (line == null) break;
+			       if(seqNum>=end) break;
+			       line=line.trim();
+				   if(line.indexOf(">")==0){			    
+					 seqIdentifier=line.substring(1,line.length());				 
+					 line=br.readLine();				
+					 if (line == null) break;
+					 seqLine="";
+					 while(line.indexOf(">")<0){
+				       seqLine = seqLine+line.trim();
+					   line=br.readLine();
+					   if (line == null) break;
+					 }
+					 
+					 if(seqNum>=start && seqNum<end){					   
+						 itemSplited=seqIdentifier.split("\\s+");
+						 seqName=itemSplited[0].trim();					
+						 seqLine=seqLine.replaceAll("N","n");
+						 perSeq=new SeqInfo();				  
+						 perSeq.seqIdentifier=seqIdentifier;
+						 perSeq.seqName=seqName;
+						 perSeq.seqLength=seqLine.length();
+						 perSeq.seq=seqLine.toUpperCase();
+				         seqObjList.add(perSeq);
+				         perSeq=null;	
+					 }
+					 
+					 seqNum=seqNum+1;
+		             
+				   }
+				}           		   
+				br.close();
+			
+		    	line=null;
+		    	seqIdentifier=null;		
+				seqLine=null;
+				seqName=null;
+				itemSplited=null;
+			}catch(IOException e){
+		        System.out.println(e);
+		    }
+
+		    return seqObjList; 
+ }
+	 
  public static List<SeqInfo> getFASTQSeqObj(String seqFile){
-	 
-	    List<SeqInfo> seqObjList=new ArrayList<SeqInfo>();
-	    SeqInfo perSeq=new SeqInfo();
-		int seqNum=0;
-		
-		try{    
-	       	BufferedReader br;              
-	        br = new BufferedReader(new FileReader(seqFile));
-		    String line;
-			String seqIdentifier;	
-			String seqLine;
-			String seqName;		
-			String seqQualityLine;
-			String [] itemSplited;
-				
-			while(true){  			   
-			   
-	           line = br.readLine();			
-		       if (line == null) break;
-			   line=line.trim();
-	           if(line.indexOf("@")!=0) {
-			      System.out.println("Error in reading fastq");
-				  break;
-			   }			   
-	      	   seqIdentifier=line.substring(1,line.length());				 
-			   itemSplited=seqIdentifier.split("\\s+");
-			   seqName=itemSplited[0].trim();
-			     
-			   line=br.readLine();			 
-			   if (line == null) break;
-			   seqLine=line.trim();			 
-			   //seqLine=seqLine.replaceAll("N","n");
-			   
-			   line=br.readLine();			  
-			   if (line == null) break;
-			   line=line.trim();
-			   if(line.indexOf("+")!=0) {
-			      System.out.println("Error in reading fastq");
-				  break;
-			   }		      
-	           
-	           line=br.readLine();			 
-			   if (line == null) break;
-			   seqQualityLine=line.trim();
-			   
-			   perSeq=new SeqInfo();
-			   perSeq.seqIdentifier=seqIdentifier;
-			   perSeq.seqName=seqName;
-			   perSeq.seqLength=seqLine.length();
-			   perSeq.seq=seqLine;
-			   perSeq.seqQualityEncode=seqQualityLine;
-			   seqObjList.add(perSeq);
-			   perSeq=null;
-			   
-			   seqNum=seqNum+1;
-		
-			}           		   
-			br.close();
-		
-	    	line=null;
-	    	seqIdentifier=null;		
-			seqLine=null;
-			seqName=null;
-			itemSplited=null;
-		}catch(IOException e){
-	        System.out.println(e);
-	    }
-
-	    return seqObjList; 
- }
- 
- public static List<SeqInfo> getFASTQSeqObj(String seqFile, int start, int end){
-	 
-	    List<SeqInfo> seqObjList=new ArrayList<SeqInfo>();
-	    SeqInfo perSeq=new SeqInfo();
-		int seqNum=0;
-		
-		try{    
-	       	BufferedReader br;              
-	        br = new BufferedReader(new FileReader(seqFile));
-		    String line;
-			String seqIdentifier;		
-			String seqLine;
-			String seqName;		
-			String seqQualityLine;
-			String [] itemSplited;
-				
-			while(true){  
-			   
-		       if(seqNum>=end) break;
-		       
-	           line = br.readLine();			
-		       if (line == null) break;
-		       line=line.trim();
-		       if(line.indexOf("@")!=0) {
-			      System.out.println("Error in reading fastq");
-				  break;
-			   }			   
-		       seqIdentifier=line.substring(1,line.length());
-			     
-			   line=br.readLine();			 
-			   if (line == null) break;
-			   seqLine=line.trim();			 			   
-			   
-			   line=br.readLine();			  
-			   if (line == null) break;
-			   if(line.indexOf("+")!=0) {
-			      System.out.println("Error in reading fastq");
-				  break;
-			   }	
-	                 
-	           line=br.readLine();			 
-			   if (line == null) break;
-			   seqQualityLine=line;
-			   
-			   if(seqNum>=start && seqNum<end){
-				   				 
+		 
+		    List<SeqInfo> seqObjList=new ArrayList<SeqInfo>();
+		    SeqInfo perSeq=new SeqInfo();
+			int seqNum=0;
+			
+			try{    
+		       	BufferedReader br;              
+		        br = new BufferedReader(new FileReader(seqFile));
+			    String line;
+				String seqIdentifier;	
+				String seqLine;
+				String seqName;		
+				String seqQualityLine;
+				String [] itemSplited;
+				outerloop:
+				while(true){  			   
+				   //for read header/identifier
+		           line = br.readLine();			
+			       if (line == null) break;
+			       while(line.length()==0 || line.matches("\\s*")){
+			    	 line = br.readLine();
+			    	 if (line == null) break outerloop;
+			       }
+				   line=line.trim();
+		           if(line.indexOf("@")!=0) {
+				      System.out.println("Error in reading fastq line:"+line);
+					  break;
+				   }			   
+		      	   seqIdentifier=line.substring(1,line.length());				 
 				   itemSplited=seqIdentifier.split("\\s+");
-				   seqName=itemSplited[0].trim();				
-				   seqLine=seqLine.replaceAll("N","n");
+				   seqName=itemSplited[0].trim();
+				   
+				   //for read sequence
+				   line=br.readLine();			 
+				   if (line == null) break;
+			       while(line.length()==0 || line.matches("\\s*")){
+			    	 line = br.readLine();
+			    	 if (line == null) break outerloop;
+			       }
+				   seqLine=line.trim();			 
+				   //seqLine=seqLine.replaceAll("N","n");
+				   
+				   //for read '+' tag
+				   line=br.readLine();			  
+				   if (line == null) break;
+			       while(line.length()==0 || line.matches("\\s*")){
+			    	 line = br.readLine();
+			    	 if (line == null) break outerloop;
+			       }
+				   line=line.trim();
+				   if(line.indexOf("+")!=0) {
+					  System.out.println("Error in reading fastq line:"+line);
+					  break;
+				   }		      
+		           
+				   //for read base quality encode
+		           line=br.readLine();			 
+				   if (line == null) break;
+				   while(line.length()==0 || line.matches("\\s*")){
+					  line = br.readLine();
+					  if (line == null) break outerloop;
+				   }
+				   seqQualityLine=line.trim();
 				   
 				   perSeq=new SeqInfo();
 				   perSeq.seqIdentifier=seqIdentifier;
 				   perSeq.seqName=seqName;
 				   perSeq.seqLength=seqLine.length();
-				   perSeq.seq=seqLine.trim();
-				   perSeq.seqQualityEncode=seqQualityLine.trim();
+				   perSeq.seq=seqLine;
+				   perSeq.seqQualityEncode=seqQualityLine;
 				   seqObjList.add(perSeq);
 				   perSeq=null;
-			   }
-			   
-			   seqNum=seqNum+1;
-		
-			}           		   
-			br.close();
-		
-	    	line=null;
-	    	seqIdentifier=null;	
-			seqLine=null;
-			seqName=null;
-			itemSplited=null;
-		}catch(IOException e){
-	        System.out.println(e);
-	    }
+				   
+				   seqNum=seqNum+1;
+			
+				}           		   
+				br.close();
+			
+		    	line=null;
+		    	seqIdentifier=null;		
+				seqLine=null;
+				seqName=null;
+				itemSplited=null;
+			}catch(IOException e){
+		        System.out.println(e);
+		    }
 
-	    return seqObjList; 
+		    return seqObjList; 
+ }
+	 
+ public static List<SeqInfo> getFASTQSeqObj(String seqFile, int start, int end){
+		 
+		    List<SeqInfo> seqObjList=new ArrayList<SeqInfo>();
+		    SeqInfo perSeq=new SeqInfo();
+			int seqNum=0;
+			
+			try{    
+		       	BufferedReader br;              
+		        br = new BufferedReader(new FileReader(seqFile));
+			    String line;
+				String seqIdentifier;		
+				String seqLine;
+				String seqName;		
+				String seqQualityLine;
+				String [] itemSplited;
+				outerloop:	
+				while(true){  
+				   
+			       if(seqNum>=end) break;
+			       
+			       //for read header/identifier
+		           line = br.readLine();			
+			       if (line == null) break;
+			       while(line.length()==0 || line.matches("\\s*")){
+			    	 line = br.readLine();
+			    	 if (line == null) break outerloop;
+			       }
+				   line=line.trim();
+		           if(line.indexOf("@")!=0) {
+				      System.out.println("Error in reading fastq line:"+line);
+					  break;
+				   }			   
+		      	   seqIdentifier=line.substring(1,line.length());				 
+				   itemSplited=seqIdentifier.split("\\s+");
+				   seqName=itemSplited[0].trim();
+				   
+				   //for read sequence
+				   line=br.readLine();			 
+				   if (line == null) break;
+			       while(line.length()==0 || line.matches("\\s*")){
+			    	 line = br.readLine();
+			    	 if (line == null) break outerloop;
+			       }
+				   seqLine=line.trim();			 
+				   //seqLine=seqLine.replaceAll("N","n");
+				   
+				   //for read '+' tag
+				   line=br.readLine();			  
+				   if (line == null) break;
+			       while(line.length()==0 || line.matches("\\s*")){
+			    	 line = br.readLine();
+			    	 if (line == null) break outerloop;
+			       }
+				   line=line.trim();
+				   if(line.indexOf("+")!=0) {
+					  System.out.println("Error in reading fastq line:"+line);
+					  break;
+				   }		      
+		           
+				   //for read base quality encode
+		           line=br.readLine();			 
+				   if (line == null) break;
+				   while(line.length()==0 || line.matches("\\s*")){
+					  line = br.readLine();
+					  if (line == null) break outerloop;
+				   }
+				   seqQualityLine=line.trim();
+				   
+				   if(seqNum>=start && seqNum<end){
+					   				 
+					   itemSplited=seqIdentifier.split("\\s+");
+					   seqName=itemSplited[0].trim();				
+					   seqLine=seqLine.replaceAll("N","n");
+					   
+					   perSeq=new SeqInfo();
+					   perSeq.seqIdentifier=seqIdentifier;
+					   perSeq.seqName=seqName;
+					   perSeq.seqLength=seqLine.length();
+					   perSeq.seq=seqLine.trim();
+					   perSeq.seqQualityEncode=seqQualityLine.trim();
+					   seqObjList.add(perSeq);
+					   perSeq=null;
+				   }
+				   
+				   seqNum=seqNum+1;
+			
+				}           		   
+				br.close();
+			
+		    	line=null;
+		    	seqIdentifier=null;	
+				seqLine=null;
+				seqName=null;
+				itemSplited=null;
+			}catch(IOException e){
+		        System.out.println(e);
+		    }
+
+		    return seqObjList; 
  }
  
  public static String convertFASTQ2FASTA(String inSeqFile){

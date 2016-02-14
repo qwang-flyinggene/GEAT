@@ -614,132 +614,159 @@ public class  SeqRocketConsole {
   }
   
   List<SeqCompoAlignInfo> getSeqObjFromFASTA(String seqFile){
-  
-    List<SeqCompoAlignInfo> seqObjList=new ArrayList<SeqCompoAlignInfo>();
-    SeqCompoAlignInfo perSeq=new SeqCompoAlignInfo();
-	int seqNum=0;
-	try{    
-		BufferedReader br;              
-        br = new BufferedReader(new FileReader(seqFile));
-	    String line;
-		String seqIdentifier;
-		String seqLine;
-		String seqName;
-		String [] itemSplited;
-		seqObjList=new ArrayList<SeqCompoAlignInfo>();
-		seqNum=0;
-		line = br.readLine();
-	
-		while(true){           
-	       if (line == null) break;
-	       line=line.trim();
-		   if(line.indexOf(">")==0){
-		     seqNum=seqNum+1;
-		     seqIdentifier=line.substring(1,line.length());				 
-			 itemSplited=seqIdentifier.split("\\s+");
-			 seqName=itemSplited[0].trim();
-			 			 
-			 line=br.readLine();
-			 seqLine="";
-			 if (line == null) break;
-			 while(line.indexOf(">")<0){
-		      seqLine = seqLine+line.trim();
-			  line=br.readLine();
-			  if (line == null) break;
-			 }
-			 	  
-			 perSeq=new SeqCompoAlignInfo();
-			 perSeq.seqIdentifier=seqIdentifier;
-			 perSeq.seqName=seqName;
-			 perSeq.seqLength=seqLine.length();
-			 perSeq.seq=seqLine;			 
-			 seqObjList.add(perSeq);
-			 perSeq=null;             
-		   }			 
-		}//while
-        		  
-		br.close();
-		
-	}catch(IOException e){
-        System.out.println(e);
-    }
-    //System.out.println("invalid reads :"+(seqNum-uniSeqName.size()));
-	//uniSeqName=null;
-    return seqObjList; 
+	  
+	    List<SeqCompoAlignInfo> seqObjList=new ArrayList<SeqCompoAlignInfo>();
+	    SeqCompoAlignInfo perSeq=new SeqCompoAlignInfo();
+		int seqNum=0;
+		try{    
+			BufferedReader br;              
+	        br = new BufferedReader(new FileReader(seqFile));
+		    String line;
+			String seqIdentifier;
+			String seqLine;
+			String seqName;
+			String [] itemSplited;
+			seqObjList=new ArrayList<SeqCompoAlignInfo>();
+			seqNum=0;
+			line = br.readLine();
+			while(line.length()==0 || line.matches("\\s*")){
+			   line = br.readLine();
+			   if (line == null){ 
+				   br.close();
+				   return seqObjList;
+			   }
+			}
+			while(true){           
+		       if (line == null) break;
+		       line=line.trim();
+			   if(line.indexOf(">")==0){
+			     seqNum=seqNum+1;
+			     seqIdentifier=line.substring(1,line.length());				 
+				 itemSplited=seqIdentifier.split("\\s+");
+				 seqName=itemSplited[0].trim();
+				 			 
+				 line=br.readLine();
+				 seqLine="";
+				 if (line == null) break;
+				 while(line.indexOf(">")<0){
+			      seqLine = seqLine+line.trim();
+				  line=br.readLine();
+				  if (line == null) break;
+				 }
+				 	  
+				 perSeq=new SeqCompoAlignInfo();
+				 perSeq.seqIdentifier=seqIdentifier;
+				 perSeq.seqName=seqName;
+				 perSeq.seqLength=seqLine.length();
+				 perSeq.seq=seqLine;			 
+				 seqObjList.add(perSeq);
+				 perSeq=null;             
+			   }			 
+			}//while
+	        		  
+			br.close();
+			
+		}catch(IOException e){
+	        System.out.println(e);
+	    }
+	    //System.out.println("invalid reads :"+(seqNum-uniSeqName.size()));
+		//uniSeqName=null;
+	    return seqObjList; 
   }
-  
+	  
   List<SeqCompoAlignInfo> getSeqObjFromFASTQ(String seqFile){
-  
-    List<SeqCompoAlignInfo> seqObjList=new ArrayList<SeqCompoAlignInfo>();
-    SeqCompoAlignInfo perSeq=new SeqCompoAlignInfo();
-	int seqNum=0;
-	try{    
-		BufferedReader br;              
-        br = new BufferedReader(new FileReader(seqFile));
-	    String line;
-		String seqIdentifier;	
-		String seqLine;
-		String seqQualityLine;
-		String seqName;
-		String [] itemSplited;
-		seqObjList=new ArrayList<SeqCompoAlignInfo>();
-		seqNum=0;
-	
-		while(true){
-           seqNum=seqNum+1;		   
-           line = br.readLine();           	   
-	       if (line == null) break;
-		   line=line.trim();
-           if(line.indexOf("@")!=0) {
-		      System.out.println("Error in reading fastq");
-			  break;
-		   }			   
-           seqIdentifier=line.substring(1,line.length());				 
-		   itemSplited=seqIdentifier.split("\\s+");
-		   seqName=itemSplited[0].trim();
-		        
-		   line=br.readLine();			 
-		   if (line == null) break;
-		   seqLine=line.trim();			 
-		   seqLine=seqLine.replaceAll("N","n");
-		   
-		   line=br.readLine();				   
-		   if (line == null) break;
-		   line=line.trim();
-		   if(line.indexOf("+")!=0) {
-		      System.out.println("Error in reading FASTQ file");
-			  break;
-		   }
-           
-           line=br.readLine();			 
-		   if (line == null) break;
-		   seqQualityLine=line.trim();	
-           
-           perSeq=new SeqCompoAlignInfo();
-           perSeq.seqIdentifier=seqIdentifier;
-		   perSeq.seqName=seqName;
-		   perSeq.seqLength=seqLine.length();
-		   perSeq.seq=seqLine;				 
-	       perSeq.seqQualityEncode=seqQualityLine;			 
-		   seqObjList.add(perSeq);
-		   perSeq=null;             		   
-    
-		}//while
-        	  
-		br.close();
-		
-		line=null;
-		seqIdentifier=null;
-		seqLine=null;
-		seqName=null;
-		itemSplited=null;
-		
-	}catch(IOException e){
-        System.out.println(e);
-    }
-    //System.out.println("invalid reads :"+(seqNum-uniSeqName.size()));
-	//uniSeqName=null;
-    return seqObjList; 
+	  
+	    List<SeqCompoAlignInfo> seqObjList=new ArrayList<SeqCompoAlignInfo>();
+	    SeqCompoAlignInfo perSeq=new SeqCompoAlignInfo();
+		int seqNum=0;
+		try{    
+			BufferedReader br;              
+	        br = new BufferedReader(new FileReader(seqFile));
+		    String line;
+			String seqIdentifier;	
+			String seqLine;
+			String seqQualityLine;
+			String seqName;
+			String [] itemSplited;
+			seqObjList=new ArrayList<SeqCompoAlignInfo>();
+			seqNum=0;
+			outerloop:
+			while(true){
+	           seqNum=seqNum+1;	
+	           
+			   //for read header/identifier
+	           line = br.readLine();			
+		       if (line == null) break;
+		       while(line.length()==0 || line.matches("\\s*")){
+		    	 line = br.readLine();
+		    	 if (line == null) break outerloop;
+		       }
+			   line=line.trim();
+	           if(line.indexOf("@")!=0) {
+			      System.out.println("Error in reading fastq line:"+line);
+				  break;
+			   }			   
+	      	   seqIdentifier=line.substring(1,line.length());				 
+			   itemSplited=seqIdentifier.split("\\s+");
+			   seqName=itemSplited[0].trim();
+			   
+			   //for read sequence
+			   line=br.readLine();			 
+			   if (line == null) break;
+		       while(line.length()==0 || line.matches("\\s*")){
+		    	 line = br.readLine();
+		    	 if (line == null) break outerloop;
+		       }
+			   seqLine=line.trim();			 
+			   //seqLine=seqLine.replaceAll("N","n");
+			   
+			   //for read '+' tag
+			   line=br.readLine();			  
+			   if (line == null) break;
+		       while(line.length()==0 || line.matches("\\s*")){
+		    	 line = br.readLine();
+		    	 if (line == null) break outerloop;
+		       }
+			   line=line.trim();
+			   if(line.indexOf("+")!=0) {
+				  System.out.println("Error in reading fastq line:"+line);
+				  break;
+			   }		      
+	           
+			   //for read base quality encode
+	           line=br.readLine();			 
+			   if (line == null) break;
+			   while(line.length()==0 || line.matches("\\s*")){
+				  line = br.readLine();
+				  if (line == null) break outerloop;
+			   }
+			   seqQualityLine=line.trim();
+	           
+	           perSeq=new SeqCompoAlignInfo();
+	           perSeq.seqIdentifier=seqIdentifier;
+			   perSeq.seqName=seqName;
+			   perSeq.seqLength=seqLine.length();
+			   perSeq.seq=seqLine;				 
+		       perSeq.seqQualityEncode=seqQualityLine;			 
+			   seqObjList.add(perSeq);
+			   perSeq=null;             		   
+	    
+			}//while
+	        	  
+			br.close();
+			
+			line=null;
+			seqIdentifier=null;
+			seqLine=null;
+			seqName=null;
+			itemSplited=null;
+			
+		}catch(IOException e){
+	        System.out.println(e);
+	    }
+	    //System.out.println("invalid reads :"+(seqNum-uniSeqName.size()));
+		//uniSeqName=null;
+	    return seqObjList; 
   }
   
   List<SeqCompoAlignInfo> checkSeq(String inSeqFile){

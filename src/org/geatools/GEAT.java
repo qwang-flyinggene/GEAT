@@ -173,24 +173,25 @@ public class GEAT{
 	 dataDir=homeDir+"/data";
 	 workingDir=homeDir+"/working";
 	 String timeStamp=new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
-	 tmpDir=homeDir+"/tmp/"+timeStamp;
-	
+	 String tmpDir0=homeDir+"/tmp";
+	 tmpDir=tmpDir0+"/"+timeStamp;
+		
 	 //System.out.println(homeDir);
 	 File dir=new File(dataDir);
 	 if(!dir.exists()) FileOperate.newFolder(dataDir);	
-	 
+		 
 	 dir=new File(workingDir);
-	 if(!dir.exists()) FileOperate.newFolder(workingDir);
-	 
-	 dir=new File(homeDir+"/tmp");
-	 if(!dir.exists()) FileOperate.newFolder(tmpDir);
+	 if(!dir.exists()) FileOperate.newFolder(workingDir);	 
+
+	 dir=new File(tmpDir0);
+	 if(!dir.exists()) FileOperate.newFolder(tmpDir0);
 	 dir=new File(tmpDir);
 	 if(!dir.exists()) FileOperate.newFolder(tmpDir);
-	 dir=null;
-	   
+	 dir=null;	   
+	 
 	 Map<String, List<String>> params=getCommandLineParams(args);
 	 
-	 taskName="SeqOperate";
+	 taskName="Utility";
 	 
 	 if(params.get("task")!=null){		
 		if(params.get("task").size()>0){
@@ -235,7 +236,7 @@ public class GEAT{
 			 CallSeqDupFilter.setWorkingDir(workingDir);
 			 CallSeqDupFilter.doWork(args);	     
 		    	
-	 }else if(taskName.equalsIgnoreCase("SeqOperate")){	
+	 }else if(taskName.equalsIgnoreCase("Utility")){	
 		   
 		   if(params.get("fastq")!=null){
 				 isFastqOK=false;
@@ -911,11 +912,12 @@ public class GEAT{
 				}
 				seqFileList=null;
 			 }
-	       }		  
-	
+	       }	
 	  
 	  }else{// if -task
 		   System.err.println("Error: '-task' is invalid");				
 	  }
+	 
+	  FileOperate.delFolder(tmpDir);
   }
 }
