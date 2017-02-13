@@ -52,11 +52,10 @@ public class SeqQCFilter {
 	String resQual;
 	String resQual2;
 	
-	boolean removeExactDup=false;
-	
+	boolean removeExactDup=false;	
 	int minQualMean=-1;
 	int minLen=-1;
-	int outFormat=2;
+	int outFormat=-1;
 	
 	public boolean isOK=true;
 	
@@ -166,7 +165,7 @@ public class SeqQCFilter {
 			  String tmp=params.get("out_format").get(0).trim();			
 			  try{
 				 outFormat=Integer.parseInt(tmp);
-				 if(outFormat<0){ 
+				 if(outFormat<=0){ 
 					 System.err.println("Illegal '-out_format' parameter usage :(");
 					 return;
 				 }	
@@ -182,6 +181,7 @@ public class SeqQCFilter {
 	
 	public List<SeqQual> getSeqQual(String seqQualFile){
 		
+		if(!new File(seqQualFile).exists()) return null;
 		List<SeqQual> seqQualList=new ArrayList<SeqQual>();
 		SeqQual seqQual;
 		int [] seqQualArray;
@@ -276,7 +276,7 @@ public class SeqQCFilter {
 			   	 cmd=cmd+" -out_good "+seqFullName+".goodQual -out_bad "+seqFullName+".badQual";	
 					   	 
 			   	 cmdList.add(cmd);
-			     cmdStrList.add("Filtering sequence with bad quality"); 
+			     cmdStrList.add("Filtering sequence with bad quality......"); 
 			   	 
 			     if(outFormat<=2 && !removeExactDup) seqFile=seqFullName+".goodQual.fasta";
 			     else seqFile=seqFullName+".goodQual.fastq";
@@ -296,7 +296,7 @@ public class SeqQCFilter {
 			     cmd=cmd+" -out_good "+seqFullName+".goodDup -out_bad "+seqFullName+".badDup";
 			  
 			     cmdList.add(cmd); 
-			     cmdStrList.add("Filtering sequence with exact duplication");
+			     cmdStrList.add("Filtering sequence with exact duplication......");
 			     
 			     if(outFormat<=2) seqFile=seqFullName+".goodDup.fasta";
 			     else if(outFormat<=5) seqFile=seqFullName+".goodDup.fastq";
@@ -317,7 +317,7 @@ public class SeqQCFilter {
 			   	 cmd=cmd+" -out_good "+seqFullName+".Out";	
 					   	 
 			   	 cmdList.add(cmd);
-			     cmdStrList.add("Filtering sequence with bad quality"); 
+			     cmdStrList.add("Outputing Sequences......"); 
 			   	 
 			     if(outFormat<=2) seqFile=seqFullName+".Out.fasta";
 			     else if(outFormat<=5) seqFile=seqFullName+".Out.fastq";

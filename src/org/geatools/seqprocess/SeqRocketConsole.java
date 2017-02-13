@@ -46,18 +46,14 @@ import org.geatools.data.structure.SeqRocket;
 import org.geatools.data.structure.SeqRocketPair;
 import org.geatools.operation.FileOperate;
 
-public class  SeqRocketConsole {
+public class SeqRocketConsole extends SeqRecognition{  
   
-  List<SeqRocket> seqRockets;
-  List<SeqRocketPair> seqPairRockets;
-  boolean isRocketsOK=false;
-  
-  BlastInfo blastInfoObj=new BlastInfo();  
-  double extendTerritoryRatio=0.3d;
+  //double extendTerritoryRatio=0.3d;
+  //String regexSeqID = "(\\s+SeqID=)(\\d+)(#\\s*)";
   
   int barTerritoryLen=12;
   int minBarcodeLen=8;
-  int minRedPrimerLen=minBarcodeLen;
+  int minPrimerLen=minBarcodeLen;
   
   double barMinAlignRatio=0.7d;
   double barMaxMismatchRatio=0.1d;
@@ -66,7 +62,7 @@ public class  SeqRocketConsole {
   double primerMinAlignRatio=0.7d;
   double primerMaxMismatchRatio=0.1d;
   double primerMaxGapRatio=0.1d;
-  int primerTrimLeftShift=5;
+  int primerLeftShift=5;
   
   double primerContMinAlignRatio=0.8d;
   double primerContMaxMismatchRatio=0.1d;
@@ -75,21 +71,19 @@ public class  SeqRocketConsole {
   double baitMinAlignRatio=0.7d;
   double baitMaxMismatchRatio=0.25d;
   double baitMaxGapRatio=0.25d;
-  int baitTrimLeftShift=10;
+  int baitLeftShift=10;
   
   int baitBrkMinAlign=12;
   double baitBrkMinAlignRatio=0.7d;
   double baitBrkMaxMismatchRatio=0.25d;
   double baitBrkMaxGapRatio=0.25d;
-  int baitBrkTrimLeftShift=10;
+  int baitBrkLeftShift=10;
   
   int baitArmMinAlign=20;
   double baitArmMinAlignRatio=0.7d;
   double baitArmMaxMismatchRatio=0.25d;
   double baitArmMaxGapRatio=0.25d;
-  int baitArmTrimLeftShift=10;
-
-  //String resultDir="";
+  int baitArmLeftShift=10;
  
   String barcodeName="Barcode";
   String primerName="Primer";
@@ -109,14 +103,6 @@ public class  SeqRocketConsole {
   String bodyColor="green";
   String rPrimerColor="blue";
   
-  
-  static String homeDir=".";
-  List<String> tmpFiles;
-  String tmpDir;
-  String dataDir;
-  
-  String regexSeqID = "(\\s+SeqID=)(\\d+)(#\\s*)";
-  
   public SeqRocketConsole(){ 
 
   }
@@ -124,38 +110,6 @@ public class  SeqRocketConsole {
 	  setHomeDir(homeDir);
 	  setDataDir(dataDir);
 	  setTmpDir(tmpDir);
-  } 
-  
-  public void setHomeDir(String dir){
-      homeDir=dir;
-  }
-  
-  public void setDataDir(String dir){
-	  dataDir=dir;
-  }
-  
-  public void setTmpDir(String dir){
-	  tmpDir=dir;
-  }
-  
-  public boolean isSeqRocketsOK(){
-	  return isRocketsOK;
-  }
-  public void setSeqRockets(List<SeqRocket> rockets){
-	 seqRockets=rockets;
-	 if(rockets!=null && rockets.size()>0) isRocketsOK=true;
-	 else isRocketsOK=false;;
-  }
-  public List<SeqRocket>  getSeqRockets(){
-	 return seqRockets;
-  }  
-  public void setSeqPairRockets(List<SeqRocketPair> pairRockets){
-	 seqPairRockets=pairRockets;
-	 if(pairRockets!=null && pairRockets.size()>0) isRocketsOK=true;
-	 else isRocketsOK=false;;
-  }
-  public List<SeqRocketPair>  getSeqPairRockets(){
-	 return seqPairRockets;
   }
  
   void configRecognizer( List<SeqRocket> rockets){
@@ -254,13 +208,13 @@ public class  SeqRocketConsole {
 		  barcode.leftTrimSave=false;
 		  barcode.rightTrimSave=false;
 		  barcode.exactAlignedSeqFile=tmpDir+"/"+barcode.seqName+"_ExactAlignedSeq";
-		  barcode.tagSeqFile=tmpDir+"/recognizer/barcode/"+barcode.seqName+".fna";	
-		  createFASTASeq(barcode.seq,barcode.seqName,barcode.tagSeqFile); 
+		  barcode.seqFASTAFile=tmpDir+"/recognizer/"+barcode.seqName+".fna";	
+		  createFASTASeq(barcode.seq,barcode.seqName,barcode.seqFASTAFile); 
 
           rockets.get(i).seqRecognizer.set(barcode.index,barcode);	
           
 		  tmpFiles.add(barcode.exactAlignedSeqFile);
-		  tmpFiles.add(barcode.tagSeqFile);
+		  tmpFiles.add(barcode.seqFASTAFile);
       }
       
 	  if(primer!=null){		
@@ -299,7 +253,7 @@ public class  SeqRocketConsole {
 		  primer.leftSubForBlast=true;
 		  primer.leftShiftForNext=true;
 		  if(primerCont!=null){
-			  primer.trimLeftShift=primerTrimLeftShift;
+			  primer.trimLeftShift=primerLeftShift;
 			  primer.saveRecognizedSeq=false;
 			  primer.alignHTMLSave=false;
 			  primer.leftTrimSave=false;
@@ -314,12 +268,12 @@ public class  SeqRocketConsole {
 			  primer.leftTrimSave=false;
 			  primer.rightTrimSave=false;
 		  }
-		  primer.tagSeqFile=tmpDir+"/recognizer/primer/"+primer.seqName+".fna";
-		  createFASTASeq(primer.seq,primer.seqName,primer.tagSeqFile);
+		  primer.seqFASTAFile=tmpDir+"/recognizer/"+primer.seqName+".fna";
+		  createFASTASeq(primer.seq,primer.seqName,primer.seqFASTAFile);
 		  
 		  rockets.get(i).seqRecognizer.set(primer.index,primer);
 		  
-		  tmpFiles.add(primer.tagSeqFile);
+		  tmpFiles.add(primer.seqFASTAFile);
 		  
       }	
 	  
@@ -382,12 +336,12 @@ public class  SeqRocketConsole {
         	  primerCont.rightTrimSave=false;
               	  
 		  }		  
-		  primerCont.tagSeqFile=tmpDir+"/recognizer/primer/"+primerCont.seqName+".fna";
-		  createFASTASeq(primerCont.seq,primerCont.seqName,primerCont.tagSeqFile);
+		  primerCont.seqFASTAFile=tmpDir+"/recognizer/"+primerCont.seqName+".fna";
+		  createFASTASeq(primerCont.seq,primerCont.seqName,primerCont.seqFASTAFile);
 		 
 		  rockets.get(i).seqRecognizer.set(primerCont.index,primerCont);
 		  
-		  tmpFiles.add(primerCont.tagSeqFile);
+		  tmpFiles.add(primerCont.seqFASTAFile);
 		  
       }	
 
@@ -425,7 +379,7 @@ public class  SeqRocketConsole {
 	        bait.rightTrimSave=false;
 		    bait.leftMaskSave=false;		  
 		  }else{
-		    bait.trimLeftShift=baitTrimLeftShift;
+		    bait.trimLeftShift=baitLeftShift;
 			bait.saveRecognizedSeq=true;
 			bait.saveSeqAsFASTAFormat=true;
 			bait.alignHTMLSave=false;					
@@ -433,12 +387,12 @@ public class  SeqRocketConsole {
 			bait.leftTrimSave=false;	
 			bait.rightTrimSave=false;
 		  }
-	      bait.tagSeqFile=tmpDir+"/recognizer/bait/"+bait.seqName+".fna";	
-	      createFASTASeq(bait.seq,bait.seqName,bait.tagSeqFile);
+	      bait.seqFASTAFile=tmpDir+"/recognizer/"+bait.seqName+".fna";	
+	      createFASTASeq(bait.seq,bait.seqName,bait.seqFASTAFile);
 		  
 		  rockets.get(i).seqRecognizer.set(bait.index,bait);
 		  
-		  tmpFiles.add(bait.tagSeqFile);
+		  tmpFiles.add(bait.seqFASTAFile);
 		 
       }
 	  
@@ -474,7 +428,7 @@ public class  SeqRocketConsole {
 			  baitBrk.rightTrimSave=false;
 			  baitBrk.leftMaskSave=false;
 		  }else{
-			  baitBrk.trimLeftShift=baitBrkTrimLeftShift;
+			  baitBrk.trimLeftShift=baitBrkLeftShift;
 			  baitBrk.saveRecognizedSeq=true;
 			  baitBrk.saveSeqAsFASTAFormat=true;
 			  baitBrk.alignHTMLSave=true;
@@ -482,12 +436,12 @@ public class  SeqRocketConsole {
 			  baitBrk.leftTrimSave=false;
 			  baitBrk.rightTrimSave=false;
           }		  
-	      baitBrk.tagSeqFile=tmpDir+"/recognizer/bait/"+baitBrk.seqName+".fna";	
-	      createFASTASeq(baitBrk.seq,baitBrk.seqName,baitBrk.tagSeqFile);
+	      baitBrk.seqFASTAFile=tmpDir+"/recognizer/"+baitBrk.seqName+".fna";	
+	      createFASTASeq(baitBrk.seq,baitBrk.seqName,baitBrk.seqFASTAFile);
 		  
 		  rockets.get(i).seqRecognizer.set(baitBrk.index,baitBrk);
 		  
-		  tmpFiles.add(baitBrk.tagSeqFile);
+		  tmpFiles.add(baitBrk.seqFASTAFile);
 		 
       }
 	  
@@ -516,7 +470,7 @@ public class  SeqRocketConsole {
 		  
 	      baitArm.leftSubForBlast=true;
 	      baitArm.leftShiftForNext=true;
-		  baitArm.trimLeftShift=baitArmTrimLeftShift;
+		  baitArm.trimLeftShift=baitArmLeftShift;
 	      baitArm.saveRecognizedSeq=true;
 		  baitArm.saveSeqAsFASTAFormat=true;
 		  baitArm.alignHTMLSave=true;
@@ -524,12 +478,12 @@ public class  SeqRocketConsole {
 	      baitArm.leftTrimSave=false;
 	      baitArm.rightTrimSave=false;
 		
-	      baitArm.tagSeqFile=tmpDir+"/recognizer/bait/"+baitArm.seqName+".fna";	
-	      createFASTASeq(baitArm.seq,baitArm.seqName,baitArm.tagSeqFile);
+	      baitArm.seqFASTAFile=tmpDir+"/recognizer/"+baitArm.seqName+".fna";	
+	      createFASTASeq(baitArm.seq,baitArm.seqName,baitArm.seqFASTAFile);
 		  
 		  rockets.get(i).seqRecognizer.set(baitArm.index,baitArm);
 		  
-		  tmpFiles.add(baitArm.tagSeqFile);
+		  tmpFiles.add(baitArm.seqFASTAFile);
 		 
       }
 	 	  
@@ -542,552 +496,40 @@ public class  SeqRocketConsole {
 	
 	}	
    
-  }
-  
-  void createFASTASeq(String seq, String seqName, String outSeqFile){
-  
-	try{    
-        BufferedWriter writer=null;
-        writer=new BufferedWriter(new FileWriter(outSeqFile));
-		String nameLine;
-	    //int seqID=0;
-	
-        nameLine=">"+seqName+" "+seq.length();
-		writer.write(nameLine);
-		writer.newLine();
-		  //writer.flush(); 
-		writer.write(seq);
-		writer.newLine();
-		writer.flush(); 
-		
-		writer.close();
-		
-	}catch(IOException e){
-        System.out.println(e);
-    }  
+  }    
  
-  }
-   
-  boolean checkStruct(){
-  
-    boolean isOK=true;
-	
-	return isOK;
-   
-  }
-  
-  void initSeqObjAlignArray(List<SeqCompoAlignInfo> seqObjList, int seqTypeNum){  
-	
-    //int seqTypeNum=seqTypeInfo.seqTypeName.size();	
-      ArrayList<Integer> seqAlignSStart;	
-      ArrayList<Integer> seqAlignSEnd;  
-    
-      for(int s=0;s<seqObjList.size();s++){   
-	        
-			 seqAlignSStart=new ArrayList<Integer>();
-			 seqAlignSEnd=new ArrayList<Integer>();
-	         for(int i=0;i<seqTypeNum;i++){	           
-				seqAlignSStart.add(-1);
-				seqAlignSEnd.add(-1);
-	         }
-	         seqObjList.get(s).seqAlignSStart=seqAlignSStart;
-	         seqObjList.get(s).seqAlignSEnd=seqAlignSEnd;
-             seqAlignSStart=null;
-			 seqAlignSEnd=null;		
-		   		 
-	  }	//for	
-     
-   }
-	
-	
-  List<SeqCompoAlignInfo> getSeqObj(String inSeqFile){
-  
-    List<SeqCompoAlignInfo> seqObjList=null;
-	
-    if(SeqOperation.isFASTASeq(inSeqFile)){		
-	   seqObjList=getSeqObjFromFASTA(inSeqFile);	   
-	}else if(SeqOperation.isFASTQSeq(inSeqFile)){		
-	   seqObjList=getSeqObjFromFASTQ(inSeqFile);	   
-	}
-    
-	return seqObjList;
-  }
-  
-  List<SeqCompoAlignInfo> getSeqObjFromFASTA(String seqFile){
-	  
-	    List<SeqCompoAlignInfo> seqObjList=new ArrayList<SeqCompoAlignInfo>();
-	    SeqCompoAlignInfo perSeq=new SeqCompoAlignInfo();
-		int seqNum=0;
-		try{    
-			BufferedReader br;              
-	        br = new BufferedReader(new FileReader(seqFile));
-		    String line;
-			String seqIdentifier;
-			String seqLine;
-			String seqName;
-			String [] itemSplited;
-			seqObjList=new ArrayList<SeqCompoAlignInfo>();
-			seqNum=0;
-			line = br.readLine();
-			while(line.length()==0 || line.matches("\\s*")){
-			   line = br.readLine();
-			   if (line == null){ 
-				   br.close();
-				   return seqObjList;
-			   }
+  static boolean checkPairEndSeq(List<SeqCompoAlignInfo> seqObjList, 
+			 List<SeqCompoAlignInfo> seqObjList2){
+		
+		 boolean isOK=true;
+		 if(seqObjList.size()!=seqObjList2.size()){
+			 System.out.println("Error: different seq num of pair-end seq");
+			 return false;
+		 }
+		 //int nc=0;
+		 for(int i=0;i<seqObjList.size();i++){
+			if(!seqObjList.get(i).seqName.trim().equals(seqObjList2.get(i).seqName.trim())){ 
+				isOK=false;
+				System.out.println("Error: inconsistent seq name between pair-end seq");
+				System.out.println("Forward: "+seqObjList.get(i).seqName
+						+"\t Reverse:"+seqObjList2.get(i).seqName);
+				break;
+				//nc=nc+1;
+				//System.out.println(seqObjList.get(i).seqName+"  "+seqObjList2.get(i).seqName);
 			}
-			while(true){           
-		       if (line == null) break;
-		       line=line.trim();
-			   if(line.indexOf(">")==0){
-			     seqNum=seqNum+1;
-			     seqIdentifier=line.substring(1,line.length());				 
-				 itemSplited=seqIdentifier.split("\\s+");
-				 seqName=itemSplited[0].trim();
-				 			 
-				 line=br.readLine();
-				 seqLine="";
-				 if (line == null) break;
-				 while(line.indexOf(">")<0){
-			      seqLine = seqLine+line.trim();
-				  line=br.readLine();
-				  if (line == null) break;
-				 }
-				 	  
-				 perSeq=new SeqCompoAlignInfo();
-				 perSeq.seqIdentifier=seqIdentifier;
-				 perSeq.seqName=seqName;
-				 perSeq.seqLength=seqLine.length();
-				 perSeq.seq=seqLine;			 
-				 seqObjList.add(perSeq);
-				 perSeq=null;             
-			   }			 
-			}//while
-	        		  
-			br.close();
-			
-		}catch(IOException e){
-	        System.out.println(e);
-	    }
-	    //System.out.println("invalid reads :"+(seqNum-uniSeqName.size()));
-		//uniSeqName=null;
-	    return seqObjList; 
+		 }
+		 //System.out.println("inconsistent seq num:"+nc);
+		 
+		 return isOK;
   }
-	  
-  List<SeqCompoAlignInfo> getSeqObjFromFASTQ(String seqFile){
-	  
-	    List<SeqCompoAlignInfo> seqObjList=new ArrayList<SeqCompoAlignInfo>();
-	    SeqCompoAlignInfo perSeq=new SeqCompoAlignInfo();
-		int seqNum=0;
-		try{    
-			BufferedReader br;              
-	        br = new BufferedReader(new FileReader(seqFile));
-		    String line;
-			String seqIdentifier;	
-			String seqLine;
-			String seqQualityLine;
-			String seqName;
-			String [] itemSplited;
-			seqObjList=new ArrayList<SeqCompoAlignInfo>();
-			seqNum=0;
-			outerloop:
-			while(true){
-	           seqNum=seqNum+1;	
-	           
-			   //for read header/identifier
-	           line = br.readLine();			
-		       if (line == null) break;
-		       while(line.length()==0 || line.matches("\\s*")){
-		    	 line = br.readLine();
-		    	 if (line == null) break outerloop;
-		       }
-			   line=line.trim();
-	           if(line.indexOf("@")!=0) {
-			      System.out.println("Error in reading fastq line:"+line);
-				  break;
-			   }			   
-	      	   seqIdentifier=line.substring(1,line.length());				 
-			   itemSplited=seqIdentifier.split("\\s+");
-			   seqName=itemSplited[0].trim();
-			   
-			   //for read sequence
-			   line=br.readLine();			 
-			   if (line == null) break;
-		       while(line.length()==0 || line.matches("\\s*")){
-		    	 line = br.readLine();
-		    	 if (line == null) break outerloop;
-		       }
-			   seqLine=line.trim();			 
-			   //seqLine=seqLine.replaceAll("N","n");
-			   
-			   //for read '+' tag
-			   line=br.readLine();			  
-			   if (line == null) break;
-		       while(line.length()==0 || line.matches("\\s*")){
-		    	 line = br.readLine();
-		    	 if (line == null) break outerloop;
-		       }
-			   line=line.trim();
-			   if(line.indexOf("+")!=0) {
-				  System.out.println("Error in reading fastq line:"+line);
-				  break;
-			   }		      
-	           
-			   //for read base quality encode
-	           line=br.readLine();			 
-			   if (line == null) break;
-			   while(line.length()==0 || line.matches("\\s*")){
-				  line = br.readLine();
-				  if (line == null) break outerloop;
-			   }
-			   seqQualityLine=line.trim();
-	           
-	           perSeq=new SeqCompoAlignInfo();
-	           perSeq.seqIdentifier=seqIdentifier;
-			   perSeq.seqName=seqName;
-			   perSeq.seqLength=seqLine.length();
-			   perSeq.seq=seqLine;				 
-		       perSeq.seqQualityEncode=seqQualityLine;			 
-			   seqObjList.add(perSeq);
-			   perSeq=null;             		   
-	    
-			}//while
-	        	  
-			br.close();
-			
-			line=null;
-			seqIdentifier=null;
-			seqLine=null;
-			seqName=null;
-			itemSplited=null;
-			
-		}catch(IOException e){
-	        System.out.println(e);
-	    }
-	    //System.out.println("invalid reads :"+(seqNum-uniSeqName.size()));
-		//uniSeqName=null;
-	    return seqObjList; 
-  }
-  
-  List<SeqCompoAlignInfo> checkSeq(String inSeqFile){
-	    
-	    List<SeqCompoAlignInfo> seqObjList = null;
 
-		if(SeqOperation.isFASTASeq(inSeqFile)){			  
-			seqObjList=checkFASTASeq(inSeqFile);			
-		}else if(SeqOperation.isFASTQSeq(inSeqFile)){		  
-			seqObjList=checkFASTQSeq(inSeqFile);			
-		}
-		
-		return seqObjList;
- }
- 
- List<SeqCompoAlignInfo> checkFASTASeq(String seqFile){
-  
-    List<SeqCompoAlignInfo> seqObjList=new ArrayList<SeqCompoAlignInfo>();
-    SeqCompoAlignInfo perSeq=new SeqCompoAlignInfo();
-	int seqNum=0;
-
-	try{    
-
-		BufferedReader br;              
-        br = new BufferedReader(new FileReader(seqFile));
-	    String line;
-		String seqIdentifier;
-		String seqLine;
-		String seqName;
-		String [] itemSplited;
-		seqObjList=new ArrayList<SeqCompoAlignInfo>();
-		seqNum=0;
-		line = br.readLine();				
-		while(true){           
-	       if (line == null) break;
-	       line=line.trim();
-		   if(line.indexOf(">")==0){
-		     seqNum=seqNum+1;
-		     seqIdentifier=line.substring(1,line.length());			 
-			 itemSplited=seqIdentifier.split("\\s+");
-			 seqName=itemSplited[0].trim();
-			  
-			 line=br.readLine();
-			 seqLine="";
-			 if (line == null) break;
-			 while(line.indexOf(">")<0){
-		      seqLine = seqLine+line.trim();
-			  line=br.readLine();
-			  if (line == null) break;
-			 }
-			 seqLine=seqLine.replaceAll("N","n");
-		  
-			 perSeq=new SeqCompoAlignInfo();
-			 perSeq.seqIdentifier=seqIdentifier;
-			 perSeq.seqName=seqName;
-			 perSeq.seqLength=seqLine.length();
-			 perSeq.seq=seqLine;
-			 seqObjList.add(perSeq);
-			 perSeq=null;             
-		   }
-		}           		   
-		br.close();
+  List<SeqCompoAlignInfo> getNonExactSeq(List<SeqCompoAlignInfo> seqObj, 
+	  List<SeqRocket> rockets, String inSeqFileFormat, String seqType){
 	
-		line=null;
-		seqIdentifier=null;	
-		seqLine=null;
-		seqName=null;
-		itemSplited=null;
-	}catch(IOException e){
-        System.out.println(e);
-    }
-
-    return seqObjList; 
- }
- 
- List<SeqCompoAlignInfo> checkFASTQSeq(String seqFile){
-  
-    List<SeqCompoAlignInfo> seqObjList=new ArrayList<SeqCompoAlignInfo>();
-    SeqCompoAlignInfo perSeq;
-	int seqNum=0;
+	 List<SeqCompoAlignInfo> nonExactMatchedSeqList=new ArrayList<SeqCompoAlignInfo>();
+	 try{    
 	
-	try{    
-       	BufferedReader br;              
-        br = new BufferedReader(new FileReader(seqFile));
-	    String line;
-		String seqIdentifier;	
-		String seqLine;
-		String seqName;		
-		String seqQualityLine;
-		String [] itemSplited;
-	
-		seqObjList=new ArrayList<SeqCompoAlignInfo>();
-		seqNum=0;
-			
-		while(true){  
-		   seqNum=seqNum+1;
-		   
-           line = br.readLine();			
-	       if (line == null) break;
-		   line=line.trim();
-           if(line.indexOf("@")!=0) {
-		      System.out.println("Error in reading fastq");
-			  break;
-		   }			   
-           seqIdentifier=line.substring(1,line.length());				 
-		   itemSplited=seqIdentifier.split("\\s+");
-		   seqName=itemSplited[0].trim();
-		      
-		   line=br.readLine();			 
-		   if (line == null) break;
-		   seqLine=line.trim();			 
-		   seqLine=seqLine.replaceAll("N","n");
-		   
-		   line=br.readLine();			  
-		   if (line == null) break;
-		   line=line.trim();
-		   if(line.indexOf("+")!=0) {
-		      System.out.println("Error in reading fastq");
-			  break;
-		   }	
-           
-           line=br.readLine();			 
-		   if (line == null) break;
-		   seqQualityLine=line.trim();
-		   
-		   perSeq=new SeqCompoAlignInfo();
-		   perSeq.seqIdentifier=seqIdentifier;
-		   perSeq.seqName=seqName;
-		   perSeq.seqLength=seqLine.length();
-		   perSeq.seq=seqLine;
-		   perSeq.seqQualityEncode=seqQualityLine;
-		   seqObjList.add(perSeq);
-		   perSeq=null;	
-		}           		   
-		br.close();
-	
-    	line=null;
-    	seqIdentifier=null;	
-		seqLine=null;
-		seqName=null;
-		itemSplited=null;
-	}catch(IOException e){
-        System.out.println(e);
-    }
-
-    return seqObjList; 
- }
- 
- static boolean checkPairEndSeq(List<SeqCompoAlignInfo> seqObjList, 
-		 List<SeqCompoAlignInfo> seqObjList2){
-	
-	 boolean isOK=true;
-	 if(seqObjList.size()!=seqObjList2.size()){
-		 System.out.println("Error: different seq num of pair-end seq");
-		 return false;
-	 }
-	 //int nc=0;
-	 for(int i=0;i<seqObjList.size();i++){
-		if(!seqObjList.get(i).seqName.trim().equals(seqObjList2.get(i).seqName.trim())){ 
-			isOK=false;
-			System.out.println("Error: inconsistent seq name between pair-end seq");
-			System.out.println("Forward: "+seqObjList.get(i).seqName
-					+"\t Reverse:"+seqObjList2.get(i).seqName);
-			break;
-			//nc=nc+1;
-			//System.out.println(seqObjList.get(i).seqName+"  "+seqObjList2.get(i).seqName);
-		}
-	 }
-	 //System.out.println("inconsistent seq num:"+nc);
-	 
-	 return isOK;
-  }
-   
-  
-  void getBlastTarSeqOfRecognizer(List<SeqCompoAlignInfo> seqObjList, SeqRocket seqRocket, 
-		  SeqCompoRecognizer recognizer, String outSeqFile){
-  
-	try{    
-        int trimSEndIndex=-1;
-		int trimLeftShift=0;
-		int trimSEnd=0;
-		for(int i=0;i<seqRocket.seqRecognizer.size();i++){
-		  if(seqRocket.seqRecognizer.get(i).done 
-				  && seqRocket.seqRecognizer.get(i).leftShiftForNext ){		 
-		   trimSEndIndex=seqRocket.seqRecognizer.get(i).index;
-		   trimLeftShift=seqRocket.seqRecognizer.get(i).trimLeftShift;
-		  }
-		}
-		
-        int territoryLen=recognizer.territoryLen;
-        boolean leftSubForBlast=recognizer.leftSubForBlast;    
-		
-		BufferedWriter writer=null;
-        writer=new BufferedWriter(new FileWriter(outSeqFile));
-		String nameLine;
-		String seqLine="";
-		String trimedSeqLine="";
-	    int seqID=0;
-		int seqLen=0;
-    	if(trimSEndIndex>=0){
-		  if(leftSubForBlast){
-		    for(int i=0;i<seqObjList.size();i++){	
-			  seqID=i;	
-			  //nameLine=">"+seqObjList.get(seqID).seqName+" "+seqObjList.get(seqID).seqLength;
-			  nameLine=">"+seqID;
-			  writer.write(nameLine);
-			  writer.newLine();
-			  //writer.flush(); 
-			  seqLine=seqObjList.get(seqID).seq;
-			  seqLen=seqLine.length();
-			  trimSEnd=seqObjList.get(seqID).seqAlignSEnd.get(trimSEndIndex)-trimLeftShift;	
-			  trimedSeqLine="nnnnnnnnnn";			
-			  if(trimSEnd+territoryLen<seqLen)
-				trimedSeqLine=seqLine.substring(trimSEnd,trimSEnd+territoryLen);
-			  else if(trimSEnd<seqLen)
-				trimedSeqLine=seqLine.substring(trimSEnd,seqLen);
-				 
-			  writer.write(trimedSeqLine);
-			  writer.newLine();
-			  writer.flush(); 
-		    }
-		  }else{
-		    for(int i=0;i<seqObjList.size();i++){	
-			  seqID=i;	
-			  //nameLine=">"+seqObjList.get(seqID).seqName+" "+seqObjList.get(seqID).seqLength;
-			  nameLine=">"+seqID;
-			  writer.write(nameLine);
-			  writer.newLine();
-			  //writer.flush(); 
-			  seqLine=seqObjList.get(seqID).seq;
-			  seqLen=seqLine.length();
-			  trimSEnd=seqObjList.get(seqID).seqAlignSEnd.get(trimSEndIndex)-trimLeftShift;	
-			  trimedSeqLine="nnnnnnnnnn";	
-			  if(trimSEnd<seqLen) trimedSeqLine=seqLine.substring(trimSEnd,seqLen);			 
-			  
-			  writer.write(trimedSeqLine);
-			  writer.newLine();
-			  writer.flush(); 
-		    }		 
-		  }
-		}else{
-		  if(leftSubForBlast){
-		    for(int i=0;i<seqObjList.size();i++){	
-			  seqID=i;	
-			  nameLine=">"+seqID;
-			  writer.write(nameLine);
-			  writer.newLine();
-			  //writer.flush(); 
-			  seqLine=seqObjList.get(seqID).seq;
-			  seqLen=seqLine.length();
-				
-			  if(territoryLen<seqLen)
-				trimedSeqLine=seqLine.substring(0,territoryLen);
-			  else 
-				trimedSeqLine=seqLine.substring(0,seqLen);
-				 
-			  writer.write(trimedSeqLine);
-			  writer.newLine();
-			  writer.flush(); 
-		    }
-		  }else{
-		    for(int i=0;i<seqObjList.size();i++){	
-			  seqID=i;	
-			  nameLine=">"+seqID;
-			  writer.write(nameLine);
-			  writer.newLine();
-			  //writer.flush(); 
-			  seqLine=seqObjList.get(seqID).seq;
-			  seqLen=seqLine.length();			 
-			  
-			  writer.write(seqLine);
-			  writer.newLine();
-			  writer.flush(); 
-		    }		  
-		  }
-		
-		}
-		writer.close();
-		
-	}catch(IOException e){
-        System.out.println(e);
-    }  
- 
-  } 
-  
-  void getLeftSubSeq(List<SeqCompoAlignInfo> seqObj,int leftSubSeqLen,String outSeqFile){
-	  		
-		try{    
-
-			String seqLine;
-			//String seqName;
-			int subSeqLength=0;
-			BufferedWriter writer=null;
-	        writer=new BufferedWriter(new FileWriter(outSeqFile));	
-			for(int i=0;i<seqObj.size();i++){     
-		      
-				 seqLine=seqObj.get(i).seq;
-				 subSeqLength=leftSubSeqLen;
-				 if(leftSubSeqLen>seqLine.length()) subSeqLength=seqLine.length();
-	             seqLine=seqLine.substring(0,subSeqLength);
-				  
-				 writer.write(">"+i);
-				 writer.newLine();
-				 writer.write(seqLine);
-				 writer.newLine();
-				 writer.flush(); 
-				 
-			}           		   
-			
-			writer.close();
-		}catch(IOException e){
-	        System.out.println(e);
-	    }
-
-  } 
-  
-  void recognizeExactBarcode(List<SeqCompoAlignInfo> seqObj, List<SeqRocket> rockets, 
-		  String noMatchSeqFile, String inSeqFileFormat){
-  		
-	try{    
-        boolean saveAsFASTAFormat=false;
+		boolean saveAsFASTAFormat=false;
 		boolean saveAsFASTQFormat=false;
 		
 		if(inSeqFileFormat.equalsIgnoreCase("fasta") 
@@ -1103,53 +545,50 @@ public class  SeqRocketConsole {
 		String seqLine;
 		String seqIdentifier;	
 		String seqQuality;
-		String barcodeSeq="";
+		String recognizerSeq="";
 		boolean isMatch=false;	
-        int barIndex=0;
+	    int matchStartIndex=0;
 		String exactAlignedSeqFile="";
-   		
-		SeqCompoRecognizer barcodeInfo=null;
+			
+		SeqCompoRecognizer recognizer=null;
 		ArrayList<BufferedWriter> writerList=new ArrayList<BufferedWriter> ();
 		BufferedWriter writer0=null;
 		for(int j=0;j<rockets.size();j++){
 		  exactAlignedSeqFile=rockets.get(j).seqRecognizer.get(
-			         rockets.get(j).seqTypeInfo.seqTypeName.indexOf(barcodeName)
+			         rockets.get(j).seqTypeInfo.seqTypeName.indexOf(seqType)
 			      ).exactAlignedSeqFile;
 		  rockets.get(j).seqRecognizer.get(
-				     rockets.get(j).seqTypeInfo.seqTypeName.indexOf(barcodeName)
+				     rockets.get(j).seqTypeInfo.seqTypeName.indexOf(seqType)
 				  ).exactAlignedSeqFile=exactAlignedSeqFile+"."+inSeqFileFormat;
 		  writer0=new BufferedWriter(new FileWriter(exactAlignedSeqFile+"."+inSeqFileFormat));	
 		  writerList.add(writer0);
-          writer0=null;		  
-		}
-		BufferedWriter writer=null;
-        writer=new BufferedWriter(new FileWriter(noMatchSeqFile));	
+	      writer0=null;	
+		}		
+
+		//BufferedWriter writer=null;
+	    //writer=new BufferedWriter(new FileWriter(noMatchSeqFile));	
 		if(saveAsFASTAFormat){
 			for(int i=0;i<seqObj.size();i++){     
 				seqIdentifier=seqObj.get(i).seqIdentifier;
 				seqLine=seqObj.get(i).seq;			
 				isMatch=false;
 				for(int j=0;j<rockets.size();j++){
-				 barcodeInfo=rockets.get(j).seqRecognizer.get(
-						 rockets.get(j).seqTypeInfo.seqTypeName.indexOf(barcodeName));
-				 barcodeSeq=barcodeInfo.seq;
-				 barIndex=seqLine.indexOf(barcodeSeq);			 
-				 if(barIndex>=0 && barIndex<=barcodeInfo.maxExactStart-1){
+				  recognizer=rockets.get(j).seqRecognizer.get(
+						 rockets.get(j).seqTypeInfo.seqTypeName.indexOf(seqType));
+				  recognizerSeq=recognizer.seq;
+				  matchStartIndex=seqLine.indexOf(recognizerSeq);			 
+				  if(matchStartIndex>=0 && matchStartIndex<=recognizer.maxExactStart-1){
 					isMatch=true;
 					writerList.get(j).write(">"+seqIdentifier);
 					writerList.get(j).newLine();
 					writerList.get(j).write(seqLine);
 					writerList.get(j).newLine();
 					writerList.get(j).flush(); 
-				 } 
+				  } 
 				}
 				
-				if(!isMatch){
-				  writer.write(">"+seqIdentifier);
-				  writer.newLine();
-				  writer.write(seqLine);
-				  writer.newLine();
-				  writer.flush(); 
+				if(!isMatch){					 
+			      nonExactMatchedSeqList.add(seqObj.get(i));		
 				}
 			}
 		}else if(saveAsFASTQFormat){
@@ -1160,11 +599,11 @@ public class  SeqRocketConsole {
 				
 				isMatch=false;
 				for(int j=0;j<rockets.size();j++){
-				 barcodeInfo=rockets.get(j).seqRecognizer.get(
-						 rockets.get(j).seqTypeInfo.seqTypeName.indexOf(barcodeName));
-				 barcodeSeq=barcodeInfo.seq;
-				 barIndex=seqLine.indexOf(barcodeSeq);			 
-				 if(barIndex>=0 && barIndex<=barcodeInfo.maxExactStart-1){
+				  recognizer=rockets.get(j).seqRecognizer.get(
+						 rockets.get(j).seqTypeInfo.seqTypeName.indexOf(seqType));
+				  recognizerSeq=recognizer.seq;
+				  matchStartIndex=seqLine.indexOf(recognizerSeq);			 
+				  if(matchStartIndex>=0 && matchStartIndex<=recognizer.maxExactStart-1){
 					isMatch=true;
 					writerList.get(j).write("@"+seqIdentifier);
 					writerList.get(j).newLine();
@@ -1175,38 +614,31 @@ public class  SeqRocketConsole {
 					writerList.get(j).write(seqQuality);
 					writerList.get(j).newLine();
 					writerList.get(j).flush(); 
-				 } 
+				  } 
 				}
-				
-				if(!isMatch){
-				    writer.write("@"+seqIdentifier);
-					writer.newLine();
-					writer.write(seqLine);
-					writer.newLine();
-					writer.write("+");
-					writer.newLine();
-					writer.write(seqQuality);
-					writer.newLine();
-					writer.flush(); 
+				if(!isMatch){					 
+				   nonExactMatchedSeqList.add(seqObj.get(i));		
 				}
 			}
 		}
-        for(int j=0;j<writerList.size();j++){		
+	   for(int j=0;j<writerList.size();j++){		
 		   writerList.get(j).close();
 		}
-		writer.close();
+		//writer.close();
 		
 		seqLine=null;
 		seqIdentifier=null;		
-		barcodeSeq=null;
+		recognizerSeq=null;
 		
-	}catch(IOException e){
-        System.out.println(e);
-    }
+	 }catch(IOException e){
+	   System.out.println(e);
+	 }
+	
+	 return nonExactMatchedSeqList;
 
- }
+  }  
 
- void getRecognizedFASTAFile(List<SeqCompoAlignInfo> seqObj,SeqCompoRecognizer recognizer,
+  void getRecognizedFASTAFile(List<SeqCompoAlignInfo> seqObj,SeqCompoRecognizer recognizer,
 		 String seqType, SeqCompoType seqTypeInfo){ 
    	
     int alignSStartIndex=seqTypeInfo.seqTypeName.indexOf(seqType);	
@@ -1468,268 +900,6 @@ public class  SeqRocketConsole {
 
  }
  
- List<SeqCompoAlignInfo> getRecognizedSeq(List<SeqCompoAlignInfo> seqObjList, 
-		 String seqType, SeqCompoType seqTypeInfo){
- 
-    List<SeqCompoAlignInfo> seqObj=new ArrayList<SeqCompoAlignInfo> () ;		
-	int alignSStartIndex=seqTypeInfo.seqTypeName.indexOf(seqType);		  
-	int alignSEndIndex=alignSStartIndex;	
-	
-	for(int i=0; i<seqObjList.size(); i++){
-	
-	   if(seqObjList.get(i).seqAlignSStart.get(alignSStartIndex)>=0 
-			   && seqObjList.get(i).seqAlignSEnd.get(alignSEndIndex)>=0){
-		   
-	     seqObj.add(seqObjList.get(i));
-	     
-	   }
-	}
-	
-	return seqObj; 
- }
- 
- List<SeqCompoAlignInfo> getNoRecognizedSeq(List<SeqCompoAlignInfo> seqObjList,
-		 String seqType,SeqCompoType seqTypeInfo){
- 
-    List<SeqCompoAlignInfo> seqObj=new ArrayList<SeqCompoAlignInfo> () ;	
-	
-	int alignSStartIndex=seqTypeInfo.seqTypeName.indexOf(seqType);		  
-	//int alignSEndIndex=alignSStartIndex;
-	
-	for(int i=0; i<seqObjList.size(); i++){
-	   if(seqObjList.get(i).seqAlignSStart.get(alignSStartIndex)==-1)
-	     seqObj.add(seqObjList.get(i));
-	
-	}
-	
-	return seqObj;
- 
- }
- 
- List<SeqCompoAlignInfo> combineSeqObj(List<SeqCompoAlignInfo> seqObjList1, 
-		 List<SeqCompoAlignInfo> seqObjList2){
- 
-    List<SeqCompoAlignInfo> seqObjList=new ArrayList<SeqCompoAlignInfo> ();
-	
-	for(int i=0; i<seqObjList1.size();i++){
-	   seqObjList.add(seqObjList1.get(i));	   
-	}
-    
-    for(int i=0; i<seqObjList2.size();i++){
-	   seqObjList.add(seqObjList2.get(i));	   
-	}
-    
-	return seqObjList;
- }
- 
- List<Integer> getSeqIndex(List<SeqCompoAlignInfo> seqObj){
-    ArrayList<Integer> seqIndex=new ArrayList<Integer>();
-    for(int i=0;i<seqObj.size();i++){
-	  seqIndex.add(seqObj.get(i).seqIndex);
-	}
-    return seqIndex;
- }
- 
- List<SeqCompoAlignInfo> getSubSeqObj(List<SeqCompoAlignInfo> seqObj,
-		 ArrayList<Integer> seqIndex){
- 
-    List<SeqCompoAlignInfo> subSeqObj=new ArrayList<SeqCompoAlignInfo>();
-    for(int i=0;i<seqIndex.size();i++){
-	  subSeqObj.add(seqObj.get(seqIndex.get(i)));
-	}
-    return subSeqObj;
- }
-  
- List<SeqCompoAlignInfo> setSeqExactMatchPos(List<SeqCompoAlignInfo> seqObjList,
-		 SeqCompoRecognizer recognizer, String seqType,SeqRocket seqRocket){
-  
- 	try{
-		String seqLine;		
-		int redSStartIndex=0;
-        int redSStart=0;
-        int redSEnd=0;		
-        int redMaxStartIndex=recognizer.maxExactStart-1;
-        if (redMaxStartIndex<0) redMaxStartIndex=0;
-		
-		int trimSEndIndex=-1;
-		int trimLeftShift=0;
-		int trimSEnd=0;		
-		for(int i=0;i<seqRocket.seqRecognizer.size();i++){
-		  if(seqRocket.seqRecognizer.get(i).done 
-				  && seqRocket.seqRecognizer.get(i).leftShiftForNext ){		 
-		    
-			  trimSEndIndex=seqRocket.seqRecognizer.get(i).index;
-		      trimLeftShift=seqRocket.seqRecognizer.get(i).trimLeftShift;
-		  
-		  }
-		}
-		
-		int alignSStartIndex=seqRocket.seqTypeInfo.seqTypeName.indexOf(seqType);		  
-		int alignSEndIndex=alignSStartIndex;
-		
-		String recogniSeq=recognizer.seq;
-		
-        if(trimSEndIndex>=0){
-		 for(int i=0;i<seqObjList.size();i++){
-
-			seqLine=seqObjList.get(i).seq;				
-			redSStartIndex=seqLine.indexOf(recogniSeq);
-		    trimSEnd=seqObjList.get(i).seqAlignSEnd.get(trimSEndIndex)-trimLeftShift;		   	
-			if(redSStartIndex>=trimSEnd && redSStartIndex<=trimSEnd+redMaxStartIndex){
-			//if(redSStartIndex>=0){	 
-				redSStart=redSStartIndex+1;
-				redSEnd=redSStartIndex+recogniSeq.length();		
-			}else{
-			    redSStart=-1;
-				redSEnd=-1;
-			}
-			
-			seqObjList.get(i).seqAlignSStart.set(alignSStartIndex,redSStart);
-			seqObjList.get(i).seqAlignSEnd.set(alignSEndIndex,redSEnd);
-			seqObjList.get(i).seqIndex=i;		
-		 }
-	   }else{
-		 for(int i=0;i<seqObjList.size();i++){
-
-			seqLine=seqObjList.get(i).seq;		
-			
-			redSStartIndex=seqLine.indexOf(recogniSeq);		   	
-			if(redSStartIndex>=0 && redSStartIndex<=redMaxStartIndex){
-			//if(redSStartIndex>=0){	 
-				redSStart=redSStartIndex+1;
-				redSEnd=redSStartIndex+recogniSeq.length();		
-			}else{
-			    redSStart=-1;
-				redSEnd=-1;
-			}
-			
-			seqObjList.get(i).seqAlignSStart.set(alignSStartIndex,redSStart);
-			seqObjList.get(i).seqAlignSEnd.set(alignSEndIndex,redSEnd);
-			seqObjList.get(i).seqIndex=i;		
-		 }
-	   }		
-    }catch(Exception e){
-        System.out.println(e);
-    }
-
-	return seqObjList;
-
- }
-   
- List<SeqCompoAlignInfo> getLeftSideBLASTSeq(List<SeqCompoAlignInfo> seqObjList, 
-		 SeqCompoRecognizer recognizer, String seqType, SeqRocket seqRocket, 
-		 String blastOutFile){
-	
-		List<SeqCompoAlignInfo> seqObj=new ArrayList<SeqCompoAlignInfo> ();
-		SeqCompoAlignInfo seq;
-		
-		int alignLen=0;
-		int mismatchNum=0;
-		int gapNum=0;
-		int qStart=0;
-		int sStart=0;
-		int sEnd=0;
-		//int sEnd0=0;
-		
-		int minAlignLen=recognizer.minAlignLen;
-		int maxMismatchNum=recognizer.maxMismatchNum;
-		int maxGapNum=recognizer.maxGapNum;
-		int maxQStart=recognizer.maxQStart;
-		int maxSStart=recognizer.maxSStart;	
-		double maxMismatchRatio=recognizer.maxMismatchRatio;
-		double maxGapRatio=recognizer.maxGapRatio;
-		
-		//ArrayList<ArrayList <String>> blastOutList=new ArrayList<ArrayList <String>> ();
-	    List<ArrayList <String>> blastOut=FileOperate.getMatrixFromFile(blastOutFile);
-		List <Integer> seqID=new ArrayList <Integer>();
-		List <Integer> sStartList=new ArrayList <Integer>();
-		List <Integer> sEndList=new ArrayList <Integer>();
-		String readName="";
-		int readID0=-1;
-		int readID=0;
-		
-		for(int i=0; i<blastOut.size();i++){
-		  readName=blastOut.get(i).get(blastInfoObj.colSName).trim();
-		  readID=Integer.parseInt(readName);
-		  if(readID>readID0){
-				
-			 alignLen=Integer.parseInt(blastOut.get(i).get(blastInfoObj.colAlignLen).trim());
-			 mismatchNum=Integer.parseInt(blastOut.get(i).get(blastInfoObj.colMismatchNum).trim());
-			 gapNum=Integer.parseInt(blastOut.get(i).get(blastInfoObj.colGapNum).trim());
-			 qStart=Integer.parseInt(blastOut.get(i).get(blastInfoObj.colQStart).trim());
-			 sStart=Integer.parseInt(blastOut.get(i).get(blastInfoObj.colSStart).trim());
-			 sEnd=Integer.parseInt(blastOut.get(i).get(blastInfoObj.colSEnd).trim());	
-	         /*
-			 if(sStart>sEnd){
-			   sEnd0=sStart;
-			   sStart=sEnd;
-			   sEnd=sEnd0;
-			 }
-			 */
-	         maxMismatchNum=(int) Math.ceil(alignLen*maxMismatchRatio);
-			 maxGapNum=(int) Math.ceil(alignLen*maxGapRatio);	 			
-				
-			 if(alignLen>=minAlignLen && mismatchNum<=maxMismatchNum && gapNum<=maxGapNum 
-						&& qStart<=maxQStart && sStart<=maxSStart && sEnd>=sStart){
-				seqID.add(readID); 
-				sStartList.add(sStart);
-				sEndList.add(sEnd);
-				readID0=readID;
-			    //blastOutList.add(blastOut.get(i));
-			}
-		  }
-		}
-	
-		blastOut=null;		
-		//blastOutList=null;
-		  
-		int alignSStartIndex=seqRocket.seqTypeInfo.seqTypeName.indexOf(seqType);	
-		int alignSEndIndex=alignSStartIndex;	    
-		
-		int trimSEndIndex=-1;
-		int trimLeftShift=0;
-		int trimSEnd=0;
-		for(int i=0;i<seqRocket.seqRecognizer.size();i++){
-		  if(seqRocket.seqRecognizer.get(i).done 
-				  && seqRocket.seqRecognizer.get(i).leftShiftForNext ){		 
-			
-			  trimSEndIndex=seqRocket.seqRecognizer.get(i).index;
-			  trimLeftShift=seqRocket.seqRecognizer.get(i).trimLeftShift;
-		  
-		  }
-		}
-			
-		if(trimSEndIndex>=0){
-			for(int i=0;i<seqID.size();i++){
-			   seq =new SeqCompoAlignInfo();	
-			   seq=seqObjList.get(seqID.get(i));
-			   trimSEnd=seq.seqAlignSEnd.get(trimSEndIndex)-trimLeftShift;		   		   
-			   seq.seqAlignSStart.set(alignSStartIndex,trimSEnd+sStartList.get(i));
-			   seq.seqAlignSEnd.set(alignSEndIndex,trimSEnd+sEndList.get(i));
-			   seqObj.add(seq);
-			   seq=null;
-			}
-		}else{
-			for(int i=0;i<seqID.size();i++){
-			   seq =new SeqCompoAlignInfo();	
-			   seq=seqObjList.get(seqID.get(i));
-			   seq.seqAlignSStart.set(alignSStartIndex,sStartList.get(i));
-			   seq.seqAlignSEnd.set(alignSEndIndex,sEndList.get(i));
-			   seqObj.add(seq);
-			   seq=null;
-			}	
-		}
-		
-		seq=null;
-		seqID=null;
-		sStartList=null;
-		sEndList=null;
-		
-		return seqObj;
-	  
- } 
- 
- 
  List<ArrayList<SeqCompoAlignInfo>> getBaitBLASTSeq(List<SeqCompoAlignInfo> seqObjList, 
 		 SeqCompoRecognizer recognizer, String seqType, SeqRocket seqRocket, 
 		 String blastOutFile){
@@ -1769,16 +939,16 @@ public class  SeqRocketConsole {
 		int readID=0;
 		
 		for(int i=0; i<blastOut.size();i++){
-		  readName=blastOut.get(i).get(blastInfoObj.colSName).trim();
+		  readName=blastOut.get(i).get(BlastInfo.colSName).trim();
 		  readID=Integer.parseInt(readName);
 		  if(readID>readID0){			
-				alignLen=Integer.parseInt(blastOut.get(i).get(blastInfoObj.colAlignLen).trim());
-				mismatchNum=Integer.parseInt(blastOut.get(i).get(blastInfoObj.colMismatchNum).trim());
-				gapNum=Integer.parseInt(blastOut.get(i).get(blastInfoObj.colGapNum).trim());
-				qStart=Integer.parseInt(blastOut.get(i).get(blastInfoObj.colQStart).trim());
-				qEnd=Integer.parseInt(blastOut.get(i).get(blastInfoObj.colQEnd).trim());
-				sStart=Integer.parseInt(blastOut.get(i).get(blastInfoObj.colSStart).trim());
-				sEnd=Integer.parseInt(blastOut.get(i).get(blastInfoObj.colSEnd).trim());	
+				alignLen=Integer.parseInt(blastOut.get(i).get(BlastInfo.colAlignLen).trim());
+				mismatchNum=Integer.parseInt(blastOut.get(i).get(BlastInfo.colMismatchNum).trim());
+				gapNum=Integer.parseInt(blastOut.get(i).get(BlastInfo.colGapNum).trim());
+				qStart=Integer.parseInt(blastOut.get(i).get(BlastInfo.colQStart).trim());
+				qEnd=Integer.parseInt(blastOut.get(i).get(BlastInfo.colQEnd).trim());
+				sStart=Integer.parseInt(blastOut.get(i).get(BlastInfo.colSStart).trim());
+				sEnd=Integer.parseInt(blastOut.get(i).get(BlastInfo.colSEnd).trim());	
 	            if(sStart>sEnd){
 				 sEnd0=sStart;
 				 sStart=sEnd;
@@ -1821,8 +991,7 @@ public class  SeqRocketConsole {
 		}
 	
 		blastOut=null;		
-		//blastOutList=null;
-	  
+		  
 		int alignSStartIndex=0;	
 		alignSStartIndex=seqRocket.seqTypeInfo.seqTypeName.indexOf(seqType);	
 		int alignSEndIndex=alignSStartIndex;	    
@@ -1895,17 +1064,16 @@ public class  SeqRocketConsole {
 		return bait;
 	  
   }
-
    
   List<SeqCompoAlignInfo> shiftAlignPos(List<SeqCompoAlignInfo> seqObjList, 
-		  String fromSeqType, String toSeqType, SeqCompoType seqTypeInfo){
+		  SeqRocket seqRocket,String fromSeqType, String toSeqType){
 	
     int fromSStartIndex=0;		  
-	fromSStartIndex=seqTypeInfo.seqTypeName.indexOf(fromSeqType);
+	fromSStartIndex=seqRocket.seqTypeInfo.seqTypeName.indexOf(fromSeqType);
 	int fromSEndIndex=fromSStartIndex;
     
     int toSStartIndex=0;		  
-	toSStartIndex=seqTypeInfo.seqTypeName.indexOf(toSeqType);
+	toSStartIndex=seqRocket.seqTypeInfo.seqTypeName.indexOf(toSeqType);
 	int toSEndIndex=toSStartIndex;		
 
 	for(int i=0;i<seqObjList.size();i++){
@@ -1939,8 +1107,8 @@ public class  SeqRocketConsole {
 	 return seqRockets;
  }
  
- public List<SeqRocket> splitLaunchSingleEnd(List<String> splitedSeqFiles,String libSeqInfoFile,
-		  String combinedSeqOut){
+ public List<SeqRocket> splitLaunchSingleEnd(List<String> splitedSeqFiles,
+		 String libSeqInfoFile, String combinedSeqOut){
 
 	 List<SeqRocket> seqRockets=new ArrayList<SeqRocket>();
 	 
@@ -1956,23 +1124,24 @@ public class  SeqRocketConsole {
 		   FileOperate.newFolder(outDir);
 		   
 		   System.out.println("......Recognizing sequence for split "+s+" ......");
-
-		   rockets=(ArrayList<SeqRocket>) launchSingleEnd(file,libSeqInfoFile,outDir);		  
-	       if(rockets!=null && rockets.size()>0) splitedRockets.add(rockets);
-		   
 		   s++;
 		   
-		   tmpFiles.add(file);
-		   for(SeqRocket rocket:rockets){
-			  if(rocket.barcodeRecognizedSeqFile!=null)
-			    tmpFiles.add(rocket.barcodeRecognizedSeqFile); 
-			  if(rocket.recognizedSeqFile!=null)
-			    tmpFiles.add(rocket.recognizedSeqFile); 
-			  if(rocket.recognizedMaskSeqFile!=null)
-			    tmpFiles.add(rocket.recognizedMaskSeqFile);
-			  if(rocket.recognizedTrimSeqFile!=null)
-			    tmpFiles.add(rocket.recognizedTrimSeqFile); 
-		   }
+		   rockets=(ArrayList<SeqRocket>) launchSingleEnd(file,libSeqInfoFile,outDir);		  
+	       if(rockets!=null && rockets.size()>0){
+	    	  splitedRockets.add(rockets);
+	    	  
+		      tmpFiles.add(file);
+		      for(SeqRocket rocket:rockets){
+			    if(rocket.barcodeRecognizedSeqFile!=null)
+			      tmpFiles.add(rocket.barcodeRecognizedSeqFile); 
+			    if(rocket.recognizedSeqFile!=null)
+			      tmpFiles.add(rocket.recognizedSeqFile); 
+			    if(rocket.recognizedMaskSeqFile!=null)
+			      tmpFiles.add(rocket.recognizedMaskSeqFile);
+			    if(rocket.recognizedTrimSeqFile!=null)
+			      tmpFiles.add(rocket.recognizedTrimSeqFile); 
+		      }
+	       }
 		   rockets=null;
 		}catch (Exception e) {
 		// TODO Auto-generated catch block
@@ -1980,7 +1149,7 @@ public class  SeqRocketConsole {
 		}
 	 }
 	   
-	 if(splitedSeqFiles.size()>0){
+	 if(splitedSeqFiles.size()>0 && splitedRockets.size()>0){
 		 String file=splitedSeqFiles.get(0);
 		 if(combinedSeqOut==null) 
 			 combinedSeqOut=file.substring(0,file.lastIndexOf("/"))+"/combined";
@@ -2001,7 +1170,7 @@ public class  SeqRocketConsole {
 			 seqFormat=FileOperate.getFileFormat(file);
 			 outName=combinedSeqOut+"/"
 			         +file.substring(file.lastIndexOf("/")+1,file.lastIndexOf("."))
-		             +"_combined."+seqFormat;
+		             +"_Combined."+seqFormat;
 			 SeqOperation.combineSeqFile(splitedSeqFiles,outName);
 			 rocket.recognizedSeqFile=outName;
 			 fileList.add(outName);
@@ -2014,7 +1183,7 @@ public class  SeqRocketConsole {
 			 seqFormat=FileOperate.getFileFormat(file);
 			 outName=combinedSeqOut+"/"
 			         +file.substring(file.lastIndexOf("/")+1,file.lastIndexOf("."))
-		             +"_combined."+seqFormat;
+		             +"_Combined."+seqFormat;
 			 SeqOperation.combineSeqFile(splitedSeqFiles,outName);
 			 rocket.recognizedMaskSeqFile=outName;
 			 
@@ -2026,7 +1195,7 @@ public class  SeqRocketConsole {
 			 seqFormat=FileOperate.getFileFormat(file);
 			 outName=combinedSeqOut+"/"
 			         +file.substring(file.lastIndexOf("/")+1,file.lastIndexOf("."))
-		             +"_combined."+seqFormat;
+		             +"_Combined."+seqFormat;
 			 SeqOperation.combineSeqFile(splitedSeqFiles,outName);
 			 rocket.barcodeRecognizedSeqFile=outName;
 			 
@@ -2037,6 +1206,8 @@ public class  SeqRocketConsole {
 	     String fileListOut=combinedSeqOut+"/fileList.txt";
 		 FileOperate.saveList(fileList, null, fileListOut);
 
+	 }else{
+		System.out.println("Warning: No sequences recognized, please check if your data or configuration is correct!!!");
 	 }
 	 splitedRockets=null;
 	 
@@ -2096,29 +1267,31 @@ public class  SeqRocketConsole {
 		   System.out.println("......Recognizing sequence for split "+(s+1)+" ......");
            
 		   rockets12=(ArrayList<SeqRocketPair>) launchPairEnd(
-				       file,file2,libSeqInfoFile,libSeqInfoFile2,outDir
+				        file,file2,libSeqInfoFile,libSeqInfoFile2,outDir
 				     );
-		   if(rockets12!=null && rockets12.size()>0) splitedRockets12.add(rockets12);
+		   if(rockets12!=null && rockets12.size()>0){
+			   splitedRockets12.add(rockets12);
 		   
-		   tmpFiles.add(file);
-		   for(SeqRocketPair rocketPair:rockets12){
-			  if(rocketPair.forward.barcodeRecognizedSeqFile!=null)
-			    tmpFiles.add(rocketPair.forward.barcodeRecognizedSeqFile); 
-			  if(rocketPair.forward.recognizedSeqFile!=null)
-			    tmpFiles.add(rocketPair.forward.recognizedSeqFile); 
-			  if(rocketPair.forward.recognizedMaskSeqFile!=null)
-			    tmpFiles.add(rocketPair.forward.recognizedMaskSeqFile);
-			  if(rocketPair.forward.recognizedTrimSeqFile!=null)
-			    tmpFiles.add(rocketPair.forward.recognizedTrimSeqFile); 
-			  
-			  if(rocketPair.reverse.barcodeRecognizedSeqFile!=null)
-				tmpFiles.add(rocketPair.reverse.barcodeRecognizedSeqFile); 
-			  if(rocketPair.reverse.recognizedSeqFile!=null)
-				tmpFiles.add(rocketPair.reverse.recognizedSeqFile); 
-			  if(rocketPair.reverse.recognizedMaskSeqFile!=null)
-			    tmpFiles.add(rocketPair.reverse.recognizedMaskSeqFile);
-			  if(rocketPair.reverse.recognizedTrimSeqFile!=null)
-			    tmpFiles.add(rocketPair.reverse.recognizedTrimSeqFile); 
+			   tmpFiles.add(file);
+			   for(SeqRocketPair rocketPair:rockets12){
+				  if(rocketPair.forward.barcodeRecognizedSeqFile!=null)
+				    tmpFiles.add(rocketPair.forward.barcodeRecognizedSeqFile); 
+				  if(rocketPair.forward.recognizedSeqFile!=null)
+				    tmpFiles.add(rocketPair.forward.recognizedSeqFile); 
+				  if(rocketPair.forward.recognizedMaskSeqFile!=null)
+				    tmpFiles.add(rocketPair.forward.recognizedMaskSeqFile);
+				  if(rocketPair.forward.recognizedTrimSeqFile!=null)
+				    tmpFiles.add(rocketPair.forward.recognizedTrimSeqFile); 
+				  
+				  if(rocketPair.reverse.barcodeRecognizedSeqFile!=null)
+					tmpFiles.add(rocketPair.reverse.barcodeRecognizedSeqFile); 
+				  if(rocketPair.reverse.recognizedSeqFile!=null)
+					tmpFiles.add(rocketPair.reverse.recognizedSeqFile); 
+				  if(rocketPair.reverse.recognizedMaskSeqFile!=null)
+				    tmpFiles.add(rocketPair.reverse.recognizedMaskSeqFile);
+				  if(rocketPair.reverse.recognizedTrimSeqFile!=null)
+				    tmpFiles.add(rocketPair.reverse.recognizedTrimSeqFile); 
+			   }
 		   }
 		   rockets12=null;
 	
@@ -2128,7 +1301,7 @@ public class  SeqRocketConsole {
 		}
 	 }
 	   
-	 if(splitedRockets12.size()>0){
+	 if(splitedRockets12.size()>0 && splitedRockets12.size()>0){
 		 file=splitedSeqFiles.get(0);
 		 if(combinedSeqOut==null) 
 			 combinedSeqOut=file.substring(0,file.lastIndexOf("/"))+"/combined";
@@ -2239,7 +1412,10 @@ public class  SeqRocketConsole {
 		 fileList_forward=null;
 		 fileList_reverse=null;
 
+	 }else{
+		System.out.println("Warning: No sequences recognized, please check if your data or configuration is correct!!!");
 	 }
+
 	 splitedRockets12=null;
 	 
 	 setSeqPairRockets(seqPairRockets);
@@ -2259,11 +1435,7 @@ public class  SeqRocketConsole {
  public List<SeqRocket> launchSingleEnd(String inSeqFile,String libSeqInfoFile,
 		 String seqOutDir) {	    
 		
-		FileOperate.newFolder(tmpDir+"/recognizer");
-		FileOperate.newFolder(tmpDir+"/recognizer/barcode");
-		FileOperate.newFolder(tmpDir+"/recognizer/primer");
-		FileOperate.newFolder(tmpDir+"/recognizer/bait");
-		
+		FileOperate.newFolder(tmpDir+"/recognizer");		
 		tmpFiles=new  ArrayList<String>();
 				
 		if(seqOutDir==null){
@@ -2285,27 +1457,30 @@ public class  SeqRocketConsole {
 		String inSeqFileFormat=FileOperate.getFileFormat(inSeqFile);
 		
 		//Recognizing barcode ...............................................	
-		
-		String barNoExactSeqFile=tmpDir+"/AllBarNoExactMatchSeq_forward."+inSeqFileFormat;
-        String barNoExactSeqLeftSubFile=barNoExactSeqFile.substring(
+		/*
+		String barNoExactSeqFile=tmpDir+"/AllBarNoExactMatchSeq_forward.fna";
+		tmpFiles.add(barNoExactSeqFile);
+        String barNoExactLeftSubSeqFile=barNoExactSeqFile.substring(
         		                          0,barNoExactSeqFile.lastIndexOf(".")
         	                            )+".leftsub.fna";       
 		
-        tmpFiles.add(barNoExactSeqFile);
-        tmpFiles.add(barNoExactSeqLeftSubFile);
+        */
+
         
-		List<SeqCompoAlignInfo> barNoExactSeqObj=getBarNoExactSeqObj(seqObjList,rockets,
-				inSeqFileFormat, barNoExactSeqFile,barNoExactSeqLeftSubFile);		
-		seqObjList=null;
+		List<SeqCompoAlignInfo> barNonExactSeqObj=getBarNonExactSeq(seqObjList,
+				rockets,inSeqFileFormat);		
+		seqObjList=null;		
+        String barNonExactLeftSubSeqFile=tmpDir+"/AllBarNoExactMatchSeq_forward.leftsub.fna";
+        tmpFiles.add(barNonExactLeftSubSeqFile);
+        createLeftSubBLASTTarSeq(barNonExactSeqObj,barTerritoryLen,barNonExactLeftSubSeqFile);	
 		
 		for(int i=0;i<rockets.size();i++){		  
 		  
-			launchSeqRocket(rockets.get(i), barNoExactSeqObj,
-					barNoExactSeqLeftSubFile,inSeqFileFormat, seqOutDir);			
-			
+			launchSeqRocket(rockets.get(i), barNonExactSeqObj,
+					barNonExactLeftSubSeqFile,inSeqFileFormat, seqOutDir);			
 
 		}// for Rocket
-		barNoExactSeqObj=null;    
+		barNonExactSeqObj=null;    
 	    
 		//System.out.println("Delete temporary files");
 	    for(String tmpFile: tmpFiles){
@@ -2321,11 +1496,7 @@ public class  SeqRocketConsole {
  public List<SeqRocketPair> launchPairEnd(String inSeqFile,String inSeqFile2,
 		 String libSeqInfoFile,String libSeqInfoFile2,String seqOutDir) {	    
 		
-		FileOperate.newFolder(tmpDir+"/recognizer");
-		FileOperate.newFolder(tmpDir+"/recognizer/barcode");
-		FileOperate.newFolder(tmpDir+"/recognizer/primer");
-		FileOperate.newFolder(tmpDir+"/recognizer/bait");
-		
+		FileOperate.newFolder(tmpDir+"/recognizer");		
 		tmpFiles=new  ArrayList<String>();
 				
 		if(seqOutDir==null){
@@ -2365,21 +1536,25 @@ public class  SeqRocketConsole {
 		
 		List<SeqRocket> rockets =buildRockets(libSeqInfoFile);	// for forward seq(Pair-end)
 		//Recognizing barcode for pair-end forward Seq...............................................	
-		String barNoExactSeqFile=tmpDir+"/AllBarNoExactMatchSeq_forward."+inSeqFileFormat;
-        String barNoExactSeqLeftSubFile=barNoExactSeqFile.substring(
+		/*
+		String barNoExactSeqFile=tmpDir+"/AllBarNoExactMatchSeq_forward.fna";
+        String barNoExactLeftSubSeqFile=barNoExactSeqFile.substring(
         		                          0,barNoExactSeqFile.lastIndexOf(".")
         	                            )+".leftsub.fna";  
         tmpFiles.add(barNoExactSeqFile);
-        tmpFiles.add(barNoExactSeqLeftSubFile);
-			
-		List<SeqCompoAlignInfo> barNoExactSeqObj=getBarNoExactSeqObj(seqObjList,rockets,
-				inSeqFileFormat, barNoExactSeqFile,barNoExactSeqLeftSubFile);
-		seqObjList=null;		
+        */
+		
+		List<SeqCompoAlignInfo> barNonExactSeqObj=getBarNonExactSeq(
+				seqObjList,rockets,inSeqFileFormat);
+		seqObjList=null;
+        String barNonExactLeftSubSeqFile=tmpDir+"/AllBarNoExactMatchSeq_forward.leftsub.fna";
+        tmpFiles.add(barNonExactLeftSubSeqFile);
+        createLeftSubBLASTTarSeq(barNonExactSeqObj,barTerritoryLen,barNonExactLeftSubSeqFile);	
 
 		for(int i=0;i<rockets.size();i++){		  
 		  
-			launchSeqRocket(rockets.get(i), barNoExactSeqObj,
-					barNoExactSeqLeftSubFile,inSeqFileFormat,seqOutDir);
+			launchSeqRocket(rockets.get(i), barNonExactSeqObj,
+					barNonExactLeftSubSeqFile,inSeqFileFormat,seqOutDir);
 			
 			String forwardSeqFile=rockets.get(i).recognizedSeqFile;
 			String forwardSeqFormat=FileOperate.getFileFormat(forwardSeqFile);
@@ -2398,17 +1573,21 @@ public class  SeqRocketConsole {
 			seqObjList2=checkSeq(reverseSeqFile);
 			
 			//Recognizing barcode for pair-end reversed Seq...............................................	
-			String barNoExactSeqFile2=tmpDir+"/AllBarNoExactMatchSeq_reverse."+inSeqFileFormat2;
-	        String barNoExactSeqLeftSubFile2=barNoExactSeqFile2.substring(
+			/*
+			String barNoExactSeqFile2=tmpDir+"/AllBarNoExactMatchSeq_reverse.fna";
+	        String barNoExactLeftSubSeqFile2=barNoExactSeqFile2.substring(
 	        		   0,barNoExactSeqFile2.lastIndexOf(".")
 	        	   )+".leftsub.fna";
 	        tmpFiles.add(barNoExactSeqFile2);
-	        tmpFiles.add(barNoExactSeqLeftSubFile2);
-						
+	        */
+					
 	        List<SeqRocket> rockets2 =buildRockets(libSeqInfoFile2); // for reversed seq(Pair-end)
-			List<SeqCompoAlignInfo> barNoExactSeqObj2=getBarNoExactSeqObj(seqObjList2,
-				rockets2,inSeqFileFormat2, barNoExactSeqFile2,barNoExactSeqLeftSubFile2);
+			List<SeqCompoAlignInfo> barNonExactSeqObj2
+			          =getBarNonExactSeq(seqObjList2,rockets2,inSeqFileFormat2);
 			seqObjList2=null;
+			String barNonExactLeftSubSeqFile2=tmpDir+"/AllBarNoExactMatchSeq_reverse.leftsub.fna";
+		    tmpFiles.add(barNonExactLeftSubSeqFile2);		
+		    createLeftSubBLASTTarSeq(barNonExactSeqObj2,barTerritoryLen,barNonExactLeftSubSeqFile2);	
 
 			for(int j=0;j<rockets2.size();j++){	
 			   try {  
@@ -2418,13 +1597,13 @@ public class  SeqRocketConsole {
 				    
 				    // get reverse-recognized result
 				    SeqRocket rocket_reverse=rockets2.get(j);
-				    rocket_reverse.rocketName=rocket12Tag+"_Reverse";					
-					launchSeqRocket(rocket_reverse, barNoExactSeqObj2,
-							barNoExactSeqLeftSubFile2, inSeqFileFormat2, seqOutDir);
+				    rocket_reverse.rocketName=rocket12Tag+"_Forward-Reverse";					
+					launchSeqRocket(rocket_reverse, barNonExactSeqObj2,
+							barNonExactLeftSubSeqFile2, inSeqFileFormat2, seqOutDir);
 							
 					// get forward seq based on reverse-recognized result
 					SeqRocket rocket_forward=(SeqRocket) rockets.get(i).clone();
-					rocket_forward.rocketName=rocket12Tag+"_Forward";
+					rocket_forward.rocketName=rocket12Tag+"_Reverse-Forward";
 					String reverseSeqOut=rocket_reverse.recognizedSeqFile;							
 					String reverseSeqNameFile=tmpDir+"/"+reverseSeqOut.substring(
 						reverseSeqOut.lastIndexOf("/")+1,reverseSeqOut.lastIndexOf(".")
@@ -2462,9 +1641,8 @@ public class  SeqRocketConsole {
 				}			
 			}
 			rockets2=null;
-			barNoExactSeqObj2=null;
-			barNoExactSeqFile2=null;
-			barNoExactSeqLeftSubFile2=null;
+			barNonExactSeqObj2=null;
+			barNonExactLeftSubSeqFile2=null;
 			reverseSeqFile=null;
 			forwardSeqFile=null;
 			forwardSeqFormat=null;
@@ -2473,8 +1651,8 @@ public class  SeqRocketConsole {
 			forwardSeqNameFile=null;
 					
 		}// for Rocket
-		barNoExactSeqObj=null;    
-	    
+		barNonExactSeqObj=null;    
+		barNonExactLeftSubSeqFile=null;
 		//System.out.println("Delete temporary files");
 	    for(String tmpFile: tmpFiles){
 	      FileOperate.delFile(tmpFile);
@@ -2658,11 +1836,14 @@ public class  SeqRocketConsole {
 			libSeqRocket.seqTypeInfo=new SeqCompoType();
 			libSeqRocket.seqTypeInfo.seqTypeName=new ArrayList<String> ();	
 			libSeqRocket.seqTypeInfo.seqColor=new ArrayList<String> ();
-			libSeqRocket.seqComponent=libExpSeqCompList.get(i);
+			////libSeqRocket.seqComponent=libExpSeqCompList.get(i);
 			if(primerSeq!=null && primerSeq.length()>0){
-			  if(primerSeq.length()<minRedPrimerLen){
-			    System.out.println("The length of your primer is less than "+minRedPrimerLen+"!");
-			    minRedPrimerLen=primerSeq.length();
+			  if(primerSeq.length()<minPrimerLen){
+			    System.out.println(
+			    	  "Warning: The length of primer for "
+			          +libExpSeqCompList.get(i).name+" is less than "+minPrimerLen+"!"
+			    );
+			    minPrimerLen=primerSeq.length();
 			  }
 			  barcode=new SeqCompoRecognizer();
 			  primer=new SeqCompoRecognizer();
@@ -2729,8 +1910,7 @@ public class  SeqRocketConsole {
 			primerCont=null;
 		    bait=null;
 			baitBrk=null;
-			baitArm=null;
-		
+			baitArm=null;		
 		}
 		
 		libExpSeqCompList=null;
@@ -2740,13 +1920,13 @@ public class  SeqRocketConsole {
 		return rockets;
  }
   
- List<SeqCompoAlignInfo> getBarNoExactSeqObj(List<SeqCompoAlignInfo>seqObjList,
-		List<SeqRocket> rockets,String inSeqFileFormat,
-		String barNoExactSeqFile,String leftSubBarNoExactSeqFile){
+ List<SeqCompoAlignInfo> getBarNonExactSeq(List<SeqCompoAlignInfo>seqObjList,
+	  List<SeqRocket> rockets,String inSeqFileFormat){
 	  
 		//Recognizing barcode ...............................................		
 		
-		recognizeExactBarcode(seqObjList,rockets,barNoExactSeqFile,inSeqFileFormat);	
+	    List<SeqCompoAlignInfo> barNonExactSeqObj
+	            =getNonExactSeq(seqObjList,rockets,inSeqFileFormat,barcodeName);	
 		
 		for(int f=0;f<rockets.size();f++){
 			tmpFiles.add(
@@ -2754,35 +1934,34 @@ public class  SeqRocketConsole {
 				    rockets.get(f).seqTypeInfo.seqTypeName.indexOf(barcodeName)
 			  ).exactAlignedSeqFile
 			);
-		}		
-					
-		List<SeqCompoAlignInfo> barNoExactSeqObj=getSeqObj(barNoExactSeqFile);
-	
-		getLeftSubSeq(barNoExactSeqObj,barTerritoryLen,leftSubBarNoExactSeqFile);	
+		}
 		
-		tmpFiles.add(barNoExactSeqFile);
-		tmpFiles.add(leftSubBarNoExactSeqFile);
-		
-		return barNoExactSeqObj;
+		return barNonExactSeqObj;
  }
   
  void launchSeqRocket(SeqRocket seqRocket, List<SeqCompoAlignInfo> barNoExactSeqObj, 
-		String barNoExactSeqLeftSubFile, String inSeqFileFormat,String seqOutDir){		
-		
+		String barNoExactLeftSubSeqFile, String inSeqFileFormat,String seqOutDir){		
+		  	 
+	      if(!seqRocket.seqTypeInfo.seqTypeName.contains(barcodeName)){
+		     System.out.println("Warning: "
+	           +"You did not set barcode or primer sequence for experiment '"
+		       +seqRocket.rocketName+"', so no sequence extraction for this experiment!!!");
+			 
+		     seqRocket.isDone=false;
+		     return;
+	      }
+	      
 		  String barBlastCMD="";
 		  String tarBlastCMD="";
 		  String baitBlastCMD="";
 		  String blastCMD="";	
-		 
+		  int blastWordSize=7;
+		  String blastTask="blastn-short";	
 		  String tarSeqFile="";
 		  String tarBaitSeqFile="";
 		  String querySeqFile="";
 		  String timeStamp=new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
 		  String blastOutFile=tmpDir+"/SeqRocket.BlastOut."+timeStamp+".txt";
-
-		  int seqNum=0;
-		  int blastWordSize=7;
-		  String blastTask="blastn-short";		
 		  
 		  List<SeqCompoAlignInfo> tarSeqObj = null;
 		  List<SeqCompoAlignInfo> tarExactSeqObj;
@@ -2791,12 +1970,11 @@ public class  SeqRocketConsole {
 		  List<ArrayList<SeqCompoAlignInfo>> baitObj;
 		  List<Integer> blastWordSizeList;
 		  String seqType="";
-		  String lastSeqType="";
-	      boolean doAlignment=false;		
+		  String lastSeqType="";	    		
 		  boolean doBarBlast=true;
 		  boolean leftTrim=false;
-		  
-		  seqNum=SeqOperation.getSeqNum(barNoExactSeqLeftSubFile);		
+		  int seqNum=0;
+		  seqNum=SeqOperation.getSeqNum(barNoExactLeftSubSeqFile);		
 		  barBlastCMD="-evalue 10000 -max_target_seqs "+seqNum;	
 		  if(seqNum==0) doBarBlast=false;
 		  String doName="";
@@ -2807,26 +1985,15 @@ public class  SeqRocketConsole {
 		  if(seqRocket.isActive){
 			tarSeqObj=new ArrayList<SeqCompoAlignInfo> ();
 			doName=seqRocket.rocketName+".";
-			doAlignment=true;
-			if(doAlignment){
-			    initSeqObjAlignArray(barNoExactSeqObj,
-			    		seqRocket.seqTypeInfo.seqTypeName.size());
-			}			
-			for(int k=0;k<seqRocket.seqRecognizer.size();k++){
-			  
-			   if(!seqRocket.seqTypeInfo.seqTypeName.contains(barcodeName)){
-				  System.out.println("Warning: "
-			           +"You did not set barcode or primer sequence for experiment '"
-				       +doName+"', so no sequence extraction for this experiment!!!");
-					  
-				  break;
-			   }				  
-			   
-			   recognizer=seqRocket.seqRecognizer.get(k);	
-			   seqType=seqRocket.seqTypeInfo.seqTypeName.get(recognizer.index);	  
+			initSeqAlignArray(barNoExactSeqObj,seqRocket.seqTypeInfo.seqTypeName.size());						
+			
+			for(int k=0;k<seqRocket.seqRecognizer.size();k++){				   
+			   recognizer=seqRocket.seqRecognizer.get(k);
+			   if(recognizer==null) break;
+			   seqType=seqRocket.seqTypeInfo.seqTypeName.get(recognizer.index);	  			  
+			   doName=doName+seqType+"-";
 			   System.out.println(recognizer.seqName+" Recognizing......");
-			   doName=doName+seqType+"-";	
-			  
+			   
 			   if(seqType.equals(barcodeName)){             		  
 				  
 				  if((inSeqFileFormat.equalsIgnoreCase("fastq") 
@@ -2835,30 +2002,22 @@ public class  SeqRocketConsole {
 				     
 					  recognizer.saveSeqAsFASTQFormat=true;
 					  recognizer.saveSeqAsFASTAFormat=false;
-				  }				  
-				 			  
-				  tarExactSeqObj=getSeqObj(recognizer.exactAlignedSeqFile);
-	              
-				  //doAlignment=true;
-				  if(doAlignment){  
-				      initSeqObjAlignArray(tarExactSeqObj,
-						  seqRocket.seqTypeInfo.seqTypeName.size());
-				  }
-				  
-				  tarExactSeqObj=setSeqExactMatchPos(tarExactSeqObj,recognizer,
-	            		  seqType,seqRocket); 
+				  }					 			  
+				  tarExactSeqObj=getSeqObj(recognizer.exactAlignedSeqFile);	 
+				  initSeqAlignArray(tarExactSeqObj,seqRocket.seqTypeInfo.seqTypeName.size());
+				  setSeqExactAlignInfo(tarExactSeqObj,seqRocket,seqType); 
 				  tarBlastSeqObj=new ArrayList<SeqCompoAlignInfo> (); 			  
 				  if(doBarBlast){
-					  querySeqFile=recognizer.tagSeqFile;
+					  querySeqFile=recognizer.seqFASTAFile;
 					  blastWordSize=recognizer.blastWordSize;
 					  blastTask=recognizer.blastTask;
 					  blastCMD="blastn -task "+blastTask+" "
 					          +barBlastCMD+" -word_size="+blastWordSize
 					          +" -query "+querySeqFile
-					          +" -subject "+barNoExactSeqLeftSubFile
+					          +" -subject "+barNoExactLeftSubSeqFile
 					          +" -out "+blastOutFile+" -outfmt 6";
 					  //System.out.println(blastCMD+"......");
-					  SeqOperation.runBLAST2Seq(blastCMD);			  
+					  SeqOperation.runBLAST(blastCMD);			  
 					  tarBlastSeqObj=getLeftSideBLASTSeq(barNoExactSeqObj,recognizer,
 							  seqType,seqRocket,blastOutFile);		  
 					  FileOperate.delFile(blastOutFile);				 		  
@@ -2912,7 +2071,7 @@ public class  SeqRocketConsole {
 						 recognizer.territoryLen=primerCont.territoryLen;
 						 recognizer.minAlignLen=primerCont.minAlignLen;
 						 recognizer.blastWordSize=primerCont.blastWordSize;
-						 recognizer.tagSeqFile=primerCont.tagSeqFile;
+						 recognizer.seqFASTAFile=primerCont.seqFASTAFile;
 					  }
 					  if(recognizer.leftSubForBlast && leftTrim){
 						tarBaitSeqFile=tmpDir+"/"+seqType+".LeftTrim.LeftSub.ForBLAST."+c+".fna";	   
@@ -2923,7 +2082,7 @@ public class  SeqRocketConsole {
 					  }else{
 						tarBaitSeqFile=tmpDir+"/"+seqType+".ForBLAST."+c+".fna";	   
 					  }
-					  getBlastTarSeqOfRecognizer(tarNoExactSeqObj,seqRocket,
+					  createRecognizerBLASTTarSeq(tarNoExactSeqObj,seqRocket,
 							  recognizer,tarBaitSeqFile);
 	                  tmpFiles.add(tarBaitSeqFile);				  
 					  blastWordSize=recognizer.blastWordSize;
@@ -2939,14 +2098,14 @@ public class  SeqRocketConsole {
 							  +" -word_size="+blastWordSize+" -evalue 10000";
 					  seqNum=SeqOperation.getSeqNum(tarBaitSeqFile);		
 					  baitBlastCMD=baitBlastCMD+" -max_target_seqs "+seqNum;         	  
-					  querySeqFile=recognizer.tagSeqFile;
+					  querySeqFile=recognizer.seqFASTAFile;
 					  blastCMD=baitBlastCMD+" -query "+querySeqFile+" -subject "
 					          +tarBaitSeqFile+" -out "+blastOutFile+" -outfmt 6";	
 					  tarBlastSeqObj=new ArrayList<SeqCompoAlignInfo> ();
 					  baitObj=new ArrayList<ArrayList<SeqCompoAlignInfo>>();
 					  if(seqNum>0){
 						//System.out.println(blastCMD+"......");
-						SeqOperation.runBLAST2Seq(blastCMD);		
+						SeqOperation.runBLAST(blastCMD);		
 						baitObj=getBaitBLASTSeq(tarNoExactSeqObj,recognizer,
 								seqType,seqRocket,blastOutFile);
 						FileOperate.delFile(blastOutFile);
@@ -2958,13 +2117,13 @@ public class  SeqRocketConsole {
 						//System.out.println(" No Sequence for "+recognizer.seqName+" Blast!");
 						break;
 					  }	  
-					  baitObj=null;
-					  	
-				  }// for blastWordSize	
+					  baitObj=null;				  	
+				  }// for blastWordSize
+				  
 				  if(tarNoExactSeqObj.size()>0){			    
 					  tarSeqObj=combineSeqObj(tarSeqObj,tarNoExactSeqObj);
 					  //Set alignArray for seqObj without BLAST alignment in order to show that this seq junction goes to out of bait region.
-					  tarSeqObj=shiftAlignPos(tarSeqObj,lastSeqType,seqType,seqRocket.seqTypeInfo);
+					  tarSeqObj=shiftAlignPos(tarSeqObj,seqRocket,lastSeqType,seqType);
 				  }
 				  System.out.println(seqRocket.rocketName+">>>Seq harbouring "+seqType
 					   +" portion/total recognized seq: "
@@ -2979,13 +2138,12 @@ public class  SeqRocketConsole {
 					     
 					  recognizer.saveSeqAsFASTQFormat=true;
 						
-				  }	
-					  
-				  tarSeqObj=setSeqExactMatchPos(tarSeqObj,recognizer,seqType,seqRocket);  
+				  }					  
 				  tarExactSeqObj=new ArrayList<SeqCompoAlignInfo> ();
-				  tarNoExactSeqObj=new ArrayList<SeqCompoAlignInfo> ();	  
-				  tarExactSeqObj=getRecognizedSeq(tarSeqObj,seqType,seqRocket.seqTypeInfo);
-				  tarNoExactSeqObj=getNoRecognizedSeq(tarSeqObj,seqType,seqRocket.seqTypeInfo);
+				  tarNoExactSeqObj=new ArrayList<SeqCompoAlignInfo> ();	
+				  setSeqExactAlignInfo(tarSeqObj,seqRocket,seqType); 		  
+				  tarExactSeqObj=getRecognizedSeq(tarSeqObj,seqRocket,seqType);
+				  tarNoExactSeqObj=getNoRecognizedSeq(tarSeqObj,seqRocket,seqType);
 				  tarSeqObj=null;			 
 				  if(recognizer.leftSubForBlast && leftTrim){
 					tarSeqFile=tmpDir+"/"+seqType+".Trim.leftsub.ForBLAST.fna";	   
@@ -2996,7 +2154,7 @@ public class  SeqRocketConsole {
 				  }else{
 					tarSeqFile=tmpDir+"/"+seqType+".ForBLAST.fna";	    
 				  }	
-				  getBlastTarSeqOfRecognizer(tarNoExactSeqObj,seqRocket,recognizer,tarSeqFile);	
+				  createRecognizerBLASTTarSeq(tarNoExactSeqObj,seqRocket,recognizer,tarSeqFile);	
 	              tmpFiles.add(tarSeqFile);		  
 				  blastWordSize=recognizer.blastWordSize;
 	              blastTask=recognizer.blastTask;			  
@@ -3004,18 +2162,18 @@ public class  SeqRocketConsole {
 						  +" -word_size="+blastWordSize+" -evalue 10000";
 				  seqNum=SeqOperation.getSeqNum(tarSeqFile);		
 				  tarBlastCMD=tarBlastCMD+" -max_target_seqs "+seqNum;         	  
-				  querySeqFile=recognizer.tagSeqFile;
+				  querySeqFile=recognizer.seqFASTAFile;
 				  blastCMD=tarBlastCMD+" -query "+querySeqFile
 						  +" -subject "+tarSeqFile+" -out "+blastOutFile+" -outfmt 6";
 				  tarBlastSeqObj=new ArrayList<SeqCompoAlignInfo> ();
 				  if(seqNum>0){
 					//System.out.println(blastCMD+"......");
-				    SeqOperation.runBLAST2Seq(blastCMD);		
+				    SeqOperation.runBLAST(blastCMD);		
 				    tarBlastSeqObj=getLeftSideBLASTSeq(tarNoExactSeqObj,recognizer,
 							seqType,seqRocket,blastOutFile);          
 					FileOperate.delFile(blastOutFile);			
 				  }else{
-					//System.out.println(" No Sequence for "+recognizer.seqName+" Blast!");
+					//System.out.println("No Sequence for "+recognizer.seqName+" Blast!");
 				  }	 
 				  tarNoExactSeqObj=null;	 
 				  tarSeqObj=combineSeqObj(tarExactSeqObj,tarBlastSeqObj);
@@ -3074,7 +2232,8 @@ public class  SeqRocketConsole {
 					  }
 				   }
 				   
-				   System.out.println(seqRocket.rocketName +">>>Saved Recognized "+saveName+" Seq!");	  
+				   seqRocket.isDone=true;				   
+				   System.out.println(seqRocket.rocketName +">>>Recognized "+saveName+" is saved!!!");	  
 			   }
 			  
 			   seqRocket.seqRecognizer.get(k).done=true;		

@@ -181,13 +181,10 @@ public class BlastNToSnp extends AbstractKnimeApplication {
 						if(k==-1 || k-j> minGapSize) break;
 						j=k+1;
 					}
-					
-					
+										
 					String ref=new String(hspHSeq.substring(i, j)).replaceAll("[\\- ]", "");
 					String alt=new String(hspQseq.substring(i, j)).replaceAll("[\\- ]", "");
-					
-					
-					
+										
 					if(hit_shift<0){
 						StringBuilder sb=new StringBuilder(alt.length());
 						for(int x=alt.length()-1;x>=0;--x){
@@ -199,9 +196,7 @@ public class BlastNToSnp extends AbstractKnimeApplication {
 						for(int x=ref.length()-1;x>=0;--x){
 							sb.append(AcidNucleics.complement(ref.charAt(x)));
 						}
-						ref=sb.toString();
-						
-						
+						ref=sb.toString();	
 					}
 						
 					pw.print(iter1.getIterationQueryDef());
@@ -223,8 +218,7 @@ public class BlastNToSnp extends AbstractKnimeApplication {
 					pw.print(ref);
 					pw.print('\t');
 					pw.print(alt);
-					
-					
+										
 					pw.print('\t');
 					pw.print(align_length);
 					pw.print('\t');
@@ -234,7 +228,6 @@ public class BlastNToSnp extends AbstractKnimeApplication {
 					pw.print('\t');
 					pw.print(hspMid.substring(i, j).replace(' ', '.'));
 
-					
 					pw.println();
 					
 					//marshaller.marshal(new JAXBElement<Hsp>(new QName("Hsp"), Hsp.class, hsp), System.out);
@@ -360,9 +353,10 @@ public class BlastNToSnp extends AbstractKnimeApplication {
 	/**
 	 * @param args
 	 */
+    /*
 	public static void main(String[] args) {
 		new BlastNToSnp().instanceMainWithExit(args);
 
 	}
-
+    */
 }

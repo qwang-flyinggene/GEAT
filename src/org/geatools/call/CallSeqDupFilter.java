@@ -233,11 +233,11 @@ public class CallSeqDupFilter extends GEAT{
 				   int k=0;	
 				   for(int i=0;i<params.get("filter_dupSeq").size();i=i+2){
 					 k++;
-					 subSeqNameFile=params.get("filter_dupSeq").get(i).trim();
-					 String seqNameCol=params.get("filter_dupSeq").get(i+1).trim();
-				     if(subSeqNameFile!=null && isInteger(seqNameCol)){
+					 seqNameFile=params.get("filter_dupSeq").get(i).trim();
+					 seqNameCol=params.get("filter_dupSeq").get(i+1).trim();
+				     if(seqNameFile!=null && isInteger(seqNameCol)){
 				    	doDupSeqFilter=false;
-				    	File f=new File(subSeqNameFile);
+				    	File f=new File(seqNameFile);
 				    	if(f.exists()) doDupSeqFilter=true;
 				    	f=null;
 				    	if(Integer.parseInt(seqNameCol)<=1) 
@@ -248,10 +248,10 @@ public class CallSeqDupFilter extends GEAT{
 				    	System.out.println("Checking for No."+k+" ......");
 				    	if(doDupSeqFilter){				    	
 				    	  System.out.println("Seq after filter: "
-				    	         +SeqDupFilter.filterExactDup(inSeqFile,subSeqNameFile,0));
+				    	         +SeqDupFilter.filterExactDup(inSeqFile,seqNameFile,0));
 				    	  //System.out.println("+");				   
 				    	}else{
-						  System.out.println("Warning: ["+subSeqNameFile+"] doesn't exist, we ignored it!!!");
+						  System.out.println("Warning: ["+seqNameFile+"] doesn't exist, we ignored it!!!");
 						}		    	
 				     }else{
 						System.out.println("Warning: '-filter_dupSeq' parameter is illeagl. We skiped it!!!");

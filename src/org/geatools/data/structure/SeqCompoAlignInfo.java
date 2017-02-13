@@ -1,4 +1,5 @@
 package org.geatools.data.structure;
+import java.util.Comparator;
 /*******************************************************************************
  *  ========================================================================
  *  GEATools : a free Genomic Event Analysis Tools for the Java(tm) platform
@@ -39,6 +40,7 @@ public class SeqCompoAlignInfo extends SeqInfo{
 	  public List<Integer> seqAlignSEnd;
 	  public List<Integer> seqAlignQStart;
 	  public List<Integer> seqAlignQEnd;
+	  public List<Boolean> isExactMatch;
 	  public int baitBrkSPos=-1;
 	  public int baitBrkQPos=-1;
 	  /*
@@ -48,4 +50,17 @@ public class SeqCompoAlignInfo extends SeqInfo{
 	  public String chr="";
 	  public String chrStrand=""; 
 	  */ 
-	}
+	  
+	  public static class CompSeqEncode implements Comparator<SeqCompoAlignInfo> {
+			
+			private int mod = 1;
+			public CompSeqEncode(boolean desc) {
+			  if (desc) mod =-1;
+			}
+			        
+			public int compare(SeqCompoAlignInfo  seq1, SeqCompoAlignInfo  seq2){
+			  return  mod*Long.valueOf(seq1.seqNumEncode).compareTo(seq2.seqNumEncode);
+			}
+			
+	  }
+}

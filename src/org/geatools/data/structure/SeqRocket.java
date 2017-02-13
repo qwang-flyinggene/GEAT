@@ -37,29 +37,31 @@ import java.util.List;
 public class SeqRocket implements Cloneable{
 	public String rocketName="";
 	public boolean isActive=true;
-	
-	public SeqCompo seqComponent;
+	public boolean isDone=false;
+	////public SeqCompo seqComponent;
 	public List<SeqCompoRecognizer> seqRecognizer;
 	public SeqCompoType seqTypeInfo;
 	public String barcodeRecognizedSeqFile;
 	public String recognizedMaskSeqFile;
 	public String recognizedTrimSeqFile;
 	public String recognizedSeqFile;
-	public int recognizedSeq;
-	public int exactAlignedSeq=0;
+	public int recognizedSeqCount=0;
+	public int exactSeqCount=0;
+	public int nonExactSeqCount=0;
+	public double recognizedSeqRPM=0;
 	
 	public void setSeqRecognizer(List<SeqCompoRecognizer> seqRecognizerList){
 		this.seqRecognizer=seqRecognizerList;
 	}
-	
-	public void setSeqComponent(SeqCompo seqCompo){
-		this.seqComponent=seqCompo;
-	}
-	
 	public void setSeqTypeInfo(SeqCompoType seqType){
 		this.seqTypeInfo=seqType;
 	}
 	
+	/*
+	public void setSeqComponent(SeqCompo seqCompo){
+		this.seqComponent=seqCompo;
+	}
+	*/	
 	
 	@Override
 	public Object clone() throws CloneNotSupportedException {
@@ -72,8 +74,8 @@ public class SeqRocket implements Cloneable{
 		}
 		cloned.setSeqRecognizer(clonedSeqRecognizer);
 		
-		SeqCompo seqCompo=(SeqCompo) cloned.seqComponent.clone();
-		cloned.setSeqComponent(seqCompo);
+		//SeqCompo seqCompo=(SeqCompo) cloned.seqComponent.clone();
+		//cloned.setSeqComponent(seqCompo);
 		
 		SeqCompoType seqType=(SeqCompoType) cloned.seqTypeInfo.clone();
 		cloned.setSeqTypeInfo(seqType);

@@ -34,9 +34,9 @@ package org.geatools.data.structure;
 public class SeqCompoRecognizer extends SeqInfo implements Cloneable{
 	  public int index=0;
 	  public String rawSeq;
-	  public String tagSeqFile;
-	  public String exactAlignedSeqFile;
-	  //String noExactAlignedSeqFile;
+	  public String seqType;
+	  public String seqFASTAFile;	 
+	  public String exactAlignedSeqFile;	  
 	  public String alignedFASTASeqFile;
 	  public String alignedFASTQSeqFile;
 	  public String alignedSeqHTMLFile;

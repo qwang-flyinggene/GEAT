@@ -45,11 +45,11 @@ public class SeqDupFilter{
 
  }
  
- public static int filterExactDup(String seqFile,String subSeqNameFile,int seqNameColIdx){
+ public static int filterExactDup(String seqFile,String seqNameFile,int seqNameColIdx){
 	
      int num=0;
 	 List<SeqInfo> subSeqObjList
-	     =SeqOperation.extractSubSeq(seqFile,subSeqNameFile,seqNameColIdx);
+	     =SeqOperation.extractSubSeq(seqFile,seqNameFile,seqNameColIdx);
 	
 	 List<SeqInfo> seqObjList = SeqOperation.getSeqObj(seqFile);	
 	 List<String> excludedSeqNameList=new ArrayList<String>();
@@ -64,7 +64,7 @@ public class SeqDupFilter{
 	 }
 	 subSeqObjList=null;
 	 String format=FileOperate.getFileFormat(seqFile);
-	 String outSeqFile=subSeqNameFile+"Dup."+format;
+	 String outSeqFile=seqNameFile+"Dup."+format;
 	 SeqOperation.saveSeqList(dupSeqObjList, outSeqFile);
 	 dupSeqObjList=null;
 	 

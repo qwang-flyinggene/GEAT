@@ -433,7 +433,7 @@ public class CallSeqExtract extends GEAT{
 					splitedSeqFiles2=null;
 					//Check seq format, and then split seq into multiple subfiles................
 					System.out.println(".........Working on pair-end reverse seq.........");
-					splitedSeqOut=outDir+"/split_revrse";
+					splitedSeqOut=outDir+"/split_reverse";
 					FileOperate.newFolder(splitedSeqOut);
 			        splitedSeqFiles2=SeqOperation.splitSeqFile(inSeqFile2,splitStep,
 			        		splitedSeqOut);			

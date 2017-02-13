@@ -35,7 +35,7 @@ public class  SeqCompo implements Cloneable{
 	
 	public boolean isActive=true;
 	
-	public String name="";
+	public String name="";	
 	public String barName=null;
 	public String barSeq=null;	
 	public String primerSeq=null;	
@@ -43,15 +43,6 @@ public class  SeqCompo implements Cloneable{
 	public String baitTerritorySeq=null;
 	public String baitTerritoryArmSeq=null;	
 
-	/*
-	public String baitSiteName=null;	
-	public String baitSiteChr=null;
-	public String baitSiteChrStart=null;
-	public String baitSiteChrEnd=null;
-	public String baitSiteStrand="+";
-	*/
-	public String rPrimerSeq=null;	
-	public String rPrimerContSeq=null;
 	public String freqCutterSeq=null;
 	
 	  @Override

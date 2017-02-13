@@ -1,4 +1,5 @@
 package org.geatools.data.structure;
+
 /*******************************************************************************
  *  ========================================================================
  *  GEATools : a free Genomic Event Analysis Tools for the Java(tm) platform
@@ -31,6 +32,8 @@ package org.geatools.data.structure;
  *  Changes (from 1-Jan-2016)
  *  ---------------------------------------------------------------------------
  *******************************************************************************/
+import java.util.Comparator;
+
 public class SeqInfo{
 	  public int seqID;
 	  public String seqName;
@@ -38,5 +41,18 @@ public class SeqInfo{
 	  public int seqLength;
 	  public String seq; 
 	  public String seqQualityEncode; 
-
+	  public long seqNumEncode;
+	  
+	  public static class CompSeqEncode implements Comparator<SeqInfo> {
+			
+			private int mod = 1;
+			public CompSeqEncode(boolean desc) {
+			  if (desc) mod =-1;
+			}
+			        
+			public int compare(SeqInfo  seq1, SeqInfo  seq2){
+			  return  mod*Long.valueOf(seq1.seqNumEncode).compareTo(seq2.seqNumEncode);
+			}
+			
+	  }
 }

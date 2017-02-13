@@ -32,16 +32,16 @@ package org.geatools.data.structure;
  *  ---------------------------------------------------------------------------
  *******************************************************************************/
 public class BlastInfo{
-    public int colQName=0;
-    public int colSName=1;
-    public int colIdentity=2;
-    public int colAlignLen=3;
-    public int colMismatchNum=4;
-    public int colGapNum=5;
-    public int colQStart=6;
-    public int colQEnd=7;
-    public int colSStart=8;
-    public int colSEnd=9;
-    public int colEValue=10;
-    public int colBitScore=11;
+    public static int colQName=0;
+    public static int colSName=1;
+    public static int colIdentity=2;
+    public static int colAlignLen=3;
+    public static int colMismatchNum=4;
+    public static int colGapNum=5;
+    public static int colQStart=6;
+    public static int colQEnd=7;
+    public static int colSStart=8;
+    public static int colSEnd=9;
+    public static int colEValue=10;
+    public static int colBitScore=11;
 }

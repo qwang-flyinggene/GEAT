@@ -76,7 +76,7 @@ public class SeqOffTarget{
 		String blastCMD="blastn -task blastn-short -word_size=7 -evalue 10000";	
 	    blastCMD=blastCMD+" -query "+targetSeqFile+" -subject "+refGenomeFile
 	    		+" -out "+blastOutFile+" -outfmt 6";	
-	    SeqOperation.runBLAST2Seq(blastCMD);
+	    SeqOperation.runBLAST(blastCMD);
 		
 		String offTargetChr="";	
 		String offTargetStrand="";	
@@ -92,21 +92,20 @@ public class SeqOffTarget{
 		int gapNum=2;
 		List<SeqInfo> targetSeqInfo=SeqOperation.getFASTASeqObj(targetSeqFile);
 		int targetSeqLen=targetSeqInfo.get(0).seq.length();
-		targetSeqInfo=null;
+		targetSeqInfo=null;		
 		
-		BlastInfo blastInfo=new BlastInfo(); 
 	    List <ArrayList <String>> blastOut=FileOperate.getMatrixFromFile(blastOutFile);
 		for(int n=0;n<blastOut.size();n++){
 	     
-		 offTargetChr=blastOut.get(n).get(blastInfo.colSName);
-		 identity=Float.parseFloat(blastOut.get(n).get(blastInfo.colIdentity));
-		 alignLen=Integer.parseInt(blastOut.get(n).get(blastInfo.colAlignLen));
-		 mismatchNum=Integer.parseInt(blastOut.get(n).get(blastInfo.colMismatchNum));
-		 gapNum=Integer.parseInt(blastOut.get(n).get(blastInfo.colGapNum));		
+		 offTargetChr=blastOut.get(n).get(BlastInfo.colSName);
+		 identity=Float.parseFloat(blastOut.get(n).get(BlastInfo.colIdentity));
+		 alignLen=Integer.parseInt(blastOut.get(n).get(BlastInfo.colAlignLen));
+		 mismatchNum=Integer.parseInt(blastOut.get(n).get(BlastInfo.colMismatchNum));
+		 gapNum=Integer.parseInt(blastOut.get(n).get(BlastInfo.colGapNum));		
 		 
 		 offTargetStrand="+";
-	     tmp1=Integer.parseInt(blastOut.get(n).get(blastInfo.colSStart));
-		 tmp2=Integer.parseInt(blastOut.get(n).get(blastInfo.colSEnd));	
+	     tmp1=Integer.parseInt(blastOut.get(n).get(BlastInfo.colSStart));
+		 tmp2=Integer.parseInt(blastOut.get(n).get(BlastInfo.colSEnd));	
 	     minPos=tmp1;
 		 maxPos=tmp2;
 		 if(tmp2<tmp1) {
@@ -152,7 +151,7 @@ public class SeqOffTarget{
 		String blastCMD="blastn -task blastn-short -word_size=7 -evalue 10000";	
 	    blastCMD=blastCMD+" -query "+targetSeqFile+" -subject "+refGenomeFile
 	    		+" -out "+blastOutFile+" -outfmt 6";	
-	    SeqOperation.runBLAST2Seq(blastCMD);
+	    SeqOperation.runBLAST(blastCMD);
 		
 		String offTargetChr="";	
 		String offTargetStrand="";
@@ -172,22 +171,21 @@ public class SeqOffTarget{
 		int alignLen=12;
 		int mismatchNum=2;
 		int gapNum=2;
-		float bitScore=0.0f;
-		BlastInfo blastInfo=new BlastInfo(); 
+		float bitScore=0.0f;	
 	    List <ArrayList <String>> blastOut=FileOperate.getMatrixFromFile(blastOutFile);
 		for(int n=0;n<blastOut.size();n++){
 	     
-			 offTargetChr=blastOut.get(n).get(blastInfo.colSName);
-			 identity=Float.parseFloat(blastOut.get(n).get(blastInfo.colIdentity));
-			 alignLen=Integer.parseInt(blastOut.get(n).get(blastInfo.colAlignLen));
-			 mismatchNum=Integer.parseInt(blastOut.get(n).get(blastInfo.colMismatchNum));
+			 offTargetChr=blastOut.get(n).get(BlastInfo.colSName);
+			 identity=Float.parseFloat(blastOut.get(n).get(BlastInfo.colIdentity));
+			 alignLen=Integer.parseInt(blastOut.get(n).get(BlastInfo.colAlignLen));
+			 mismatchNum=Integer.parseInt(blastOut.get(n).get(BlastInfo.colMismatchNum));
 			 maxMismatchNum=(int) Math.ceil(alignLen*maxMismatchRatio);
-			 gapNum=Integer.parseInt(blastOut.get(n).get(blastInfo.colGapNum));
-			 bitScore=Float.parseFloat(blastOut.get(n).get(blastInfo.colBitScore));
+			 gapNum=Integer.parseInt(blastOut.get(n).get(BlastInfo.colGapNum));
+			 bitScore=Float.parseFloat(blastOut.get(n).get(BlastInfo.colBitScore));
 					 
 			 offTargetStrand="+";
-		     tmp1=Integer.parseInt(blastOut.get(n).get(blastInfo.colSStart));
-			 tmp2=Integer.parseInt(blastOut.get(n).get(blastInfo.colSEnd));	
+		     tmp1=Integer.parseInt(blastOut.get(n).get(BlastInfo.colSStart));
+			 tmp2=Integer.parseInt(blastOut.get(n).get(BlastInfo.colSEnd));	
 		     minPos=tmp1;
 			 maxPos=tmp2;
 			 if(tmp2<tmp1){

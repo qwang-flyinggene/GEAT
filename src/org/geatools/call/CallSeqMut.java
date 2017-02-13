@@ -118,10 +118,11 @@ public class CallSeqMut extends GEAT{
 		 String querySeqListFile = null;
 		 String querySeqListFile2 = null;
 		 String refSeqFile = null;
-		 List<String>querySeqList=new ArrayList<String>(); 
-		 List<String>querySeqList2=new ArrayList<String>(); 
-		 List<SeqQual> seqQualList=new ArrayList<SeqQual>();
-		 List<SeqQual> seqQualList2=new ArrayList<SeqQual>();		
+		 List<String> seqQCOptList;
+		 List<String>querySeqList; 
+		 List<String>querySeqList2; 
+		 List<SeqQual> seqQualList=null;
+		 List<SeqQual> seqQualList2=null;		
 		 
 		 if(homeDir==null) homeDir=GEAT.getClassPath();			   
 		 if(tmpDir==null){
@@ -431,12 +432,7 @@ public class CallSeqMut extends GEAT{
 			  }
 		   }
 		   
-		   List<String> seqQCOptList=new ArrayList<String>();
-		   if(isFastqOK || isFastq2OK){
-			 doSeqQCFilter=true; 
-			 seqQCOptList.add("-out_format");
-			 seqQCOptList.add("2");
-		   }
+		   seqQCOptList=new ArrayList<String>();		
 		   if(params.get("filter_seqQC")!=null){		
 			   doSeqQCFilter=true;
 			   String subParams;
@@ -460,11 +456,7 @@ public class CallSeqMut extends GEAT{
 						}else if(itemSplited[0].trim().equalsIgnoreCase("de_exact_dup")){
 							seqQCOptList.add("-de_exact_dup");
 							seqQCOptList.add(itemSplited[1].trim());
-						}/*else if(itemSplited[0].trim().equalsIgnoreCase("out_format")){
-							seqQCOptList.add("-out_format");
-							seqQCOptList.add(itemSplited[1].trim());
-						}
-						*/					
+						}					
 					  }
 				    }
 			      }
@@ -472,12 +464,6 @@ public class CallSeqMut extends GEAT{
 				  System.out.println("Warning: empty '-filter_seqQC' parameter,the system uses default '-filter_seqQC' parameter.");
 				  doSeqQCFilter=true;
 			   }				
-		   }
-		   if(seqQCOptList.size()>0){ 		
-			  seqQCOpts=new String[seqQCOptList.size()];
-			  for(int k=0;k<seqQCOptList.size();k++){
-				 seqQCOpts[k]=seqQCOptList.get(k);
-			  }
 		   }
 		   
 		   if(params.get("filter_AQS")!=null){		
@@ -864,11 +850,7 @@ public class CallSeqMut extends GEAT{
 	       SHM.setTargetMut(interestMut);
 		   SeqMutInfo mut;
 		   List<SeqMutInfo> mutList;
-		   if(doSeqQCFilter){
-			 seqQC=new SeqQCFilter();
-			 seqQC.setOutDir(outDir);
-			 seqQC.setOpts(seqQCOpts);
-		   }
+		   String tmpFile=null;
 		   if(seqType.equalsIgnoreCase(SeqOperation.SEQTYPE_SINGLEEND)){	
 				if(querySeqList==null || querySeqList.size()==0){
 					System.err.println("Error: No querySeq or querySeqList provided!");
@@ -886,17 +868,34 @@ public class CallSeqMut extends GEAT{
 						   (querySeqFile.lastIndexOf(".")>0) ? querySeqFile.lastIndexOf("."):querySeqFile.length()
 					    );	
 					    if(doSeqQCFilter && SeqOperation.isFASTQSeq(querySeqFile)){
-						  System.out.println("Seq QC for ["+ querySeqFile+"]");					    	
+						  System.out.println("Seq QC for ["+ querySeqFile+"]");	
+						  seqQC=new SeqQCFilter();
+						  seqQC.setOutDir(outDir);
+						  if(seqQCOptList.size()>0){ 		
+							  seqQCOpts=new String[seqQCOptList.size()+2];
+							  for(int k=0;k<seqQCOptList.size();k++){
+								 seqQCOpts[k]=seqQCOptList.get(k);
+							  }
+							  seqQCOpts[seqQCOptList.size()]="-out_format";
+							  seqQCOpts[seqQCOptList.size()+1]="2";
+						  }
+						  seqQC.setOpts(seqQCOpts);
 						  seqQC.prinseqQC(querySeqFile);
 						  querySeqFile=seqQC.getResFasta();
-						  seqQualList=seqQC.getSeqQual(seqQC.getResQual());					
+						  seqQualList=seqQC.getSeqQual(seqQC.getResQual());	
+						  tmpFile=querySeqFile;
+						  if(seqQC.getResQual()!=null) FileOperate.delFile(seqQC.getResQual());						 
+						  seqQC=null;
 					    }else if(SeqOperation.isFASTQSeq(querySeqFile)){									 
-			              querySeqFile=SeqOperation.convertFASTQ2FASTA(querySeqFile);	
+			              querySeqFile=SeqOperation.convertFASTQ2FASTA(querySeqFile);
+			              tmpFile=querySeqFile;
 					    }					   
 					
-			            System.out.println("Call mutation for ["+ querySeqFile+"]");			          
+			            System.out.println("Call mutation for ["+ outTag+"]");			          
 					    mut=SHM.getBLASTSeqMut(querySeqFile,refSeqFile,seqQualList);
 					    seqQualList=null;
+						if(tmpFile!=null) FileOperate.delFile(tmpFile);
+						tmpFile=null;
 					    if(mut!=null){ 						
 						  SHM.saveMutInfo(mut, outDir, outTag);
 						  mutList.add(mut);
@@ -943,16 +942,33 @@ public class CallSeqMut extends GEAT{
 						 
 						 if(doSeqQCFilter && SeqOperation.isFASTQSeq(querySeqFile)){
 							System.out.println("Seq QC for ["+ querySeqFile+"]");
+							seqQC=new SeqQCFilter();
+							seqQC.setOutDir(outDir);
+							if(seqQCOptList.size()>0){ 		
+							   seqQCOpts=new String[seqQCOptList.size()+2];
+							   for(int k=0;k<seqQCOptList.size();k++){
+								 seqQCOpts[k]=seqQCOptList.get(k);
+							   }
+							   seqQCOpts[seqQCOptList.size()]="-out_format";
+							   seqQCOpts[seqQCOptList.size()+1]="2";
+							}
+							seqQC.setOpts(seqQCOpts);
 							seqQC.prinseqQC(querySeqFile);
 							querySeqFile=seqQC.getResFasta();
-							seqQualList=seqQC.getSeqQual(seqQC.getResQual());					
+							seqQualList=seqQC.getSeqQual(seqQC.getResQual());
+							tmpFile=querySeqFile;
+						    if(seqQC.getResQual()!=null) FileOperate.delFile(seqQC.getResQual());
+							seqQC=null;
 						 }else if(SeqOperation.isFASTQSeq(querySeqFile)){									 
 				            querySeqFile=SeqOperation.convertFASTQ2FASTA(querySeqFile);	
+				            tmpFile=querySeqFile;
 						 }
 			
-	                     System.out.println("Call mutation for ["+ querySeqFile+"]");	                    
+	                     System.out.println("Call mutation for ["+ outTag+"]");	                    
 						 mut=SHM.getBLASTSeqMut(querySeqFile,refSeqFile,seqQualList);
 						 seqQualList=null;
+						 if(tmpFile!=null) FileOperate.delFile(tmpFile);
+						 tmpFile=null;
 						 if(mut!=null){ 						
 						    SHM.saveMutInfo(mut, outDir, outTag);
 						    mutList.add(mut);
@@ -977,22 +993,39 @@ public class CallSeqMut extends GEAT{
 					    		  || SeqOperation.isFASTASeq(querySeqFile2)){
 						 
 						 outTag2=querySeqFile2.substring(
-						   querySeqFile2.lastIndexOf("/")+1,
-						   (querySeqFile2.lastIndexOf(".")>0) ? querySeqFile2.lastIndexOf("."):querySeqFile2.length()
+						    querySeqFile2.lastIndexOf("/")+1,
+						    (querySeqFile2.lastIndexOf(".")>0) ? querySeqFile2.lastIndexOf("."):querySeqFile2.length()
 						 );	
 						 
 						 if(doSeqQCFilter && SeqOperation.isFASTQSeq(querySeqFile2)){											
 							System.out.println("Seq QC for reverse: ["+ querySeqFile2+"]");
+							seqQC=new SeqQCFilter();
+							seqQC.setOutDir(outDir);
+							if(seqQCOptList.size()>0){ 		
+							   seqQCOpts=new String[seqQCOptList.size()+2];
+							   for(int k=0;k<seqQCOptList.size();k++){
+								 seqQCOpts[k]=seqQCOptList.get(k);
+							   }
+							   seqQCOpts[seqQCOptList.size()]="-out_format";
+							   seqQCOpts[seqQCOptList.size()+1]="2";
+							}
+							seqQC.setOpts(seqQCOpts);
 							seqQC.prinseqQC(querySeqFile2);
 							querySeqFile2=seqQC.getResFasta();
 							seqQualList2=seqQC.getSeqQual(seqQC.getResQual());
+							tmpFile=querySeqFile2;
+							if(seqQC.getResQual()!=null) FileOperate.delFile(seqQC.getResQual());
+							seqQC=null;
 						 }if(SeqOperation.isFASTQSeq(querySeqFile2)){									 
-				            querySeqFile2=SeqOperation.convertFASTQ2FASTA(querySeqFile2);	
+				            querySeqFile2=SeqOperation.convertFASTQ2FASTA(querySeqFile2);
+				            tmpFile=querySeqFile2;
 						 }
 										
-						 System.out.println("Call mutation for reverse: ["+ querySeqFile2+"]");
+						 System.out.println("Call mutation for reverse: ["+ outTag2+"]");
 						 mut2=SHM.getBLASTSeqMut(querySeqFile2,refSeqFile,seqQualList2);
 						 seqQualList2=null;
+						 if(tmpFile!=null) FileOperate.delFile(tmpFile);
+						 tmpFile=null;
 						 if(mut2!=null){ 						
 						    SHM.saveMutInfo(mut2,outDir,outTag2);
 						    mutList2.add(mut2);
@@ -1006,7 +1039,7 @@ public class CallSeqMut extends GEAT{
 				}//
 				querySeqList2=null;
 				if(mutList2.size()>0){
-					SHM.saveBaseMutRate(mutList2,outDir,"reverse_profile");
+				  SHM.saveBaseMutRate(mutList2,outDir,"reverse_profile");
 				}
 				
 				if(mutList.size()==mutList2.size() && mutList.size()>0){
@@ -1025,8 +1058,8 @@ public class CallSeqMut extends GEAT{
 		   
 		   //delTmpDir(tmpDir);	
 		   if(tmpFiles!=null){
-		    for(String tmpFile: tmpFiles){
-			  FileOperate.delFile(tmpFile);
+		    for(String tmp: tmpFiles){
+			  FileOperate.delFile(tmp);
 		    }
 		   }
     }

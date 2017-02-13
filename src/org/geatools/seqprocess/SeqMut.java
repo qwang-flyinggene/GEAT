@@ -55,14 +55,15 @@ public class SeqMut {
 	public static int colIdx_refBase=7;
 	public static int colIdx_altBase=8;
 	
-	int blastWordSize=7;
-	String blastTask="blastn-short";	
+	//int blastWordSize=7;
+	//String blastTask="blastn-short";
+	int blastWordSize=21;
+	String blastTask="blastn";	
 	String homeDir=".";
 	String dataDir;
 	List<String> tmpFiles;
-	String tmpDir;
-	
-	BlastInfo blastInfoObj=new BlastInfo();  
+	String tmpDir;	
+
 	// Alignment Quality Standard(AQS) filter criteria	
 	int minAlignLen=200;
 	int maxMismatch=5;
@@ -217,7 +218,7 @@ public class SeqMut {
 		          +" -out "+blastOutFile
 		          +" -outfmt 6";
 
-		res1=SeqOperation.runBLAST2Seq(blastCMD);
+		res1=SeqOperation.runBLAST(blastCMD);
 		if(res1==0){
 			System.out.println("Got BLAST txt!");
 		}else{
@@ -233,7 +234,7 @@ public class SeqMut {
 		          +" -subject "+refSeqFile
 		          +" -out "+blastOutXMLFile
 		          +" -outfmt 5";
-		res2=SeqOperation.runBLAST2Seq(blastCMD);
+		res2=SeqOperation.runBLAST(blastCMD);
 		if(res2==0){
 			System.out.println("Got BLAST XML!");
 		}else{
@@ -289,13 +290,15 @@ public class SeqMut {
 		}		
 		
 		mutInfo=getSeqMutInfo(filterBaseMutList,usedSeqNum,refSeqFile);	
-        if(usedSeqNum==0){
+		if(mutInfo!=null){
+    	  mutInfo.expName=querySeqFile;
+    	  mutInfo.seqName=refSeqFile;
+          if(usedSeqNum==0){
             System.out.println("Warning: There is no any reads to pass filter criteria in "+querySeqFile);
-        }else if(filterBaseMutList.size()==0){
+          }else if(filterBaseMutList.size()==0){
             System.out.println("Warning: There is no any mutant base in "+querySeqFile);
-        }else if(mutInfo!=null){
-        	mutInfo.expName=querySeqFile;
-        	mutInfo.seqName=refSeqFile;
+          }else{
+
             System.out.println("Average BaseMutFrequency between "
                   +refSeqStart+"-"+refSeqEnd+" bp"
         		  +": "+mutInfo.avgMutRate + " for ["+querySeqFile+"]");
@@ -308,9 +311,10 @@ public class SeqMut {
                       +refSeqStart+"-"+refSeqEnd+" bp"
                 	  +": "+mutInfo.avgOtherMutRate + " for ["+querySeqFile+"]");
             }
-        }else{
-            System.out.println("Error: null  ["+refSeqFile+"]");
-            return null;
+          }
+		}else{
+          System.out.println("Error: null  ["+refSeqFile+"]");
+          return null;
         }
 		filterBaseMutList=null;	
 		baseMutList=null;
@@ -350,10 +354,10 @@ public class SeqMut {
 	   List <String> seqNameList=new ArrayList <String>();
 		
 	   for(int i=0; i<blastOut.size();i++){
-		 alignLen=Integer.parseInt(blastOut.get(i).get(blastInfoObj.colAlignLen).trim());
-		 mismatchNum=Integer.parseInt(blastOut.get(i).get(blastInfoObj.colMismatchNum).trim());
-		 gapNum=Integer.parseInt(blastOut.get(i).get(blastInfoObj.colGapNum).trim());
-		 qStart=Integer.parseInt(blastOut.get(i).get(blastInfoObj.colQStart).trim());
+		 alignLen=Integer.parseInt(blastOut.get(i).get(BlastInfo.colAlignLen).trim());
+		 mismatchNum=Integer.parseInt(blastOut.get(i).get(BlastInfo.colMismatchNum).trim());
+		 gapNum=Integer.parseInt(blastOut.get(i).get(BlastInfo.colGapNum).trim());
+		 qStart=Integer.parseInt(blastOut.get(i).get(BlastInfo.colQStart).trim());
 		 //qEnd=Integer.parseInt(blastOut.get(i).get(blastInfoObj.colQEnd).trim());
 		 //sStart=Integer.parseInt(blastOut.get(i).get(blastInfoObj.colSStart).trim());
 		 //sEnd=Integer.parseInt(blastOut.get(i).get(blastInfoObj.colSEnd).trim());
@@ -361,7 +365,7 @@ public class SeqMut {
 		 if(alignLen>=minAlignLen && mismatchNum<=maxMismatch && gapNum<=maxGapNum 
 					&& qStart<=maxQStart && qStart>=minQStart){
 			 
-			 seqName=blastOut.get(i).get(blastInfoObj.colQName).trim();
+			 seqName=blastOut.get(i).get(BlastInfo.colQName).trim();
 			 seqNameList.add(seqName);
 	
 		}
@@ -641,6 +645,8 @@ public class SeqMut {
 			mutInfo.baseMutStat[i].mutRate=0;
 			mutInfo.baseMutStat[i].tarMutCount=0;
 			mutInfo.baseMutStat[i].tarMutRate=0;
+			mutInfo.baseMutStat[i].otherMutCount=0;
+			mutInfo.baseMutStat[i].otherMutRate=0;
 			mutInfo.baseMutStat[i].a=0;
 			mutInfo.baseMutStat[i].g=0;
 			mutInfo.baseMutStat[i].c=0;
@@ -762,93 +768,131 @@ public class SeqMut {
 	
 	void setTargetMutInfo(SeqMutInfo mutInfo){
 		
-		String refBasei;	
-		double sumTarMutRate=0.0d;
-		double sumOtherMutRate=0.0d;
-		int targetBaseNum=0;
-		int otherBaseNum=0;
-		boolean isTargetBase=false;
+
 		if(interestMut!=null && interestMut.length>0){
+		   String refBasei;	
+		   double sumTarMutRate=0.0d;
+		   double sumOtherMutRate=0.0d;		 
+		   int targetBaseNum=0;
+		   int otherBaseNum=0;
+		   int tarMutCount=0;
+		   boolean isValidTarBase=false;
+		   boolean isValidBase=false;
+		   String[] itemSplited;
+		   boolean isGUsed=false;
+		   boolean isCUsed=false;
+		   boolean isTUsed=false;
+		   boolean isAUsed=false;
+		   boolean isDelUsed=false;
+		   boolean isNUsed=false;
 		   for(int i=0;i<mutInfo.seq.length();i++){
-			  isTargetBase=false;			
-			  mutInfo.baseMutStat[i].tarMutCount=0;
+			  isValidBase=false;
+			  isValidTarBase=false;	
+			  tarMutCount=0;
+			  mutInfo.baseMutStat[i].tarMutCount=0;			  
+			  /*
+			  mutInfo.baseMutStat[i].otherMutCount=   
+			             +mutInfo.baseMutStat[i].g
+					     +mutInfo.baseMutStat[i].c
+                         +mutInfo.baseMutStat[i].a
+                         +mutInfo.baseMutStat[i].t
+                         +mutInfo.baseMutStat[i].del;
+			  */
+			  if(i>=refSeqStart && i<=refSeqEnd) isValidBase=true;	
 			  refBasei=String.valueOf(mutInfo.seq.charAt(i));
 			  for(int m=0;m<interestMut.length;m++){
-			      if(refBasei.equalsIgnoreCase(interestMut[m][0])){
-			    	  
-			    	  if(i>=refSeqStart && i<=refSeqEnd) isTargetBase=true;			    		 
-			    	  
-			    	  if(interestMut[m][1].equalsIgnoreCase("G")){			    		   
-					   	 mutInfo.baseMutStat[i].tarMutCount=mutInfo.baseMutStat[i].g;
-					   	 mutInfo.baseMutStat[i].otherMutCount=mutInfo.baseMutStat[i].c
-					   			                             +mutInfo.baseMutStat[i].a
-					   			                             +mutInfo.baseMutStat[i].t
-					   	                                     +mutInfo.baseMutStat[i].del;
+			     if(refBasei.equalsIgnoreCase(interestMut[m][0])){
+			
+			    	if(i>=refSeqStart && i<=refSeqEnd) isValidTarBase=true;			    		 
+			    	 /*
+			    	if(interestMut[m][1].equalsIgnoreCase("G")){			    		   
+					   	 mutInfo.baseMutStat[i].tarMutCount=mutInfo.baseMutStat[i].g;					   
 					   	 break;
-				      }else if(interestMut[m][1].equalsIgnoreCase("C")){			    		   
-						 mutInfo.baseMutStat[i].tarMutCount=mutInfo.baseMutStat[i].c;
-					   	 mutInfo.baseMutStat[i].otherMutCount=mutInfo.baseMutStat[i].g
-		                                                      +mutInfo.baseMutStat[i].a
-		                                                      +mutInfo.baseMutStat[i].t
-                                                              +mutInfo.baseMutStat[i].del;
+				    }else if(interestMut[m][1].equalsIgnoreCase("C")){			    		   
+						 mutInfo.baseMutStat[i].tarMutCount=mutInfo.baseMutStat[i].c;					   	 
 					     break;
-				      }else if(interestMut[m][1].equalsIgnoreCase("A")){			    		   
-					   	 mutInfo.baseMutStat[i].tarMutCount=mutInfo.baseMutStat[i].a;
-					   	 mutInfo.baseMutStat[i].otherMutCount=mutInfo.baseMutStat[i].c
-		                                                      +mutInfo.baseMutStat[i].g
-		                                                      +mutInfo.baseMutStat[i].t
-                                                              +mutInfo.baseMutStat[i].del;
+				    }else if(interestMut[m][1].equalsIgnoreCase("A")){			    		   
+					   	 mutInfo.baseMutStat[i].tarMutCount=mutInfo.baseMutStat[i].a;					
 					   	 break;
-			    	  }else if(interestMut[m][1].equalsIgnoreCase("T")){			    		   
-						 mutInfo.baseMutStat[i].tarMutCount=mutInfo.baseMutStat[i].t;
-					   	 mutInfo.baseMutStat[i].otherMutCount=mutInfo.baseMutStat[i].c
-								                              +mutInfo.baseMutStat[i].a
-								                              +mutInfo.baseMutStat[i].g
-						                                      +mutInfo.baseMutStat[i].del;
+			    	}else if(interestMut[m][1].equalsIgnoreCase("T")){			    		   
+						 mutInfo.baseMutStat[i].tarMutCount=mutInfo.baseMutStat[i].t;					   
 					     break;
-			    	  }else if(interestMut[m][1].equalsIgnoreCase("-")){			    		   
-						 mutInfo.baseMutStat[i].tarMutCount=mutInfo.baseMutStat[i].del;
-					   	 mutInfo.baseMutStat[i].otherMutCount=mutInfo.baseMutStat[i].c
-		                                                      +mutInfo.baseMutStat[i].a
-		                                                      +mutInfo.baseMutStat[i].t
-                                                              +mutInfo.baseMutStat[i].g;
+			    	}else if(interestMut[m][1].equalsIgnoreCase("-")){			    		   
+						 mutInfo.baseMutStat[i].tarMutCount=mutInfo.baseMutStat[i].del;					   	
 						 break;
-				      }else if(interestMut[m][1].equalsIgnoreCase("N")){			    		   
+				    }else if(interestMut[m][1].equalsIgnoreCase("N")){			    		   
 						 mutInfo.baseMutStat[i].tarMutCount=mutInfo.baseMutStat[i].mutCount;
-						 mutInfo.baseMutStat[i].otherMutCount=0;
 						 break;
-					  }else{			    	  
+					}else{			    	  
 			    	    break;
-					  }
-				   }
+					}
+					*/
+			    	
+			 	    isGUsed=false;
+				    isCUsed=false;
+				    isTUsed=false;
+				    isAUsed=false;
+				    isDelUsed=false;
+				    isNUsed=false;
+				    mutInfo.baseMutStat[i].tarMutCount=0;					
+			    	itemSplited=interestMut[m][1].split("|");
+			    	for(String mut:itemSplited){
+			    	   tarMutCount=0;
+			    	   if(mut.equalsIgnoreCase("G") && !isGUsed){			    		   
+			    		  tarMutCount=mutInfo.baseMutStat[i].g;
+			    		  isGUsed=true;
+					   }else if(mut.equalsIgnoreCase("C") && !isCUsed){			    		   
+						  tarMutCount=mutInfo.baseMutStat[i].c;
+						  isCUsed=true;
+					   }else if(mut.equalsIgnoreCase("A") && !isAUsed){			    		   
+						  tarMutCount=mutInfo.baseMutStat[i].a;	
+						  isAUsed=true;
+				       }else if(mut.equalsIgnoreCase("T") && !isTUsed){			    		   
+				    	  tarMutCount=mutInfo.baseMutStat[i].t;	
+				    	  isTUsed=true;
+				       }else if(mut.equalsIgnoreCase("-") && !isDelUsed){			    		   
+				    	  tarMutCount=mutInfo.baseMutStat[i].del;
+				    	  isDelUsed=true;
+					   }else if(mut.equalsIgnoreCase("N") && !isNUsed){			    		   
+						  tarMutCount=mutInfo.baseMutStat[i].mutCount;
+						  isNUsed=true;
+					   }			    	  
+			    	   mutInfo.baseMutStat[i].tarMutCount
+			    	       =mutInfo.baseMutStat[i].tarMutCount+tarMutCount;
+			    	}
+			    	break;
+				 }
 			  }
 			 	
 			  mutInfo.baseMutStat[i].tarMutRate
 					 =(1.0d*mutInfo.baseMutStat[i].tarMutCount)/mutInfo.readsNum;
 			  
+			  mutInfo.baseMutStat[i].otherMutCount
+			         =mutInfo.baseMutStat[i].mutCount-mutInfo.baseMutStat[i].tarMutCount;
 			  mutInfo.baseMutStat[i].otherMutRate
 				     =(1.0d*mutInfo.baseMutStat[i].otherMutCount)/mutInfo.readsNum;
 			
-			  if(!skipBaseMutCheck && doBaseErrCheck){
-			    if((1.0d*mutInfo.baseMutStat[i].g/mutInfo.readsNum)>=baseErrRate){
-					mutInfo.baseMutStat[i].tarMutRate=-2;
-			    }else if((1.0d*mutInfo.baseMutStat[i].c/mutInfo.readsNum)>=baseErrRate){
-					mutInfo.baseMutStat[i].tarMutRate=-2;
-			    }else if((1.0d*mutInfo.baseMutStat[i].t/mutInfo.readsNum)>=baseErrRate){
-					mutInfo.baseMutStat[i].tarMutRate=-2;
-			    }else if((1.0d*mutInfo.baseMutStat[i].a/mutInfo.readsNum)>=baseErrRate){
-					mutInfo.baseMutStat[i].tarMutRate=-2;
+			  if(!skipBaseMutCheck && doBaseErrCheck){			    
+			    if(mutInfo.baseMutStat[i].mutRate<0 
+			    		|| mutInfo.baseMutStat[i].mutRate>=baseErrRate){
+					
+					isValidTarBase=false;
+					isValidBase=false;
+
+					if(mutInfo.baseMutStat[i].tarMutRate>=baseErrRate)
+					   mutInfo.baseMutStat[i].tarMutRate=-2;
+					if(mutInfo.baseMutStat[i].otherMutRate>=baseErrRate)
+					   mutInfo.baseMutStat[i].otherMutRate=-2;
+					if(mutInfo.baseMutStat[i].mutRate>=baseErrRate)
+					   mutInfo.baseMutStat[i].mutRate=-2;
 			    }
-			    
-			    if(mutInfo.baseMutStat[i].otherMutRate>=baseErrRate){
-					  mutInfo.baseMutStat[i].otherMutRate=-2;
-				}
 			  }
 			  
-			  if(isTargetBase && mutInfo.baseMutStat[i].tarMutRate>=0){
+			  if(isValidTarBase){
 				  sumTarMutRate=sumTarMutRate+mutInfo.baseMutStat[i].tarMutRate;
 				  targetBaseNum++;
-			  }else if(isTargetBase && mutInfo.baseMutStat[i].otherMutRate>=0){
+			  }
+			  if(isValidBase){
 				  sumOtherMutRate=sumOtherMutRate+mutInfo.baseMutStat[i].otherMutRate;
 				  otherBaseNum++;
 			  }			 
@@ -948,7 +992,7 @@ public class SeqMut {
 		perRow=new ArrayList<String>();
 		perRow.add("Pos");
 		perRow.add("Base");	
-	    for(SeqMutInfo mut:mutList){	
+	    for(SeqMutInfo mut:mutList){
 	      perRow.add(mut.expName.substring(mut.expName.lastIndexOf("/")+1,mut.expName.length()));		
 		}
 	    out.add(perRow);

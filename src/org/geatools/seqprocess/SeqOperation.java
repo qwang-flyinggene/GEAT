@@ -33,6 +33,7 @@ package org.geatools.seqprocess;
  *******************************************************************************/
 import java.io.*;  
 import java.util.ArrayList; 
+import java.util.HashMap;
 import java.util.List;
 
 import org.geatools.data.structure.ChrSite;
@@ -47,9 +48,12 @@ public class SeqOperation{
  public static final String SEQTYPE_SINGLEEND="SingleEnd";
  public static final String SEQTYPE_PAIREND="PairEnd";
  
- static int splitStep=500000;
+ static int maxEncodeBaseLen=19;
+ static int splitStep=100000;
+ 
  static String tmpDir;
  static List<String> tmpFiles; 
+ 
  public SeqOperation(){
 
  }
@@ -57,7 +61,8 @@ public class SeqOperation{
  public void setTmpDir(String dir){
 	tmpDir=dir;
  }
- public static int runBLAST2Seq(String blastCMD){
+ 
+ public static int runBLAST(String blastCMD){
 	   try {
 	        Runtime rt = Runtime.getRuntime();        
 	        Process pr = rt.exec(blastCMD);
@@ -84,6 +89,65 @@ public class SeqOperation{
 	    
  }
  
+ public static HashMap<Character, Integer> getBase2NumMap(){
+	  
+	  final HashMap<Character, Integer> base2numMap =new HashMap<Character, Integer>(); 
+	  base2numMap.put('A', 1);
+	  base2numMap.put('C', 2);
+	  base2numMap.put('G', 3);
+	  base2numMap.put('T', 4);
+	  base2numMap.put('N', 0);
+	  base2numMap.put('a', 1);
+	  base2numMap.put('c', 2);
+	  base2numMap.put('g', 3);
+	  base2numMap.put('t', 4);
+	  base2numMap.put('n', 0);
+	  
+	  return base2numMap;
+ }
+ 
+ public static long getSeqEncodeVal(String seq){
+	 Integer val;
+	 char ch;
+	 long encodeVal=0;
+	 String encodeValStr="";
+	 int baseLen=Math.min(seq.length(), maxEncodeBaseLen);
+	 for (int b = 0; b < baseLen; b++) {
+		 ch = seq.charAt(b);			   
+		 val =getBase2NumMap().get(ch);
+		 if(val!=null){
+			 encodeValStr=encodeValStr+val;
+		 }
+	 }
+	 encodeVal=Long.parseLong(encodeValStr);
+	 
+	 return encodeVal;
+ }
+ 
+ public static void setSeqEncodeVal(SeqInfo seqInfo){
+	 Integer val;
+	 char ch;
+	 long encodeVal=0;
+	 String encodeValStr="";
+	 int baseLen=Math.min(seqInfo.seq.length(), maxEncodeBaseLen);
+	 for (int b = 0; b < baseLen; b++) {
+		 ch = seqInfo.seq.charAt(b);			   
+		 val =getBase2NumMap().get(ch);
+		 if(val!=null){
+			encodeValStr=encodeValStr+val;
+		 }
+	 }
+	 encodeVal=Long.parseLong(encodeValStr);
+	 seqInfo.seqNumEncode=encodeVal;
+	
+ }
+ 
+ public static void setSeqEncodeVal(List<SeqInfo> seqInfoList){
+     for(SeqInfo seqInfo:seqInfoList){
+    	 setSeqEncodeVal(seqInfo);
+     }	
+ }
+
  public static List<SeqInfo> getSeqObj(String seqFile){
      
 	 List<SeqInfo> seqObj=new ArrayList<SeqInfo>();
@@ -96,8 +160,7 @@ public class SeqOperation{
 	 return seqObj;
 		
  }
- 
- public static  List<SeqInfo> getFASTASeqObj(String seqFile){
+ public static List<SeqInfo> getFASTASeqObj(String seqFile){
 	 
 	    List<SeqInfo> seqObjList=new ArrayList<SeqInfo>();
 		SeqInfo seqObj;
@@ -112,6 +175,10 @@ public class SeqOperation{
 			String [] itemSplited;			
 			seqNum=0;
 			line = br.readLine();
+			if (line == null){ 
+			   br.close();
+			   return seqObjList;
+			}
 			while(line.length()==0 || line.matches("\\s*")){
 			   line = br.readLine();
 			   if (line == null){ 
@@ -119,11 +186,11 @@ public class SeqOperation{
 				   return seqObjList;
 			   }
 			}
+			
 			while(true){           
 		       if (line == null) break;
 		       line=line.trim();
-			   if(line.indexOf(">")==0){
-			     
+			   if(line.indexOf(">")==0){			     
 				 seqIdentifier=line.substring(1,line.length());			 
 				 itemSplited=seqIdentifier.split("\\s+");
 				 seqName=itemSplited[0].trim();	
@@ -176,6 +243,10 @@ public class SeqOperation{
 				String [] itemSplited;
 				seqNum=0;
 				line = br.readLine();
+				if (line == null){ 
+				   br.close();
+				   return seqObjList;
+				}
 				while(line.length()==0 || line.matches("\\s*")){
 				   line = br.readLine();
 				   if (line == null){ 
@@ -183,8 +254,8 @@ public class SeqOperation{
 				       return seqObjList;
 				   }
 				}
-				while(true){  
-		         		
+				
+				while(true){		         		
 			       if (line == null) break;
 			       if(seqNum>=end) break;
 			       line=line.trim();
@@ -249,14 +320,14 @@ public class SeqOperation{
 				while(true){  			   
 				   //for read header/identifier
 		           line = br.readLine();			
-			       if (line == null) break;
+			       if(line == null) break;
 			       while(line.length()==0 || line.matches("\\s*")){
 			    	 line = br.readLine();
 			    	 if (line == null) break outerloop;
 			       }
 				   line=line.trim();
 		           if(line.indexOf("@")!=0) {
-				      System.out.println("Error in reading fastq line:"+line);
+				      System.out.println("Error in reading fastq line: "+line);
 					  break;
 				   }			   
 		      	   seqIdentifier=line.substring(1,line.length());				 
@@ -282,7 +353,7 @@ public class SeqOperation{
 			       }
 				   line=line.trim();
 				   if(line.indexOf("+")!=0) {
-					  System.out.println("Error in reading fastq line:"+line);
+					  System.out.println("Error in reading fastq line: "+line);
 					  break;
 				   }		      
 		           
@@ -801,187 +872,45 @@ public class SeqOperation{
 		}
 		
 		return seqObjList;
- }
- 
- static List<SeqInfo> checkFASTASeq(String seqFile, String outSeqFile){
-	  
+ } 
+	 
+ List<SeqInfo> checkFASTASeq(String seqFile){
+		  
 	    List<SeqInfo> seqObjList=new ArrayList<SeqInfo>();
-	    SeqInfo perSeq=new SeqInfo();
+	    SeqInfo perSeq;
 		int seqNum=0;
-		//ArrayList<String> uniSeqName=new ArrayList<String> ();
-		try{    
-	        BufferedWriter writer=null;
-	        writer=new BufferedWriter(new FileWriter(outSeqFile));
+
+		try{  
 			BufferedReader br;              
 	        br = new BufferedReader(new FileReader(seqFile));
 		    String line;
 			String seqIdentifier;
 			String seqLine;
 			String seqName;
-			String [] itemSplited;
-			//uniSeqName=new ArrayList<String> ();
-			seqObjList=new ArrayList<SeqInfo>();
+			String [] itemSplited;		
 			seqNum=0;
-			line = br.readLine();				
-			while(true){           
-		       if (line == null) break;
-			   if(line.trim().indexOf(">")==0){
-			     seqNum=seqNum+1;
-			     seqIdentifier=line.substring(1,line.length());				 
-				 itemSplited=seqIdentifier.split("\\s+");
-				 seqName=itemSplited[0].trim();
-				  
-				 line=br.readLine();
-				 seqLine="";
-				 if (line == null) break;
-				 while(line.indexOf(">")<0){
-			      seqLine = seqLine+line.trim();
-				  line=br.readLine();
-				  if (line == null) break;
-				 }
-				 seqLine=seqLine.replaceAll("N","n");
-
-				//uniSeqName.add(seqName);
-				 writer.write(">"+seqIdentifier);
-				 writer.newLine();
-				 writer.write(seqLine);
-				 writer.newLine();
-				 writer.flush();  
-				  
-				 perSeq=new SeqInfo();
-				 perSeq.seqIdentifier=seqIdentifier;
-				 perSeq.seqName=seqName;
-				 perSeq.seqLength=seqLine.length();
-				 perSeq.seq=seqLine;
-				 seqObjList.add(perSeq);
-				 perSeq=null;
-	             
+			line = br.readLine();
+			if (line == null){ 
+			   br.close();
+			   return seqObjList;
+			}
+			while(line.length()==0 || line.matches("\\s*")){
+			   line = br.readLine();
+			   if (line == null){ 
+				   br.close();
+				   return seqObjList;
 			   }
-				 
-			}           		   
-			br.close();
-			writer.close();
+			}
 			
-			line=null;
-			seqIdentifier=null;	
-			seqLine=null;
-			seqName=null;
-			itemSplited=null;
-		}catch(IOException e){
-	        System.out.println(e);
-	    }
-
-	    return seqObjList; 
- }
-	 
- static List<SeqInfo> checkFASTQSeq(String seqFile, String outSeqFile){
-	  
-	    List<SeqInfo> seqObjList=new ArrayList<SeqInfo>();
-	    SeqInfo perSeq=new SeqInfo();
-		try{    
-	        BufferedWriter writer=null;
-	        writer=new BufferedWriter(new FileWriter(outSeqFile));
-			BufferedReader br;              
-	        br = new BufferedReader(new FileReader(seqFile));
-		    String line;
-			String seqIdentifier;		
-			String seqLine;
-			String seqName;		
-			String seqQualityLine;
-			String [] itemSplited;
-		
-			seqObjList=new ArrayList<SeqInfo>();
-			
-			while(true){    
-			   line = br.readLine();	// seq name		
-		       if (line == null) break;
-			   line=line.trim();
-	           if(line.indexOf("@")!=0) {
-			      System.out.println("Error in reading fastq");
-				  break;
-			   }			   
-	           seqIdentifier=line.substring(1,line.length());			 
-			   itemSplited=seqIdentifier.split("\\s+");
-			   seqName=itemSplited[0].trim();
-			     
-			   line=br.readLine();		// seq line	 
-			   if (line == null) break;
-			   seqLine=line.trim();			 
-			   seqLine=seqLine.replaceAll("N","n");
-			   
-			   line=br.readLine();		// '+' tag	  
-			   if (line == null) break;
-			   line=line.trim();
-			   if(line.indexOf("+")!=0) {
-			      System.out.println("Error in reading fastq");
-				  break;
-			   }	   
-	           
-	           line=br.readLine();		// seq quality	 
-			   if (line == null) break;
-			   seqQualityLine=line.trim();
-				
-			   writer.write("@"+seqIdentifier);
-			   writer.newLine();
-			   writer.write(seqLine);
-			   writer.newLine();
-			   writer.write("+");
-			   writer.newLine();
-			   writer.write(seqQualityLine);
-			   writer.newLine();
-			   writer.flush();  
-				  
-			   perSeq=new SeqInfo();
-			   perSeq.seqIdentifier=seqIdentifier;
-			   perSeq.seqName=seqName;
-			   perSeq.seqLength=seqLine.length();
-			   perSeq.seq=seqLine;
-			   perSeq.seqQualityEncode=seqQualityLine;
-			   seqObjList.add(perSeq);
-			   perSeq=null;
-				 
-			}           		   
-			br.close();
-			writer.close();
-			
-			line=null;
-			seqIdentifier=null;
-			seqLine=null;
-			seqName=null;
-			itemSplited=null;
-		}catch(IOException e){
-	        System.out.println(e);
-	    }
-
-	    return seqObjList; 
-  }
-	 
-  static List<SeqInfo> checkFASTASeq(String seqFile){
-	  
-	    List<SeqInfo> seqObjList=new ArrayList<SeqInfo>();
-	    SeqInfo perSeq=new SeqInfo();
-		int seqNum=0;
-
-		try{
-			
-			BufferedReader br;              
-	        br = new BufferedReader(new FileReader(seqFile));
-		    String line;
-			String seqIdentifier;
-			String seqLine;
-			String seqName;
-			String [] itemSplited;
-			seqObjList=new ArrayList<SeqInfo>();
-			seqNum=0;
-			line = br.readLine();				
 			while(true){           
 		       if (line == null) break;
+		       line=line.trim();
 			   if(line.indexOf(">")==0){
 			     seqNum=seqNum+1;
-			     seqIdentifier=line.substring(1,line.length());		 
+			     seqIdentifier=line.substring(1,line.length());			 
 				 itemSplited=seqIdentifier.split("\\s+");
 				 seqName=itemSplited[0].trim();
-				 
+				  
 				 line=br.readLine();
 				 seqLine="";
 				 if (line == null) break;
@@ -998,10 +927,8 @@ public class SeqOperation{
 				 perSeq.seqLength=seqLine.length();
 				 perSeq.seq=seqLine;
 				 seqObjList.add(perSeq);
-				 perSeq=null;
-	             
+				 perSeq=null;             
 			   }
-				 
 			}           		   
 			br.close();
 		
@@ -1015,55 +942,76 @@ public class SeqOperation{
 	    }
 
 	    return seqObjList; 
-  }
+ }
 	 
-  static List<SeqInfo> checkFASTQSeq(String seqFile){
+ List<SeqInfo> checkFASTQSeq(String seqFile){
 	  
 	    List<SeqInfo> seqObjList=new ArrayList<SeqInfo>();
-	    SeqInfo perSeq=new SeqInfo();
-			
+	    SeqInfo perSeq;
+		int seqNum=0;
+		
 		try{    
 	       	BufferedReader br;              
 	        br = new BufferedReader(new FileReader(seqFile));
 		    String line;
-			String seqIdentifier;		
+			String seqIdentifier;	
 			String seqLine;
 			String seqName;		
 			String seqQualityLine;
 			String [] itemSplited;
-		
-			seqObjList=new ArrayList<SeqInfo>();
-			
+			seqNum=0;
+			outerloop:	
 			while(true){  
-			  
-	           line = br.readLine();		// seq name	
+	           seqNum=seqNum+1;	
+	           
+			   //for read header/identifier
+	           line = br.readLine();			
 		       if (line == null) break;
+		       while(line.length()==0 || line.matches("\\s*")){
+		    	 line = br.readLine();
+		    	 if (line == null) break outerloop;
+		       }
 			   line=line.trim();
 	           if(line.indexOf("@")!=0) {
-			      System.out.println("Error in reading fastq");
+			      System.out.println("Error in reading fastq line:"+line);
 				  break;
 			   }			   
-	           seqIdentifier=line.substring(1,line.length());				 
+	      	   seqIdentifier=line.substring(1,line.length());				 
 			   itemSplited=seqIdentifier.split("\\s+");
 			   seqName=itemSplited[0].trim();
-			     
-			   line=br.readLine();		// seq line	 
+			   
+			   //for read sequence
+			   line=br.readLine();			 
 			   if (line == null) break;
+		       while(line.length()==0 || line.matches("\\s*")){
+		    	 line = br.readLine();
+		    	 if (line == null) break outerloop;
+		       }
 			   seqLine=line.trim();			 
 			   seqLine=seqLine.replaceAll("N","n");
 			   
-			   line=br.readLine();		// '+' tag	  
+			   //for read '+' tag
+			   line=br.readLine();			  
 			   if (line == null) break;
+		       while(line.length()==0 || line.matches("\\s*")){
+		    	 line = br.readLine();
+		    	 if (line == null) break outerloop;
+		       }
 			   line=line.trim();
 			   if(line.indexOf("+")!=0) {
-			      System.out.println("Error in reading fastq");
+				  System.out.println("Error in reading fastq line:"+line);
 				  break;
-			   }	
-	          	           
-	           line=br.readLine();		// seq quality	 
+			   }		      
+	           
+			   //for read base quality encode
+	           line=br.readLine();			 
 			   if (line == null) break;
+			   while(line.length()==0 || line.matches("\\s*")){
+				  line = br.readLine();
+				  if (line == null) break outerloop;
+			   }
 			   seqQualityLine=line.trim();
-			   
+
 			   perSeq=new SeqInfo();
 			   perSeq.seqIdentifier=seqIdentifier;
 			   perSeq.seqName=seqName;
@@ -1071,13 +1019,12 @@ public class SeqOperation{
 			   perSeq.seq=seqLine;
 			   perSeq.seqQualityEncode=seqQualityLine;
 			   seqObjList.add(perSeq);
-			   perSeq=null;
-		
+			   perSeq=null;	
 			}           		   
 			br.close();
 		
 	    	line=null;
-	    	seqIdentifier=null;		
+	    	seqIdentifier=null;	
 			seqLine=null;
 			seqName=null;
 			itemSplited=null;
