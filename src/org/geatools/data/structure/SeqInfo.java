@@ -41,7 +41,10 @@ public class SeqInfo{
 	  public int seqLength;
 	  public String seq; 
 	  public String seqQualityEncode; 
-	  public long seqNumEncode;
+	  public long seqNumEncode=0;
+	  public long seqNumRevEncode=0;
+	  public boolean isDup=false;
+	  public int dupNum=-1;
 	  
 	  public static class CompSeqEncode implements Comparator<SeqInfo> {
 			
@@ -55,4 +58,32 @@ public class SeqInfo{
 			}
 			
 	  }
+	  
+	  public static class CompSeqRevEncode implements Comparator<SeqInfo> {
+			
+			private int mod = 1;
+			public CompSeqRevEncode(boolean desc) {
+			  if (desc) mod =-1;
+			}
+			        
+			public int compare(SeqInfo  seq1, SeqInfo  seq2){
+			  return  mod*Long.valueOf(seq1.seqNumRevEncode).compareTo(seq2.seqNumRevEncode);
+			}
+			
+	  }
+
+	  
+	  public static class CompSeqID implements Comparator<SeqInfo> {
+			
+			private int mod = 1;
+			public CompSeqID(boolean desc) {
+			  if (desc) mod =-1;
+			}
+			        
+			public int compare(SeqInfo  seq1, SeqInfo  seq2){
+			  return  mod*Integer.valueOf(seq1.seqID).compareTo(seq2.seqID);
+			}
+			
+	  }
+
 }

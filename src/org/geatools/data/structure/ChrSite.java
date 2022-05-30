@@ -32,6 +32,8 @@
  *******************************************************************************/
 package org.geatools.data.structure;
 
+import java.util.Comparator;
+
 public class ChrSite {
 	
 	public int index;
@@ -43,6 +45,63 @@ public class ChrSite {
 	public int chrEnd;
 	public String associatedGen="-";
 	public String genRelation="-";
+	public Double score=null;
 	public String seq="";
+	
+	public static class CompSiteCenter implements Comparator<ChrSite> {
+		
+		private int mod = 1; //default ascend
+		
+		public CompSiteCenter() {
+			mod = 1; //ascend
+		}
+
+		public CompSiteCenter(boolean desc) {
+		  if (desc) mod =-1; //descend
+		}
+		        
+		public int compare(ChrSite  site1, ChrSite  site2){
+		  return  mod*Integer.valueOf((site1.chrStart+site1.chrEnd)/2)
+				  .compareTo((site2.chrStart+site2.chrEnd)/2);
+		}
+		
+	}
+	
+	public static class CompSiteStart implements Comparator<ChrSite> {
+		
+		private int mod = 1; //default ascend
+		
+		public CompSiteStart() {
+			mod = 1; //ascend
+		}
+
+		public CompSiteStart(boolean desc) {
+		  if (desc) mod =-1; //descend
+		}
+		        
+		public int compare(ChrSite  site1, ChrSite  site2){
+		  return  mod*Integer.valueOf(site1.chrStart).compareTo(site2.chrStart);
+		}
+		
+	}
+	
+	public static class CompSiteEnd implements Comparator<ChrSite> {
+		
+		private int mod = 1; //default ascend
+		
+		public CompSiteEnd() {
+			mod = 1; //ascend
+		}
+
+		public CompSiteEnd(boolean desc) {
+		  if (desc) mod =-1; //descend
+		}
+		        
+		public int compare(ChrSite  site1, ChrSite  site2){
+		  return  mod*Integer.valueOf(site1.chrEnd).compareTo(site2.chrEnd);
+		}
+		
+	}
+
 	
 }

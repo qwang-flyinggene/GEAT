@@ -42,29 +42,31 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.geatools.operation.FileOperate;
+import org.geatools.operation.FileOperation;
+import org.geatools.operation.SeqOperation;
 import org.geatools.call.CallFq2Fa;
-import org.geatools.call.CallSeqDupFilter;
-import org.geatools.call.CallSeqExtract;
+import org.geatools.call.CallQuerySeqCount;
+import org.geatools.call.CallSeqFilter;
 import org.geatools.call.CallSeqMut;
 import org.geatools.call.CallSeqOffTarget;
 import org.geatools.call.CallSeqQCFilter;
+import org.geatools.call.CallSeqRecognition;
+import org.geatools.call.CallSeqRetrieve;
 import org.geatools.call.CallUtility;
 import org.geatools.seqprocess.SeqQCFilter;
-import org.geatools.seqprocess.SeqOperation;
 import org.geatools.seqprocess.SeqRocketConsole;
-import org.geatools.call.CallSeqCount;
 
 public class GEAT{
   
-	 protected static String homeDir=getClassPath();	   
-	 protected static String dataDir=homeDir+"/data";
-	 protected static String workingDir=homeDir+"/working";	
-	 protected static String tmpDir=homeDir+"/tmp";	
-	 protected static List<String> tmpFiles;
+	 protected static String homeDir=getClassPath();
+	 protected static String fileSeparator = System.getProperties().getProperty("file.separator");
+	 protected static String dataDir=homeDir+fileSeparator+"data";
+	 protected static String workingDir=homeDir+fileSeparator+"working";	
+	 protected static String tmpDir=homeDir+fileSeparator+"tmp";	
+	 protected static List<String> tmpFiles=new ArrayList<String>();
 		   
 	 // basic parameters................
-	 protected static String taskName="SeqRocket";
+	 protected static String taskName=null;
 	 protected static String fastq = null;
 	 protected static String fasta = null;
 	 protected static String fastq2 = null;
@@ -75,40 +77,24 @@ public class GEAT{
 	 protected static List<String> fastaList2;
 	 protected static String seqType=SeqOperation.SEQTYPE_SINGLEEND;
 	 protected static String expSeqInfo = null;
-	 protected static String expSeqInfo2 = null;
-	 protected static String refGenome = null;
+	 protected static String expSeqInfo2 = null;	
 	 protected static String outDir = null;
 	 protected static String outTag=null;
 	 protected static String outName=null;
-	 protected static String seqNameFile=null;
-	 protected static String seqNameCol=null;
-	 protected static String baitName="CRISPR";
-	 protected static String baitChr="chr8";
-	 protected static String baitChrStatr="127738081";
-	 protected static String baitChrEnd="127738085";
-	 protected static String baitChrStrand="+";
-	 protected static String restSeq="GGCC";
-	   
 	 protected static boolean isFastqOK=false;
 	 protected static boolean isFastaOK=false;
 	 protected static boolean isFastq2OK=false;
 	 protected static boolean isFasta2OK=false;
 	 protected static boolean isLibExpSeqInfoOK=false;
-	 protected static boolean doSeqQCFilter=false;	
-	 protected static boolean doGenomeAlignment=false;
-	 protected static boolean doOutput=false;
+	 protected static boolean doSeqQCFilter=false;		
 	 protected static boolean doSeqExtraction=false;
-	 protected static boolean doSeqExclusion=false;
-	 protected static boolean doSplitSeq=true;	
-	 protected static int splitStep=100000;
-	 protected static List<String> splitedSeqFiles = null;
-	 protected static List<String> splitedSeqFiles2 = null;
-	 protected static int seqNameColIdx=0;
+	 protected static boolean doSeqExclusion=false;	 
 	 protected static SeqQCFilter seqQC=null;
 	 protected static String[] seqQCOpts=null;
 	 protected static SeqRocketConsole seqRC=null;
 	 protected static boolean isSeqRocketOK=false;
 	 protected static boolean isSeqPairRocketOK=false;	
+	
 	 
   public GEAT(){
 	 
@@ -153,41 +139,81 @@ public class GEAT{
 
       String absolutePath = decodedPath.substring(0, decodedPath.lastIndexOf("/"));
       return absolutePath;
-  }  
-  public static boolean isInteger(String strNum) {
-	    boolean ret = true;
-	    try {
+  }
+  
+  public static void setHomeDir(String str){
+	 File dir=new File(str);
+	 if(!dir.exists()) FileOperation.newFolder(str);
+	 dir=null;
+	 homeDir=str;	 
+  }
+  public static String getHomeDir(){
+	 return homeDir;
+  }
+  
+  public static void setfileSeparator(String str){
+	 fileSeparator=str;
+  }
+  public static String getfileSeparator(){
+	 return fileSeparator;
+  }
 
-	        Integer.parseInt(strNum);
+  public static void setWorkingDir(String str){
+	 File dir=new File(str);
+	 if(!dir.exists()) FileOperation.newFolder(str);
+	 dir=null;
+	 workingDir=str;
+  }
+  public static String getWorkingDir(){
+	 return workingDir;
+  }
+  
+  public static void setDataDir(String str){
+	 File dir=new File(str);
+	 if(!dir.exists()) FileOperation.newFolder(str);
+	 dir=null;
+	 dataDir=str;
+  }
+  public static String getDataDir(){
+	 return dataDir;
+  }
 
-	    }catch (NumberFormatException e) {
-	        ret = false;
-	    }
-	    return ret;
+  public static void setTmpDir(String str){
+	 File dir=new File(str);
+	 if(!dir.exists()) FileOperation.newFolder(str);
+	 dir=null;
+	 tmpDir=str;
+  }
+  public static String getTmpDir(){
+	 return tmpDir;
+  }
+
+  public static void delTmpDir(String dir){
+	 FileOperation.delFolder(dir);
   }
 	 
-  public static void main(String[] args) throws Exception {	
-	  
-	 //String fileSeparator = System.getProperties().getProperty("file.separator");
-	 //String workDir = System.getProperties().getProperty("user.dir");
+  public static void main(String[] args) throws Exception {		  
+	 
 	 homeDir=getClassPath();
-	 dataDir=homeDir+"/data";
-	 workingDir=homeDir+"/working";
+	 fileSeparator = System.getProperties().getProperty("file.separator");
+	 dataDir=homeDir+fileSeparator+"data";
+	 //String workDir = System.getProperties().getProperty("user.dir");
+	 workingDir=homeDir+fileSeparator+"working";
 	 String timeStamp=new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
-	 String tmpDir0=homeDir+"/tmp";
-	 tmpDir=tmpDir0+"/"+timeStamp;
+	 String tmpDir0=homeDir+fileSeparator+"tmp";
+	 tmpDir=tmpDir0+fileSeparator+timeStamp;
 	
 	 //System.out.println(homeDir);
 	 File dir=new File(dataDir);
-	 if(!dir.exists()) FileOperate.newFolder(dataDir);	
+	 if(!dir.exists()) FileOperation.newFolder(dataDir);	
 	 
 	 dir=new File(workingDir);
-	 if(!dir.exists()) FileOperate.newFolder(workingDir);	 
+	 if(!dir.exists()) FileOperation.newFolder(workingDir);	 
 
 	 dir=new File(tmpDir0);
-	 if(!dir.exists()) FileOperate.newFolder(tmpDir0);
+	 if(!dir.exists()) FileOperation.newFolder(tmpDir0);
 	 dir=new File(tmpDir);
-	 if(!dir.exists()) FileOperate.newFolder(tmpDir);
+	 if(!dir.exists()) FileOperation.newFolder(tmpDir);
 	 dir=null;
 	   
 	 Map<String, List<String>> params=getCommandLineParams(args);
@@ -196,62 +222,33 @@ public class GEAT{
 	 
 	 if(params.get("task")!=null){		
 		if(params.get("task").size()>0){
-			taskName=params.get("task").get(0).trim();		 
+		  taskName=params.get("task").get(0).trim();		 
 		}
 	 }
-	   
-	 if(taskName.equalsIgnoreCase("SeqExtract")){
-		 CallSeqExtract.setHomeDir(homeDir);
-		 CallSeqExtract.setTmpDir(tmpDir);
-		 CallSeqExtract.setWorkingDir(workingDir);
-		 CallSeqExtract.doWork(args);	     
-	    	
+	 
+   
+	 if(taskName.equalsIgnoreCase("SeqRecognition")){
+		 CallSeqRecognition.doWork(args); 
      }else if(taskName.equalsIgnoreCase("SeqMut")){
-		 CallSeqMut.setHomeDir(homeDir);
-		 CallSeqMut.setTmpDir(tmpDir);
-		 CallSeqMut.setWorkingDir(workingDir); 
-		 CallSeqMut.doWork(args);		 
-	    	
+		 CallSeqMut.doWork(args);
 	 }else if(taskName.equalsIgnoreCase("SeqOffTarget")){
-		 CallSeqOffTarget.setHomeDir(homeDir);
-		 CallSeqOffTarget.setTmpDir(tmpDir);
-		 CallSeqOffTarget.setWorkingDir(workingDir);
-	     CallSeqOffTarget.doWork(args);	     
-	    	
+	     CallSeqOffTarget.doWork(args);	  
 	 }else if(taskName.equalsIgnoreCase("SeqQCFilter")){
-		 CallSeqQCFilter.setHomeDir(homeDir);
-		 CallSeqQCFilter.setTmpDir(tmpDir);
-		 CallSeqQCFilter.setWorkingDir(workingDir);
-		 CallSeqQCFilter.doWork(args);	     
-		    	
+		 CallSeqQCFilter.doWork(args);			    	
 	 }else if(taskName.equalsIgnoreCase("Fq2Fa")){
-		 CallFq2Fa.setHomeDir(homeDir);
-		 CallFq2Fa.setTmpDir(tmpDir);
-		 CallFq2Fa.setWorkingDir(workingDir);
-		 CallFq2Fa.doWork(args);	     
-			    	
-	 }else if(taskName.equalsIgnoreCase("SeqCount")){
-		 CallSeqCount.setHomeDir(homeDir);
-		 CallSeqCount.setTmpDir(tmpDir);
-		 CallSeqCount.setWorkingDir(workingDir);
-		 CallSeqCount.doWork(args);	     
-	    	
-     }else if(taskName.equalsIgnoreCase("SeqDupFilter")){
-		 CallSeqDupFilter.setHomeDir(homeDir);
-		 CallSeqDupFilter.setTmpDir(tmpDir);
-		 CallSeqDupFilter.setWorkingDir(workingDir);
-		 CallSeqDupFilter.doWork(args);	     
-		    	
-	 }else if(taskName.equalsIgnoreCase("Utility")){	
-		 CallUtility.setHomeDir(homeDir);
-		 CallUtility.setTmpDir(tmpDir);
-		 CallUtility.setWorkingDir(workingDir);
-		 CallUtility.doWork(args);	 
-		 	  
+		 CallFq2Fa.doWork(args);			    	
+	 }else if(taskName.equalsIgnoreCase("QuerySeqCount")){
+		 CallQuerySeqCount.doWork(args);
+     }else if(taskName.equalsIgnoreCase("SeqFilter")){
+		 CallSeqFilter.doWork(args);			    	
+	 }else if(taskName.equalsIgnoreCase("SeqRetrieve")){
+		 CallSeqRetrieve.doWork(args);			    	
+	 }else if(taskName.equalsIgnoreCase("Utility")){
+		 CallUtility.doWork(args);			 	  
 	 }else{// if -task
 		 System.err.println("Error: '-task' is invalid");				
 	 }
 	  
-	  FileOperate.delFolder(tmpDir);
+	 delTmpDir(tmpDir);
   }
 }

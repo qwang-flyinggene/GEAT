@@ -33,42 +33,35 @@
 package org.geatools.call;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
 import org.geatools.GEAT;
 import org.geatools.data.load.LoadChrInfo;
 import org.geatools.data.structure.ChrInfo;
-import org.geatools.data.structure.SeqChrAlignSite;
+import org.geatools.data.structure.SeqAlignSite;
 import org.geatools.data.structure.SeqInfo;
-import org.geatools.operation.FileOperate;
+import org.geatools.operation.FileOperation;
+import org.geatools.operation.SeqOperation;
 import org.geatools.seqprocess.SeqOffTarget;
-import org.geatools.seqprocess.SeqOperation;
 
 public class CallSeqOffTarget extends GEAT{
-	static String homeDir=null;	
-	static String workingDir=null;
-	static String tmpDir=null;
-	//static String pathSeparator="/";
-	
-	public static void setHomeDir(String dir){
-		homeDir=dir;
-	}
-	public static void setWorkingDir(String dir){
-		workingDir=dir;
-	}
-	public static void setTmpDir(String dir){
-		tmpDir=dir;
-	}
-	public static void delTmpDir(String dir){
-			FileOperate.delFolder(dir);
-	}
 	
 	public static void doWork( String[] args){
-		  
+		 
+		 if(homeDir==null) homeDir=GEAT.getHomeDir();			 
+		 if(fileSeparator==null) fileSeparator = GEAT.getfileSeparator();		 
+		 if(workingDir==null) workingDir=GEAT.getWorkingDir();	
+		 File dir=null;
+		 dir=new File(workingDir);
+		 if(!dir.exists()) FileOperation.newFolder(workingDir);
+		 
+		 if(tmpDir==null) tmpDir=GEAT.getTmpDir();			
+		 dir=new File(tmpDir);
+		 if(!dir.exists()) FileOperation.newFolder(tmpDir);
+		 dir=null;
+
 		 String targetSeqFile = null;
 		 String targetSeqStr;
 		 String refGenome = "mm9";
@@ -77,33 +70,20 @@ public class CallSeqOffTarget extends GEAT{
 		 float seqMaxMismatchRatio=0.25f;
 		 int maxGapNum=2;
 		 String outDir = null;	 
-	     int siteDownStreamSize=6;
-	     int siteUpStreamSize=0;
+	     int siteDownLen=6;
+	     int siteUpLen=0;
 	     
 		 boolean doIt=false;
 		 String taskName;
-		 //boolean isTargetSeqFileOK=false;
-		 
-		 if(homeDir==null) homeDir=GEAT.getClassPath();			   
-		 if(tmpDir==null){
-		   String timeStamp=new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
-		   tmpDir=homeDir+"/tmp/"+timeStamp;
-		 }
-		 if(workingDir==null) workingDir=homeDir+"/working";
-		 File dir=new File(tmpDir);
-		 if(!dir.exists()) FileOperate.newFolder(tmpDir);
-		 dir=null;
-		 dir=new File(workingDir);
-		 if(!dir.exists()) FileOperate.newFolder(workingDir);
-		 dir=null;
-			
+		 //boolean isTargetSeqFileOK=false;		 
+
 		 Map<String, List<String>> params=getCommandLineParams(args);
 		 if(params.get("task")!=null){		
 			doIt=false;	
 			if(params.get("task").size()>0){
 			  taskName=params.get("task").get(0).trim();
 			  if(taskName!=null){
-			    if(taskName.equalsIgnoreCase("ScanOffTarget")){
+			    if(taskName.equalsIgnoreCase("SeqOffTarget")){
 			   	  doIt=true;	    	    
 			    }else{
 			      doIt=false;
@@ -136,19 +116,19 @@ public class CallSeqOffTarget extends GEAT{
 		     }	
 			
 			//####### set target Seq fasta #######
-			 if(params.get("targetSeqFasta")!=null){		
-			   if(params.get("targetSeqFasta").size()>0){
-				 targetSeqFile=params.get("targetSeqFasta").get(0).trim();
+			 if(params.get("targetSeqFASTA")!=null){		
+			   if(params.get("targetSeqFASTA").size()>0){
+				 targetSeqFile=params.get("targetSeqFASTA").get(0).trim();
 			     if(targetSeqFile!=null){
 			       File f = new File(targetSeqFile);
 				   if(!f.exists()){
-					 System.err.println("'-targetSeqFasta' file you provided doesn't exist :(");
+					 System.err.println("'-targetSeqFASTA' file you provided doesn't exist :(");
 				     return;
 				   }
 				   f=null;
 				 }
 			   }else{
-				 System.err.println("You didn't provide '-targetSeqFasta' file :(");
+				 System.err.println("You didn't provide '-targetSeqFASTA' file :(");
 				 return;
 			   }
 			 }	
@@ -168,26 +148,26 @@ public class CallSeqOffTarget extends GEAT{
 			 }  
 	         
 			 //####### set seq minmum align length to target seq length ratio #######
-			 if(params.get("minAlignSizeRatio")!=null){		  	
-			   if(params.get("minAlignSizeRatio").size()>0){
-				  String tmp=params.get("minAlignSizeRatio").get(0).trim();
+			 if(params.get("minAlignLenRatio")!=null){		  	
+			   if(params.get("minAlignLenRatio").size()>0){
+				  String tmp=params.get("minAlignLenRatio").get(0).trim();
 				  if(tmp!=null){
 					try{
 					   seqMinAlignLenRatio=Float.parseFloat(tmp);
 					   if(seqMinAlignLenRatio>1 || seqMinAlignLenRatio<0){ 
-						 System.err.println("Illegal '-minAlignSizeRatio' parameter usage :(");
+						 System.err.println("Illegal '-minAlignLenRatio' parameter usage :(");
 						 return;
 					   }	
 					}catch(Exception e){
-					   System.err.println("Illegal '-minAlignSizeRatio' parameter usage :(");
+					   System.err.println("Illegal '-minAlignLenRatio' parameter usage :(");
 					   return;
 				    } 
 				  }else{
-					System.err.println("Illegal '-minAlignSizeRatio' parameter usage :(");
+					System.err.println("Illegal '-minAlignLenRatio' parameter usage :(");
 				    return;
 				  }
 			   }else{
-				  System.err.println("Illegal '-minAlignSizeRatio' parameter usage :(");
+				  System.err.println("Illegal '-minAlignLenRatio' parameter usage :(");
 				  return;
 			   }
 			 }
@@ -278,7 +258,7 @@ public class CallSeqOffTarget extends GEAT{
 				   doOutput=true;
 				   f=null;
 				 }else if (outDir!=null){
-				   FileOperate.newFolder(outDir);
+				   FileOperation.newFolder(outDir);
 				   doOutput=true;
 				 }
 			   }
@@ -286,7 +266,7 @@ public class CallSeqOffTarget extends GEAT{
 			 if(!doOutput){			   
 				 outDir=workingDir;
 				 dir=new File(outDir);
-				 if(!dir.exists()) FileOperate.newFolder(outDir);	
+				 if(!dir.exists()) FileOperation.newFolder(outDir);	
 		         dir=null;
 				 doOutput=true;   	
 			 }	
@@ -314,7 +294,7 @@ public class CallSeqOffTarget extends GEAT{
 		     int queryCount=0;
 		 	 for(SeqInfo targetSeq:targetSeqList){
 		 		 queryCount++;
-			 	 List<SeqChrAlignSite> chrOfftargetSites;
+			 	 List<SeqAlignSite> chrOfftargetSites;
 			 	 List<ArrayList<String>> offTargetList=new ArrayList<ArrayList<String>>();
 			 	 ArrayList<String> offTarget=new ArrayList<String>();
 			 	 if(targetSeq.seqName==null || targetSeq.seqName==""){
@@ -322,56 +302,54 @@ public class CallSeqOffTarget extends GEAT{
 			 	 }
 			 	 System.out.println("### For target sequence "+targetSeq.seqName+"......");	
 			 	 String targetSeqFaFile=tmpDir+targetSeq.seqName+".fna";
-			 	 SeqOperation.saveSeqInfoAsFASTA(targetSeq, targetSeqFaFile);
-			 	 String chrGenomeSeqFile="";
+			 	 SeqOperation.saveSeqObjAsFASTA(targetSeq, targetSeqFaFile);
+			 	 String genomeChrSeqFile="";
 			 	 
 			  	 for(int i=0;i<chrInfoList.size(); i++){
 			  	   System.out.println("Scanning "+chrInfoList.get(i).name+"......");	
-			 	   chrGenomeSeqFile=chrInfoList.get(i).chrFaFile;
+			  	   genomeChrSeqFile=chrInfoList.get(i).chrFaFile;
 			 	   
-			 	   chrOfftargetSites=OTS.getOffTargetSite(targetSeqFaFile,chrGenomeSeqFile,
+			 	   chrOfftargetSites=OTS.getOffTargetSite(targetSeqFaFile,genomeChrSeqFile,
 			 			   seqMinIdentity,seqMinAlignLenRatio,seqMaxMismatchRatio,maxGapNum); 
 			 	   
 			 	   //sortSiteByScore(chrOfftargetSites,true);
 			 	   OTS.sortSiteByMismatchNum(chrOfftargetSites,false);
 			 	  
-			 	   List<String> chrLineSeqs=SeqOperation.getChrGenomeLineSeqs(chrGenomeSeqFile);
+			 	   List<String> chrLineSeq=SeqOperation.getGenomeChrLineSeq(genomeChrSeqFile);
 			 	   
-			 	   SeqOperation.setChrSiteSeq(chrOfftargetSites,
-			 			  siteDownStreamSize,siteUpStreamSize,chrLineSeqs);
+			 	   SeqOperation.setAlignSiteSeq(chrOfftargetSites,chrLineSeq,siteDownLen,siteUpLen);
 			 	   List<Integer> targetSiteIdx=new ArrayList<Integer>();
 			 	   for(int j=0;j<chrOfftargetSites.size();j++){	
 			 		  if(chrOfftargetSites.get(j).name.equalsIgnoreCase("OffTarget")){
-				 		  offTarget=new ArrayList<String>();	 
-				 		  offTarget.add(chrOfftargetSites.get(j).chr); 	 
-				 		  offTarget.add(Integer.toString(chrOfftargetSites.get(j).chrStart));
-				 		  offTarget.add(Integer.toString(chrOfftargetSites.get(j).chrEnd));
-				 		  offTarget.add(chrOfftargetSites.get(j).strand);
-				 		  offTarget.add(chrOfftargetSites.get(j).name);
-				 		  offTarget.add(Double.toString(chrOfftargetSites.get(j).score));
-				 		  offTarget.add(Integer.toString(chrOfftargetSites.get(j).mismatchNum));
-				 		  offTarget.add(chrOfftargetSites.get(j).seq);
-				 		  offTargetList.add(offTarget);
-				 	      offTarget=null;
+				 		 offTarget=new ArrayList<String>();	 
+				 		 offTarget.add(chrOfftargetSites.get(j).chr); 	 
+				 		 offTarget.add(Integer.toString(chrOfftargetSites.get(j).chrStart));
+				 		 offTarget.add(Integer.toString(chrOfftargetSites.get(j).chrEnd));
+				 		 offTarget.add(chrOfftargetSites.get(j).strand);
+				 		 offTarget.add(chrOfftargetSites.get(j).name);
+				 		 offTarget.add(Double.toString(chrOfftargetSites.get(j).score));
+				 		 offTarget.add(Integer.toString(chrOfftargetSites.get(j).mismatchNum));
+				 		 offTarget.add(chrOfftargetSites.get(j).seq);
+				 		 offTargetList.add(offTarget);
+				 	     offTarget=null;
 			 		  }else if(chrOfftargetSites.get(j).name.equalsIgnoreCase("Target")){
 			 			 targetSiteIdx.add(j);
 			 		  }
 			 	   }
 			 	   
 			 	   for(int t=0;t<targetSiteIdx.size();t++){	
-			 	          int j=targetSiteIdx.get(t);
-				 		  offTarget=new ArrayList<String>();	 
-				 		  offTarget.add(chrOfftargetSites.get(j).chr); 	 
-				 		  offTarget.add(Integer.toString(chrOfftargetSites.get(j).chrStart));
-				 		  offTarget.add(Integer.toString(chrOfftargetSites.get(j).chrEnd));
-				 		  offTarget.add(chrOfftargetSites.get(j).strand);
-				 		  offTarget.add(chrOfftargetSites.get(j).name);
-				 		  offTarget.add(Double.toString(chrOfftargetSites.get(j).score));
-				 		  offTarget.add(Integer.toString(chrOfftargetSites.get(j).mismatchNum));
-				 		  offTarget.add(chrOfftargetSites.get(j).seq);
-				 		  offTargetList.add(t,offTarget);
-				 	      offTarget=null;
-			 		  
+			 	         int j=targetSiteIdx.get(t);
+				 		 offTarget=new ArrayList<String>();	 
+				 		 offTarget.add(chrOfftargetSites.get(j).chr); 	 
+				 		 offTarget.add(Integer.toString(chrOfftargetSites.get(j).chrStart));
+				 		 offTarget.add(Integer.toString(chrOfftargetSites.get(j).chrEnd));
+				 		 offTarget.add(chrOfftargetSites.get(j).strand);
+				 		 offTarget.add(chrOfftargetSites.get(j).name);
+				 		 offTarget.add(Double.toString(chrOfftargetSites.get(j).score));
+				 		 offTarget.add(Integer.toString(chrOfftargetSites.get(j).mismatchNum));
+				 		 offTarget.add(chrOfftargetSites.get(j).seq);
+				 		 offTargetList.add(t,offTarget);
+				 	     offTarget=null;			 		  
 			 	   }
 			 	   targetSiteIdx=null;
 			 	}
@@ -380,7 +358,7 @@ public class CallSeqOffTarget extends GEAT{
 			 			+targetSeq.seqName+".OffTargetSite_IP"+seqMinIdentity
 			 			+"LR"+seqMinAlignLenRatio+"MR"+seqMaxMismatchRatio
 			 			+"G"+maxGapNum+".bed";
-			 	FileOperate.saveMatrixList(offTargetList, outFile);
+			 	FileOperation.saveMatrixList(offTargetList, outFile);
 			
 			 	offTargetList=null;
 		 	}

@@ -1,3 +1,4 @@
+package org.geatools.data.structure;
 /*******************************************************************************
  *  ========================================================================
  *  GEATools : a free Genomic Event Analysis Tools for the Java(tm) platform
@@ -30,19 +31,49 @@
  *  Changes (from 1-Jan-2016)
  *  ---------------------------------------------------------------------------
  *******************************************************************************/
-package org.geatools.data.structure;
 
-import java.util.List;
+import java.util.Comparator;
 
-public class SeqCompoType implements Cloneable{
-	   public List<String> seqTypeName;
-	   public List<String> seqColor; 
-	   
-	   @Override
-	   public Object clone() throws CloneNotSupportedException {
-		   SeqCompoType cloned = (SeqCompoType)super.clone();
-		   
-		   return cloned;
-	   }
-		    
-} 
+public class SeqAlignSite extends ChrSite{
+	 
+	 public int qSeqID;
+	 public String qName;
+	 public String sName;
+	 public float identity;
+	 public int alignLen;
+	 public int mismatchNum;
+	 public int gapNum;
+	 public int qStart;
+	 public int qEnd;
+	 public int sStart;
+	 public int sEnd;
+	 public double eValue;
+	 public double score;
+	    
+	 public static class CompScore implements Comparator<SeqAlignSite> {
+		
+		private int mod = 1;
+		public CompScore(boolean desc) {
+		  if (desc) mod =-1;
+		}
+		        
+		public int compare(SeqAlignSite  site1, SeqAlignSite  site2){
+		  return  mod*Double.valueOf(site1.score).compareTo(site2.score);
+		}
+		
+	 }
+	 
+	 public static class CompMismatch implements Comparator<SeqAlignSite> {
+			
+		private int mod = 1;
+		public CompMismatch(boolean desc) {
+		  if (desc) mod =-1;
+		}
+		        
+		public int compare(SeqAlignSite  site1, SeqAlignSite  site2){
+		  return  mod*Integer.valueOf(site1.mismatchNum).compareTo(site2.mismatchNum);
+		}
+		
+	 }
+
+}

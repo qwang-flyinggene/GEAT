@@ -46,6 +46,6 @@ public class SeqMutInfo {
 	  public double sumTarMutRate;	
 	  public double sumOtherMutRate;
 	  public int baseNum;
-	  public int tarBaseNum;
+	  public int tarNum;
 	  public int otherBaseNum;
 }

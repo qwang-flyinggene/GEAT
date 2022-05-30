@@ -37,14 +37,18 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.geatools.data.structure.BaseMutStat;
 import org.geatools.data.structure.BaseSNP;
 import org.geatools.data.structure.BlastInfo;
 import org.geatools.data.structure.SeqMutInfo;
 import org.geatools.data.structure.SeqQual;
+import org.geatools.data.structure.SeqTarget;
 import org.geatools.data.structure.BaseMut;
-import org.geatools.operation.FileOperate;
+import org.geatools.operation.FileOperation;
+import org.geatools.operation.SeqOperation;
 
 public class SeqMut {
     
@@ -91,8 +95,11 @@ public class SeqMut {
 	int localBaseNum=5;
 	int localMaxMutNum=3;
 	
-	boolean doInterestMut=false;
-	String [][]interestMut;
+	boolean doTarRegex=false;
+	String tarRegex;
+	List<SeqTarget>tarList;
+	boolean doTarMut=false;
+	String [][]tarMut;
 	
 	float snpRate=0.2f;
 	float baseErrRate=0.01f;
@@ -103,7 +110,7 @@ public class SeqMut {
 	boolean skipNQS=false;
 	boolean skipIndel=false;
 	boolean skipLMS=false;
-	boolean skipBaseMutCheck=true;
+	boolean doBaseMutCheck=true;
 	boolean doSNPCheck=false;
 	boolean doBaseErrCheck=false;
 	
@@ -118,16 +125,25 @@ public class SeqMut {
 		
 	}
 	
-	public void setHomeDir(String dir){
-	    homeDir=dir;
+	public void setHomeDir(String str){
+	    File dir=new File(str);
+	    if(!dir.exists()) FileOperation.newFolder(str);
+	    dir=null;
+	    homeDir=str;	
+	} 
+	  
+	public void setDataDir(String str){
+	    File dir=new File(str);
+	    if(!dir.exists()) FileOperation.newFolder(str);
+	    dir=null;
+		dataDir=str;
 	}
 	  
-	public void setDataDir(String dir){
-		dataDir=dir;
-	}
-	  
-	public void setTmpDir(String dir){
-	    tmpDir=dir;
+	public void setTmpDir(String str){
+	    File dir=new File(str);
+	    if(!dir.exists()) FileOperation.newFolder(str);
+	    dir=null;
+		tmpDir=str;
 	}
 	
 	public void setAQS(int alignLen,int mismatch,int gapNum,boolean skip){
@@ -156,21 +172,27 @@ public class SeqMut {
 	}
 	
 	public void setSNP(float rate,boolean doIt){
-	    if(doIt) skipBaseMutCheck=false;
+		doBaseMutCheck=doIt;
 		snpRate=rate;
  	    doSNPCheck=doIt;
 	}
 	
 	public void setBaseErr(float rate,boolean doIt){
-		if(doIt) skipBaseMutCheck=false;
+		doBaseMutCheck=doIt;
 		baseErrRate=rate;
  	    doBaseErrCheck=doIt;
 	}
 	
 	public void setTargetMut(String[][]mut){
-		interestMut=mut;
-		if(interestMut!=null && interestMut.length>0) doInterestMut=true;
-		else doInterestMut=false;
+		doTarMut=false;
+		tarMut=mut;
+		if(tarMut!=null && tarMut.length>0) doTarMut=true;		
+	}
+	
+	public void setTargetRegex(String regex){		
+		doTarRegex=false;
+		tarRegex=regex;
+		if(tarRegex!=null && tarRegex.trim()!="") doTarRegex=true;		
 	}
 	
 	public void setAvgRegion(int start, int end){
@@ -185,15 +207,14 @@ public class SeqMut {
 	}
 	
 	public void setIsReversed(boolean status){
- 	  isReverse=status;
+ 	    isReverse=status;
 	}
 	
 	public List<BaseSNP> getSNPList(){
-		return snpList;
+	    return snpList;
 	}
 	
-	public SeqMutInfo getBLASTSeqMut(String querySeqFile, String refSeqFile,
-			List<SeqQual>seqQualList){
+	public SeqMutInfo getBLASTSeqMut(String querySeqFile, String refSeqFile, List<SeqQual>seqQualList){
 	  
 	    if(querySeqFile==null || refSeqFile==null) return null;
 		  
@@ -204,7 +225,7 @@ public class SeqMut {
 		tmpFiles=new ArrayList<String>();
 		
 		if(doSNPCheck) snpList=new ArrayList<BaseSNP>();
-		
+		boolean isBLASTErr=false;
 		String timeStamp=new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
 		String blastOutFile=tmpDir+"/Mut.BlastOut."+timeStamp+".txt";
 		String blastOutXMLFile=tmpDir+"/Mut.BlastOut."+timeStamp+".xml";
@@ -224,90 +245,100 @@ public class SeqMut {
 		}else{
 			System.out.println("Error for BLAST txt out!!!");
 			//System.exit(-1);
-			return null;
+			//return null;
+			isBLASTErr=true;
 		}
 		
-		blastCMD="blastn -task "+blastTask
-		          +" -word_size="+blastWordSize
-		          +" -max_target_seqs=1"
-		          +" -query "+querySeqFile
-		          +" -subject "+refSeqFile
-		          +" -out "+blastOutXMLFile
-		          +" -outfmt 5";
-		res2=SeqOperation.runBLAST(blastCMD);
-		if(res2==0){
-			System.out.println("Got BLAST XML!");
-		}else{
-			System.out.println("Error for BLAST xml out!!!");
-			//System.exit(-1);
-			return null;
+		if(!isBLASTErr){
+			blastCMD="blastn -task "+blastTask
+			          +" -word_size="+blastWordSize
+			          +" -max_target_seqs=1"
+			          +" -query "+querySeqFile
+			          +" -subject "+refSeqFile
+			          +" -out "+blastOutXMLFile
+			          +" -outfmt 5";
+			res2=SeqOperation.runBLAST(blastCMD);
+			if(res2==0){
+				System.out.println("Got BLAST XML!");
+			}else{
+				System.out.println("Error for BLAST xml out!!!");
+				//System.exit(-1);
+				//return null;
+				isBLASTErr=true;
+			}
 		}
 		
-		List<ArrayList<String>> blastOut=FileOperate.getMatrixFromFile(blastOutFile);
-		totalSeqNum=blastOut.size();		
-		List<BaseMut> baseMutList=getMutFromBLASTXML(blastOutXMLFile);
-		System.out.println("Total sequences: "+totalSeqNum);	
-		System.out.println("Total mutations: "+baseMutList.size());
-		
-		int usedSeqNum;
+		totalSeqNum=0;
+		int usedSeqNum=0;
 		List<BaseMut> filterBaseMutList = new ArrayList<BaseMut>();
-		if(skipAQS){
-		   System.out.println("skip AQS filter");
-		   usedSeqNum=totalSeqNum;
-		}else{		  
-		   System.out.println("AQS filtering.........");
-		   filterBaseMutList=filterBaseMut_AQS(baseMutList,blastOut);
-		   blastOut=null;
-		   usedSeqNum=filteredSeqNum;
-		   System.out.println("Got sequences by AQS filter: "+filteredSeqNum);		   
-		   System.out.println("Got mutations by AQS filter: "+filterBaseMutList.size());
-		}
 		
-		if(skipNQS){
-		   System.out.println("skip NQS filter");
-		}else if(seqQualList!=null && seqQualList.size()>0){
-		   System.out.println("NQS filtering.........");
-		   filterBaseMutList=filterBaseMut_NQS(filterBaseMutList,seqQualList);
-		   System.out.println("Got mutations by NQS filter: "+filterBaseMutList.size());
-		}else{
-		   System.out.println("Warning: No seq quality info, the system skip NQS");
+		if(!isBLASTErr){
+			List<ArrayList<String>> blastOut=FileOperation.getMatrixFromFile(blastOutFile);
+			totalSeqNum=blastOut.size();		
+			List<BaseMut> baseMutList=getMutFromBLASTXML(blastOutXMLFile);
+			System.out.println("Total sequences: "+totalSeqNum);	
+			System.out.println("Total mutations: "+baseMutList.size());			
+
+			if(skipAQS){
+			   System.out.println("skip AQS filter");
+			   usedSeqNum=totalSeqNum;
+			}else{		  
+			   System.out.println("AQS filtering.........");
+			   filterBaseMutList=filterBaseMut_AQS(baseMutList,blastOut);
+			   blastOut=null;
+			   usedSeqNum=filteredSeqNum;
+			   System.out.println("Got sequences by AQS filter: "+filteredSeqNum);		   
+			   System.out.println("Got mutations by AQS filter: "+filterBaseMutList.size());
+			}
+			
+			if(skipNQS){
+			   System.out.println("skip NQS filter");
+			}else if(seqQualList!=null && seqQualList.size()>0){
+			   System.out.println("NQS filtering.........");
+			   filterBaseMutList=filterBaseMut_NQS(filterBaseMutList,seqQualList);
+			   System.out.println("Got mutations by NQS filter: "+filterBaseMutList.size());
+			}else{
+			   System.out.println("Warning: No seq quality info, the system skip NQS");
+			}
+			
+			if(skipIndel) {
+			   System.out.println("skip indel filter");
+			}else{
+			   System.out.println("INDEL filtering.........");
+			   filterBaseMutList=filterBaseMut_Indel(filterBaseMutList);
+			   System.out.println("Got mutations by INDEL filter: "+filterBaseMutList.size());
+			}
+			
+			if(skipLMS) {
+			   System.out.println("skip LMS filter");
+			}else{
+			   System.out.println("LMS filtering.........");
+			   filterBaseMutList=filterBaseMut_LMS(filterBaseMutList);
+			   System.out.println("Got mutations by LMS filter: "+filterBaseMutList.size());
+			}
+			
+			baseMutList=null;
 		}
-		
-		if(skipIndel)
-		   System.out.println("skip indel filter");
-		else{
-		   System.out.println("INDEL filtering.........");
-		   filterBaseMutList=filterBaseMut_Indel(filterBaseMutList);
-		   System.out.println("Got mutations by INDEL filter: "+filterBaseMutList.size());
-		}
-		
-		if(skipLMS)
-		   System.out.println("skip LMS filter");
-		else{
-		   System.out.println("LMS filtering.........");
-		   filterBaseMutList=filterBaseMut_LMS(filterBaseMutList);
-		   System.out.println("Got mutations by LMS filter: "+filterBaseMutList.size());
-		}		
 		
 		mutInfo=getSeqMutInfo(filterBaseMutList,usedSeqNum,refSeqFile);	
 		if(mutInfo!=null){
     	  mutInfo.expName=querySeqFile;
     	  mutInfo.seqName=refSeqFile;
           if(usedSeqNum==0){
-            System.out.println("Warning: There is no any reads to pass filter criteria in "+querySeqFile);
+            System.out.println("Warning: no any reads to pass filter criteria in "+querySeqFile);
           }else if(filterBaseMutList.size()==0){
-            System.out.println("Warning: There is no any mutant base in "+querySeqFile);
+            System.out.println("Warning: no any mutant base in "+querySeqFile);
           }else{
 
-            System.out.println("Average BaseMutFrequency between "
+            System.out.println("Average BMF between "
                   +refSeqStart+"-"+refSeqEnd+" bp"
         		  +": "+mutInfo.avgMutRate + " for ["+querySeqFile+"]");
-            if(doInterestMut){
-            	System.out.println("Average BaseMutFrequency of interesting targets between "
+            if(doTarMut){
+            	System.out.println("Average BMF of target between "
                       +refSeqStart+"-"+refSeqEnd+" bp"
               		  +": "+mutInfo.avgTarMutRate + " for ["+querySeqFile+"]");
             	
-            	System.out.println("Average BaseMutFrequency of others between "
+            	System.out.println("Average BMF of non-target between "
                       +refSeqStart+"-"+refSeqEnd+" bp"
                 	  +": "+mutInfo.avgOtherMutRate + " for ["+querySeqFile+"]");
             }
@@ -316,11 +347,10 @@ public class SeqMut {
           System.out.println("Error: null  ["+refSeqFile+"]");
           return null;
         }
-		filterBaseMutList=null;	
-		baseMutList=null;
+		filterBaseMutList=null;			
 	
 		for(String tmpFile: tmpFiles){
-		    FileOperate.delFile(tmpFile);
+		    FileOperation.delFile(tmpFile);
 		}
 
 	    return mutInfo;
@@ -375,8 +405,7 @@ public class SeqMut {
 		
 	}
 	
-	List<BaseMut> filterBaseMut_AQS(List<BaseMut>baseMutList, 
-			List<ArrayList<String>> blastOut){
+	List<BaseMut> filterBaseMut_AQS(List<BaseMut>baseMutList, List<ArrayList<String>> blastOut){
         
 		List<BaseMut>baseMutFilterList=new ArrayList<BaseMut>();
 		List<String> filteredSeqName=filterBLASTOut(blastOut);
@@ -594,7 +623,7 @@ public class SeqMut {
 		List<BaseMut> baseMutList=new ArrayList<BaseMut>();
 		BaseMut baseMut;	
 		if(res==0){
-		   List<ArrayList<String>> blast2mut=FileOperate.getMatrixFromFile(args[1]); 		
+		   List<ArrayList<String>> blast2mut=FileOperation.getMatrixFromFile(args[1]); 		
 		   for(int i=1;i<blast2mut.size();i++){
 			  baseMut=new BaseMut();
 			  rowSize=blast2mut.get(i).size();
@@ -621,15 +650,16 @@ public class SeqMut {
 			  baseMutList.add(baseMut);
 		   }
 		}else{
-			System.exit(res);
+			//System.exit(res);
+			System.out.println("Error for parsing BLASTXML!!!");
+			return baseMutList;
 		}
 		
 		return baseMutList;
 		
 	}
 	
-	public SeqMutInfo getSeqMutInfo(List<BaseMut> baseMutList, int readNum,
-			String refSeqFastaFile){
+	public SeqMutInfo getSeqMutInfo(List<BaseMut> baseMutList, int readNum, String refSeqFastaFile){
 		
 		if(!SeqOperation.isFASTASeq(refSeqFastaFile)) return null;
 		
@@ -701,7 +731,7 @@ public class SeqMut {
 		}
 		double sumMutRate=0;
 		int n=0;
-		if(skipBaseMutCheck){
+		if(!doBaseMutCheck){
 		  n=(refSeqEnd-refSeqStart+1);
 		  for(int i=0;i<mutInfo.seq.length();i++){			
 			mutInfo.baseMutStat[i].mutRate=(1.0d*mutInfo.baseMutStat[i].mutCount)/mutInfo.readsNum;				
@@ -712,7 +742,9 @@ public class SeqMut {
 		}else{			
 		  snpList=new ArrayList<BaseSNP>();		
 		  for(int i=0;i<mutInfo.seq.length();i++){			
-			 mutInfo.baseMutStat[i].mutRate=(1.0d*mutInfo.baseMutStat[i].mutCount)/mutInfo.readsNum;	
+			 
+			 mutInfo.baseMutStat[i].mutRate=(1.0d*mutInfo.baseMutStat[i].mutCount)/mutInfo.readsNum;
+			 
 			 if(doSNPCheck &&((1.0d*mutInfo.baseMutStat[i].g/mutInfo.readsNum)>=snpRate
 				 || (1.0d*mutInfo.baseMutStat[i].c/mutInfo.readsNum)>=snpRate
 				 || (1.0d*mutInfo.baseMutStat[i].t/mutInfo.readsNum)>=snpRate
@@ -748,7 +780,14 @@ public class SeqMut {
 		mutInfo.baseNum=n;
 		mutInfo.avgMutRate=sumMutRate/n;
 		
-		if(doInterestMut) setTargetMutInfo(mutInfo);
+		if(doTarMut) {
+		   if(doTarRegex){			
+			  tarList=getSeqTarget(tarRegex, mutInfo.seq);
+			  setTargetMutInfo(mutInfo,tarList);			
+		   }else {
+			  setTargetMutInfo(mutInfo);
+		   }
+		}
 		
 		return mutInfo;
 	}
@@ -766,14 +805,13 @@ public class SeqMut {
 		return base;
 	}
 	
-	void setTargetMutInfo(SeqMutInfo mutInfo){
-		
+	void setTargetMutInfo(SeqMutInfo mutInfo){		
 
-		if(interestMut!=null && interestMut.length>0){
+		if(tarMut!=null && tarMut.length>0){
 		   String refBasei;	
 		   double sumTarMutRate=0.0d;
 		   double sumOtherMutRate=0.0d;		 
-		   int targetBaseNum=0;
+		   int targetNum=0;
 		   int otherBaseNum=0;
 		   int tarMutCount=0;
 		   boolean isValidTarBase=false;
@@ -785,49 +823,17 @@ public class SeqMut {
 		   boolean isAUsed=false;
 		   boolean isDelUsed=false;
 		   boolean isNUsed=false;
+		   
 		   for(int i=0;i<mutInfo.seq.length();i++){
 			  isValidBase=false;
 			  isValidTarBase=false;	
 			  tarMutCount=0;
-			  mutInfo.baseMutStat[i].tarMutCount=0;			  
-			  /*
-			  mutInfo.baseMutStat[i].otherMutCount=   
-			             +mutInfo.baseMutStat[i].g
-					     +mutInfo.baseMutStat[i].c
-                         +mutInfo.baseMutStat[i].a
-                         +mutInfo.baseMutStat[i].t
-                         +mutInfo.baseMutStat[i].del;
-			  */
+			  mutInfo.baseMutStat[i].tarMutCount=0;	
 			  if(i>=refSeqStart && i<=refSeqEnd) isValidBase=true;	
 			  refBasei=String.valueOf(mutInfo.seq.charAt(i));
-			  for(int m=0;m<interestMut.length;m++){
-			     if(refBasei.equalsIgnoreCase(interestMut[m][0])){
-			
-			    	if(i>=refSeqStart && i<=refSeqEnd) isValidTarBase=true;			    		 
-			    	 /*
-			    	if(interestMut[m][1].equalsIgnoreCase("G")){			    		   
-					   	 mutInfo.baseMutStat[i].tarMutCount=mutInfo.baseMutStat[i].g;					   
-					   	 break;
-				    }else if(interestMut[m][1].equalsIgnoreCase("C")){			    		   
-						 mutInfo.baseMutStat[i].tarMutCount=mutInfo.baseMutStat[i].c;					   	 
-					     break;
-				    }else if(interestMut[m][1].equalsIgnoreCase("A")){			    		   
-					   	 mutInfo.baseMutStat[i].tarMutCount=mutInfo.baseMutStat[i].a;					
-					   	 break;
-			    	}else if(interestMut[m][1].equalsIgnoreCase("T")){			    		   
-						 mutInfo.baseMutStat[i].tarMutCount=mutInfo.baseMutStat[i].t;					   
-					     break;
-			    	}else if(interestMut[m][1].equalsIgnoreCase("-")){			    		   
-						 mutInfo.baseMutStat[i].tarMutCount=mutInfo.baseMutStat[i].del;					   	
-						 break;
-				    }else if(interestMut[m][1].equalsIgnoreCase("N")){			    		   
-						 mutInfo.baseMutStat[i].tarMutCount=mutInfo.baseMutStat[i].mutCount;
-						 break;
-					}else{			    	  
-			    	    break;
-					}
-					*/
-			    	
+			  for(int m=0;m<tarMut.length;m++){
+			     if(refBasei.equalsIgnoreCase(tarMut[m][0])){			
+			    	if(i>=refSeqStart && i<=refSeqEnd) isValidTarBase=true;					    	
 			 	    isGUsed=false;
 				    isCUsed=false;
 				    isTUsed=false;
@@ -835,7 +841,7 @@ public class SeqMut {
 				    isDelUsed=false;
 				    isNUsed=false;
 				    mutInfo.baseMutStat[i].tarMutCount=0;					
-			    	itemSplited=interestMut[m][1].split("|");
+			    	itemSplited=tarMut[m][1].split("|");
 			    	for(String mut:itemSplited){
 			    	   tarMutCount=0;
 			    	   if(mut.equalsIgnoreCase("G") && !isGUsed){			    		   
@@ -857,8 +863,7 @@ public class SeqMut {
 						  tarMutCount=mutInfo.baseMutStat[i].mutCount;
 						  isNUsed=true;
 					   }			    	  
-			    	   mutInfo.baseMutStat[i].tarMutCount
-			    	       =mutInfo.baseMutStat[i].tarMutCount+tarMutCount;
+			    	   mutInfo.baseMutStat[i].tarMutCount=mutInfo.baseMutStat[i].tarMutCount+tarMutCount;
 			    	}
 			    	break;
 				 }
@@ -872,10 +877,8 @@ public class SeqMut {
 			  mutInfo.baseMutStat[i].otherMutRate
 				     =(1.0d*mutInfo.baseMutStat[i].otherMutCount)/mutInfo.readsNum;
 			
-			  if(!skipBaseMutCheck && doBaseErrCheck){			    
-			    if(mutInfo.baseMutStat[i].mutRate<0 
-			    		|| mutInfo.baseMutStat[i].mutRate>=baseErrRate){
-					
+			  if(doBaseMutCheck && doBaseErrCheck){			    
+			    if(mutInfo.baseMutStat[i].mutRate<0 || mutInfo.baseMutStat[i].mutRate>=baseErrRate){					
 					isValidTarBase=false;
 					isValidBase=false;
 
@@ -890,7 +893,7 @@ public class SeqMut {
 			  
 			  if(isValidTarBase){
 				  sumTarMutRate=sumTarMutRate+mutInfo.baseMutStat[i].tarMutRate;
-				  targetBaseNum++;
+				  targetNum++;
 			  }
 			  if(isValidBase){
 				  sumOtherMutRate=sumOtherMutRate+mutInfo.baseMutStat[i].otherMutRate;
@@ -898,8 +901,8 @@ public class SeqMut {
 			  }			 
 		   }
 		   mutInfo.sumTarMutRate=sumTarMutRate;
-		   mutInfo.tarBaseNum=targetBaseNum;
-		   mutInfo.avgTarMutRate=sumTarMutRate/targetBaseNum;
+		   mutInfo.tarNum=targetNum;
+		   mutInfo.avgTarMutRate=sumTarMutRate/targetNum;
 		   
 		   mutInfo.sumOtherMutRate=sumOtherMutRate;
 		   mutInfo.otherBaseNum=otherBaseNum;
@@ -907,8 +910,154 @@ public class SeqMut {
 	   }
 	}
 	
+	static List<SeqTarget> getSeqTarget(String regex, String seq){		
+        
+		List<SeqTarget> tarList=new ArrayList<SeqTarget>();
+		SeqTarget tar;
+	    Pattern pattern = Pattern.compile(regex);
+	    Matcher matcher = pattern.matcher(seq);
+	    int from = 0;
+	    //int count = 0;
+	    while(matcher.find(from)) {
+	    	
+	    	tar =new SeqTarget();
+	    	tar.start=matcher.start();
+	    	tar.end=matcher.end();
+	    	tar.tarSeq=matcher.group();
+	    	tarList.add(tar);
+	    	tar=null;
+	    	
+	    	from = matcher.start() + 1; 
+	        //count++;
+	    }
+	    
+	    //System.out.println(count);		    
+		//return count;
+	    
+		return tarList;
+	}
+		
+	void setTargetMutInfo(SeqMutInfo mutInfo, List<SeqTarget>tarList){		
+
+		if(tarMut!=null && tarMut.length>0){
+		   String refBasei;	
+		   double sumTarMutRate=0.0d;
+		   double sumOtherMutRate=0.0d;		 
+		   int targetNum=0;
+		   int otherBaseNum=0;
+		   int tarMutCount=0;
+		   boolean isValidTarBase=false;
+		   boolean isValidBase=false;
+		   String[] itemSplited;
+		   boolean isGUsed=false;
+		   boolean isCUsed=false;
+		   boolean isTUsed=false;
+		   boolean isAUsed=false;
+		   boolean isDelUsed=false;
+		   boolean isNUsed=false;
+		   
+		   for(int i=0;i<mutInfo.seq.length();i++){
+			  isValidBase=false;
+			  isValidTarBase=false;	
+			  tarMutCount=0;
+			  mutInfo.baseMutStat[i].tarMutCount=0;	
+			  if(i>=refSeqStart && i<=refSeqEnd) isValidBase=true;				
+			  refBasei=String.valueOf(mutInfo.seq.charAt(i));
+			  for(int m=0;m<tarMut.length;m++){
+			      if(refBasei.equalsIgnoreCase(tarMut[m][0]) && isBaseInTarget(i,tarList)){			
+			    	if(i>=refSeqStart && i<=refSeqEnd) isValidTarBase=true;			    	
+			 	    isGUsed=false;
+				    isCUsed=false;
+				    isTUsed=false;
+				    isAUsed=false;
+				    isDelUsed=false;
+				    isNUsed=false;
+				    mutInfo.baseMutStat[i].tarMutCount=0;					
+			    	itemSplited=tarMut[m][1].split("|");
+			    	for(String mut:itemSplited){
+			    	   tarMutCount=0;
+			    	   if(mut.equalsIgnoreCase("G") && !isGUsed){			    		   
+			    		  tarMutCount=mutInfo.baseMutStat[i].g;
+			    		  isGUsed=true;
+					   }else if(mut.equalsIgnoreCase("C") && !isCUsed){			    		   
+						  tarMutCount=mutInfo.baseMutStat[i].c;
+						  isCUsed=true;
+					   }else if(mut.equalsIgnoreCase("A") && !isAUsed){			    		   
+						  tarMutCount=mutInfo.baseMutStat[i].a;	
+						  isAUsed=true;
+				       }else if(mut.equalsIgnoreCase("T") && !isTUsed){			    		   
+				    	  tarMutCount=mutInfo.baseMutStat[i].t;	
+				    	  isTUsed=true;
+				       }else if(mut.equalsIgnoreCase("-") && !isDelUsed){			    		   
+				    	  tarMutCount=mutInfo.baseMutStat[i].del;
+				    	  isDelUsed=true;
+					   }else if(mut.equalsIgnoreCase("N") && !isNUsed){			    		   
+						  tarMutCount=mutInfo.baseMutStat[i].mutCount;
+						  isNUsed=true;
+					   }			    	  
+			    	   mutInfo.baseMutStat[i].tarMutCount=mutInfo.baseMutStat[i].tarMutCount+tarMutCount;
+			    	}
+			    	break;
+				  }
+			  }
+			
+			  
+			  mutInfo.baseMutStat[i].tarMutRate
+					 =(1.0d*mutInfo.baseMutStat[i].tarMutCount)/mutInfo.readsNum;
+			  
+			  mutInfo.baseMutStat[i].otherMutCount
+			         =mutInfo.baseMutStat[i].mutCount-mutInfo.baseMutStat[i].tarMutCount;
+			  mutInfo.baseMutStat[i].otherMutRate
+				     =(1.0d*mutInfo.baseMutStat[i].otherMutCount)/mutInfo.readsNum;
+			
+			  if(doBaseMutCheck && doBaseErrCheck){			    
+			    if(mutInfo.baseMutStat[i].mutRate<0 || mutInfo.baseMutStat[i].mutRate>=baseErrRate){					
+					isValidTarBase=false;
+					isValidBase=false;
+
+					if(mutInfo.baseMutStat[i].tarMutRate>=baseErrRate)
+					   mutInfo.baseMutStat[i].tarMutRate=-2;
+					if(mutInfo.baseMutStat[i].otherMutRate>=baseErrRate)
+					   mutInfo.baseMutStat[i].otherMutRate=-2;
+					if(mutInfo.baseMutStat[i].mutRate>=baseErrRate)
+					   mutInfo.baseMutStat[i].mutRate=-2;
+			    }
+			  }
+			  
+			  if(isValidTarBase){
+				  sumTarMutRate=sumTarMutRate+mutInfo.baseMutStat[i].tarMutRate;
+				  targetNum++;
+			  }
+			  if(isValidBase){
+				  sumOtherMutRate=sumOtherMutRate+mutInfo.baseMutStat[i].otherMutRate;
+				  otherBaseNum++;
+			  }			 
+		   }
+		   mutInfo.sumTarMutRate=sumTarMutRate;
+		   mutInfo.tarNum=targetNum;
+		   mutInfo.avgTarMutRate=sumTarMutRate/targetNum;
+		   
+		   mutInfo.sumOtherMutRate=sumOtherMutRate;
+		   mutInfo.otherBaseNum=otherBaseNum;
+		   mutInfo.avgOtherMutRate=sumOtherMutRate/otherBaseNum;
+	   }
+	}
+
+	boolean isBaseInTarget(int basePos, List<SeqTarget>tarList) {
+		
+		boolean isTar=false;
+		
+		for(SeqTarget tar: tarList ) {
+			if(basePos>=tar.start && basePos<=tar.end) {				
+				isTar=true;
+				break;
+			} 
+		}
+		
+		return isTar;
+	}
 	
-	public void saveMutInfo(SeqMutInfo mutInfo, String outDir, String outTag){
+	public void saveBaseMut(SeqMutInfo mutInfo, String outDir, String outTag){
 		
 		if(mutInfo==null) return;
 		
@@ -919,10 +1068,10 @@ public class SeqMut {
 		perRow.add("Base");
 		perRow.add("Rate_Mut:All");
 		perRow.add("Count_Mut:All");
-		if(doInterestMut){
+		if(doTarMut){
 			String mutTag="";
-			for(int m=0;m<interestMut.length;m++){
-			  mutTag=mutTag+interestMut[m][0]+">"+interestMut[m][1]+"|";
+			for(int m=0;m<tarMut.length;m++){
+			  mutTag=mutTag+tarMut[m][0]+">"+tarMut[m][1]+"|";
 			}
 			mutTag=mutTag.substring(0,mutTag.lastIndexOf("|"));
 			perRow.add("Rate_Mut:"+mutTag);
@@ -940,12 +1089,15 @@ public class SeqMut {
 		for(int i=0;i<mutInfo.seq.length();i++){
 			perRow=new ArrayList<String>();
 			perRow.add(String.valueOf(mutInfo.seq.charAt(i)));
+			
 			if(mutInfo.baseMutStat[i].mutRate>=0)				
 			  perRow.add(Double.toString(mutInfo.baseMutStat[i].mutRate));
 			else
 			  perRow.add("NA");
+			
 			perRow.add(Integer.toString(mutInfo.baseMutStat[i].mutCount));
-			if(doInterestMut){
+			
+			if(doTarMut){
 			  if(mutInfo.baseMutStat[i].tarMutRate>=0)
 				perRow.add(Double.toString(mutInfo.baseMutStat[i].tarMutRate));	
 			  else
@@ -976,7 +1128,7 @@ public class SeqMut {
 		else
 		  outFile="BaseMutInfo-"+outTag+".txt";
 		
-		FileOperate.saveMatrixList(out, outFile);
+		FileOperation.saveMatrixList(out, outFile);
 		out=null;
 	}
 	
@@ -1018,11 +1170,11 @@ public class SeqMut {
 		else
 		  outFile="BaseMutFrequency_"+outTag+".txt";
 		
-		FileOperate.saveMatrixList(out, outFile);
+		FileOperation.saveMatrixList(out, outFile);
 		out=null;
 		
 		//Save interesting target mut rate for each single base as profile
-		if(doInterestMut){
+		if(doTarMut){
 			//saver intersting target base mut frequency
 			out=new ArrayList<ArrayList<String>>();
 			perRow=new ArrayList<String>();
@@ -1054,7 +1206,7 @@ public class SeqMut {
 			else
 			  outFile="TargetBaseMutFrequency_"+outTag+".txt";
 			
-			FileOperate.saveMatrixList(out, outFile);
+			FileOperation.saveMatrixList(out, outFile);
 			out=null;
 			
 			// save other base mut frequency
@@ -1088,7 +1240,7 @@ public class SeqMut {
 			else
 			  outFile="OtherBaseMutFrequency_"+outTag+".txt";
 			
-			FileOperate.saveMatrixList(out, outFile);
+			FileOperation.saveMatrixList(out, outFile);
 			out=null;
 		}
 	}
@@ -1119,10 +1271,10 @@ public class SeqMut {
 		perRow=null;
 		
 		//save Average Base Mut
-		if(doInterestMut){
+		if(doTarMut){
 		  String mutTag="";
-		  for(int m=0;m<interestMut.length;m++){
-			  mutTag=mutTag+interestMut[m][0]+">"+interestMut[m][1]+"|";
+		  for(int m=0;m<tarMut.length;m++){
+			  mutTag=mutTag+tarMut[m][0]+">"+tarMut[m][1]+"|";
 		  }
 		  mutTag=mutTag.substring(0,mutTag.lastIndexOf("|"));
 		  perRow=new ArrayList<String>();
@@ -1158,12 +1310,11 @@ public class SeqMut {
 		else
 		  outFile="AverageBaseMutFrequency-"+outTag+".txt";
 		
-		FileOperate.saveMatrixList(out, outFile);
+		FileOperation.saveMatrixList(out, outFile);
 		out=null;
 	}
     
-    public void saveAvgBaseMutRate(List<SeqMutInfo> mutList,List<SeqMutInfo> mutList2,
-    		String outDir, String outTag){
+    public void saveAvgBaseMutRate(List<SeqMutInfo> mutList,List<SeqMutInfo> mutList2, String outDir, String outTag){
 		
     	if(mutList==null || mutList.size()<1) return;
     	if(mutList2==null || mutList2.size()<1) return;
@@ -1195,10 +1346,10 @@ public class SeqMut {
 		perRow=null;
 		
 		//save Average Base Mut
-		if(doInterestMut){
+		if(doTarMut){
 		  String mutTag="";
-		  for(int m=0;m<interestMut.length;m++){
-			  mutTag=mutTag+interestMut[m][0]+">"+interestMut[m][1]+"|";
+		  for(int m=0;m<tarMut.length;m++){
+			  mutTag=mutTag+tarMut[m][0]+">"+tarMut[m][1]+"|";
 		  }
 		  mutTag=mutTag.substring(0,mutTag.lastIndexOf("|"));
 		  perRow=new ArrayList<String>();
@@ -1237,10 +1388,10 @@ public class SeqMut {
 		perRow=null;
 				
 		//save Average Base Mut
-		if(doInterestMut){
+		if(doTarMut){
 		   String mutTag="";
-	 	   for(int m=0;m<interestMut.length;m++){
-			  mutTag=mutTag+interestMut[m][0]+">"+interestMut[m][1]+"|";
+	 	   for(int m=0;m<tarMut.length;m++){
+			  mutTag=mutTag+tarMut[m][0]+">"+tarMut[m][1]+"|";
 		   }
 	 	   mutTag=mutTag.substring(0,mutTag.lastIndexOf("|"));
 		   perRow=new ArrayList<String>();
@@ -1271,10 +1422,10 @@ public class SeqMut {
 		//========= for forward-reverse=========
 		//save Average Base Mut
 		double avgMutRate=0.0d;
-		if(doInterestMut){
+		if(doTarMut){
 			  String mutTag="";
-			  for(int m=0;m<interestMut.length;m++){
-				  mutTag=mutTag+interestMut[m][0]+">"+interestMut[m][1]+"|";
+			  for(int m=0;m<tarMut.length;m++){
+				  mutTag=mutTag+tarMut[m][0]+">"+tarMut[m][1]+"|";
 			  }
 			  mutTag=mutTag.substring(0,mutTag.lastIndexOf("|"));
 			  perRow=new ArrayList<String>();
@@ -1282,7 +1433,7 @@ public class SeqMut {
 			  avgMutRate=0.0d;
 		      for(int i=0;i<mutList.size();i++){
 		    	 avgMutRate=mutList.get(i).sumTarMutRate+mutList2.get(i).sumTarMutRate;
-		    	 avgMutRate=avgMutRate/(mutList.get(i).tarBaseNum+mutList2.get(i).tarBaseNum);
+		    	 avgMutRate=avgMutRate/(mutList.get(i).tarNum+mutList2.get(i).tarNum);
 		    	 perRow.add(Double.toString(avgMutRate));
 			  }
 		      out.add(perRow);
@@ -1319,7 +1470,7 @@ public class SeqMut {
 		else
 		  outFile="AverageBaseMutFrequency-"+outTag+".txt";
 		
-		FileOperate.saveMatrixList(out, outFile);
+		FileOperation.saveMatrixList(out, outFile);
 		out=null;
 	}
     
@@ -1363,7 +1514,7 @@ public class SeqMut {
 		else
 		  outFile="SeqSNPs-"+outTag+".txt";
 		
-		FileOperate.saveMatrixList(out, outFile);
+		FileOperation.saveMatrixList(out, outFile);
 		out=null;
 
 	}

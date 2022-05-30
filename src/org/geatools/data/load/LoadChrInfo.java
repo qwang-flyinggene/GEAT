@@ -34,7 +34,7 @@ package org.geatools.data.load;
 
 import org.geatools.data.structure.ChrInfo;
 import org.geatools.data.structure.ChrSite;
-import org.geatools.operation.FileOperate;
+import org.geatools.operation.FileOperation;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -75,7 +75,7 @@ public class LoadChrInfo {
 		    
 		  List <ChrInfo> chrInfoList=new ArrayList <ChrInfo> ();
 		  ChrInfo chrInfo;
-		  List <ArrayList <String>> chromInfo0=FileOperate.getMatrixFromFile(chrInfoFile);
+		  List <ArrayList <String>> chromInfo0=FileOperation.getMatrixFromFile(chrInfoFile);
 		  List<String> chrList=new ArrayList<String>(); 
 		  for(int i=0;i<chromInfo0.size(); i++){
 			 chrInfo=new ChrInfo ();
@@ -99,7 +99,7 @@ public class LoadChrInfo {
 		   
 		 ArrayList <ChrSite> chrBandsList=new ArrayList<ChrSite>();
 		 ChrSite chrBand=null;
-		 List<ArrayList<String>> bandList=FileOperate.getMatrixFromFile(cytobandFile);
+		 List<ArrayList<String>> bandList=FileOperation.getMatrixFromFile(cytobandFile);
 	         
 	     String bandChr="";
 	     String bandName="";

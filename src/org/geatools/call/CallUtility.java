@@ -33,49 +33,45 @@
 package org.geatools.call;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
 import org.geatools.GEAT;
+import org.geatools.NumberCheck;
 import org.geatools.data.structure.SeqInfo;
-import org.geatools.operation.FileOperate;
-import org.geatools.seqprocess.SeqOperation;
+import org.geatools.operation.FileOperation;
+import org.geatools.operation.SeqOperation;
+import org.geatools.seqprocess.SeqFilter;
 import org.geatools.seqprocess.SeqQCFilter;
 
 public class CallUtility extends GEAT{
 	
-	public static void setHomeDir(String dir){
-		homeDir=dir;
-	}
-	public static void setWorkingDir(String dir){
-		workingDir=dir;
-	}
-	public static void setTmpDir(String dir){
-		tmpDir=dir;
-	}
-	public static void delTmpDir(String dir){
-		FileOperate.delFolder(dir);
-	}
+	static boolean doSplitSeq=false;	
+	static int splitStep=1000000;
+	static List<String> splitedSeqFiles = null;
+	static List<String> splitedSeqFiles2 = null;
 	
 	public static void doWork(String[] args){		
 		 
-		 if(homeDir==null) homeDir=GEAT.getClassPath();			   
-		 if(tmpDir==null){
-		   String timeStamp=new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
-		   tmpDir=homeDir+"/tmp/"+timeStamp;
-		 } 
-		 if(workingDir==null) workingDir=homeDir+"/working";
-		 File dir=new File(tmpDir);
-		 if(!dir.exists()) FileOperate.newFolder(tmpDir);
-		 dir=null;
+		 if(homeDir==null) homeDir=GEAT.getHomeDir();			 
+		 if(fileSeparator==null) fileSeparator = GEAT.getfileSeparator();		 
+		 if(workingDir==null) workingDir=GEAT.getWorkingDir();	
+		 File dir=null;
 		 dir=new File(workingDir);
-		 if(!dir.exists()) FileOperate.newFolder(workingDir);
+		 if(!dir.exists()) FileOperation.newFolder(workingDir);
+		 
+		 if(tmpDir==null) tmpDir=GEAT.getTmpDir();			
+		 dir=new File(tmpDir);
+		 if(!dir.exists()) FileOperation.newFolder(tmpDir);
 		 dir=null;
+		 
+		 String seqNameFile=null;
+		 String seqNameCol=null;
+		 int seqNameColIdx=0;
 			
 		 Map<String, List<String>> params=getCommandLineParams(args);
+		 
 		 if(params.get("fastq")!=null){
 			isFastqOK=false;
 			if(params.get("fastq").size()>0){
@@ -115,6 +111,48 @@ public class CallUtility extends GEAT{
 			   return;
 		     }
 		 }
+		 
+		 
+		 if(params.get("fastq1")!=null){
+			isFastqOK=false;
+			if(params.get("fastq1").size()>0){
+			   fastq=params.get("fastq1").get(0).trim();
+			   if(fastq!=null){
+			  	 if(SeqOperation.isFASTQSeq(fastq)){
+			   	   isFastqOK=true;
+			   	   fastqList=new ArrayList<String>();
+			   	   fastqList.add(fastq);
+			   	   seqType=SeqOperation.SEQTYPE_SINGLEEND;
+			   	 }else{
+			       System.err.println("The -fastq1 file doesn't exist or isn't a fastq file:(");
+			       return;
+			     }		    	
+			   }
+			}else{
+			   System.err.println("You didn't provide fastq file :(");
+			   return;
+			}
+		 }else if(params.get("fasta1")!=null){
+			isFastaOK=false;
+			if(params.get("fasta1").size()>0){
+			  fasta=params.get("fasta1").get(0).trim();
+			  if(fasta!=null){
+				 if(SeqOperation.isFASTASeq(fasta)){
+				   isFastaOK=true;
+				   fastaList=new ArrayList<String>();
+				   fastaList.add(fasta);
+				   seqType=SeqOperation.SEQTYPE_SINGLEEND;
+				 }else{
+				   System.err.println("The -fasta1 file doesn't exist or isn't a fastq file:(");
+				   return;
+				 }		    	
+			   }
+		     }else{
+			   System.err.println("You didn't provide fasta file :(");
+			   return;
+		     }
+		 }			   
+
 			   
 		 if(params.get("fastq2")!=null){
 			isFastq2OK=false;
@@ -136,7 +174,7 @@ public class CallUtility extends GEAT{
 			   return;
 			}
 		 }else if(params.get("fasta2")!=null){
-			isFastaOK=false;
+			isFasta2OK=false;
 			if(params.get("fasta2").size()>0){
 			   fasta2=params.get("fasta2").get(0).trim();
 			   if(fasta2!=null){
@@ -160,7 +198,7 @@ public class CallUtility extends GEAT{
 			isFastqOK=false;
 			if(params.get("fastqList").size()>0){
 			   String fastqFiles=params.get("fastqList").get(0).trim();
-		       fastqList=FileOperate.getRowListFromFile(fastqFiles);
+		       fastqList=FileOperation.getRowsOfFile(fastqFiles);
 		       if(SeqOperation.isFASTQSeq(fastqList)){					
 				  isFastqOK=true;
 			  	  seqType=SeqOperation.SEQTYPE_SINGLEEND;				
@@ -178,7 +216,7 @@ public class CallUtility extends GEAT{
 			isFastaOK=false;
 			if(params.get("fastaList").size()>0){
 				String fastqFiles=params.get("fastaList").get(0).trim();
-				fastaList=FileOperate.getRowListFromFile(fastqFiles);
+				fastaList=FileOperation.getRowsOfFile(fastqFiles);
 				if(SeqOperation.isFASTASeq(fastaList)){					
 				   isFastaOK=true;
 				   seqType=SeqOperation.SEQTYPE_SINGLEEND;				
@@ -193,12 +231,52 @@ public class CallUtility extends GEAT{
 				return;
 			}
 		 }
+		 
+		 
+		 if(params.get("fastqList1")!=null){
+			isFastqOK=false;
+			if(params.get("fastqList1").size()>0){
+			   String fastqFiles=params.get("fastqList1").get(0).trim();
+		       fastqList=FileOperation.getRowsOfFile(fastqFiles);
+		       if(SeqOperation.isFASTQSeq(fastqList)){					
+				  isFastqOK=true;
+			  	  seqType=SeqOperation.SEQTYPE_SINGLEEND;				
+			   }else{	
+				  System.err.println("Error: '-fastqList1' file doesn't exist or doesn't contain a fastq file.");
+				  fastqList=new ArrayList<String>();					
+			  	  return;
+			   }
+		  	   fastqFiles=null;
+			}else{
+			   System.err.println("Illegal '-fastqList1' parameter usage :(");			
+			   return;
+			}
+		 }else if(params.get("fastaList1")!=null){
+			isFastaOK=false;
+			if(params.get("fastaList1").size()>0){
+				String fastqFiles=params.get("fastaList1").get(0).trim();
+				fastaList=FileOperation.getRowsOfFile(fastqFiles);
+				if(SeqOperation.isFASTASeq(fastaList)){					
+				   isFastaOK=true;
+				   seqType=SeqOperation.SEQTYPE_SINGLEEND;				
+				}else{	
+				   System.err.println("Error: '-fastaList1' file doesn't exist or doesn't contain a fastq file.");
+				   fastaList=new ArrayList<String>();					
+				   return;
+				}
+				fastqFiles=null;
+			}else{
+				System.err.println("Illegal '-fastaList1' parameter usage :(");			
+				return;
+			}
+		 }
+
 			   
 		 if(params.get("fastqList2")!=null){
 			isFastq2OK=false;
 			if(params.get("fastqList2").size()>0){
 			  String fastqFiles=params.get("fastqList2").get(0).trim();					
-			  fastqList2=FileOperate.getRowListFromFile(fastqFiles);
+			  fastqList2=FileOperation.getRowsOfFile(fastqFiles);
 		  	  if(SeqOperation.isFASTQSeq(fastqList2)){
 				 isFastq2OK=true;
 				 seqType=SeqOperation.SEQTYPE_PAIREND;
@@ -216,7 +294,7 @@ public class CallUtility extends GEAT{
 			isFasta2OK=false;
 			if(params.get("fastaList2").size()>0){
 			    String fastqFiles=params.get("fastaList2").get(0).trim();					
-			    fastaList2=FileOperate.getRowListFromFile(fastqFiles);
+			    fastaList2=FileOperation.getRowsOfFile(fastqFiles);
 				if(SeqOperation.isFASTASeq(fastaList2)){
 				   isFasta2OK=true;
 				   seqType=SeqOperation.SEQTYPE_PAIREND;
@@ -231,49 +309,60 @@ public class CallUtility extends GEAT{
 				return;
 		     }
 		 }
+		 
+		 List<String> inSeqFiles = null;	
+		 ////List<String> inSeqFiles2 = null;	
+		 if(isFastaOK){
+		    inSeqFiles=fastaList;
+			////if(isFasta2OK) inSeqFiles2=fastaList2;
+		 }else if(isFastqOK){
+		    inSeqFiles=fastqList;
+			////if(isFastq2OK) inSeqFiles2=fastqList2;
+		 }
+
 		   
-		   //####### set output #######
+		 //####### set output #######
 		 boolean  doOutput=false;
 		 if(params.get("outName")!=null){				
-			   if(params.get("outName").size()>0){
-				 outName=params.get("outName").get(0).trim();					
-			   }else{
-				 System.err.println("Illegal '-outName' parameter usage :(");
-				 return;
-			   }
+			if(params.get("outName").size()>0){
+			   outName=params.get("outName").get(0).trim();					
+			}else{
+			   System.err.println("Illegal '-outName' parameter usage :(");
+			   return;
+		    }
 		 }
 			
 		 if(params.get("outTag")!=null){		  	
-			   if(params.get("outTag").size()>0){
-				 outTag=params.get("outTag").get(0).trim();						 
-			   }else{
-				 System.err.println("Illegal '-outTag' parameter usage :(");
-				 return;
-			   }
+			if(params.get("outTag").size()>0){
+			   outTag=params.get("outTag").get(0).trim();						 
+			}else{
+			   System.err.println("Illegal '-outTag' parameter usage :(");
+			   return;
+		    }
 		 }
 			
 		 if(params.get("outDir")!=null){			
-			   if(params.get("outDir").size()>0){
-				 outDir=params.get("outDir").get(0).trim();
-				 File f=new File(outDir);
-			     if (f.exists()){
-				   doOutput=true;
-				   f=null;
-				 }else if (outDir!=null){
-				   FileOperate.newFolder(outDir);
-				   doOutput=true;
-				 }			  
-			   }else{
-				 System.err.println("Illegal '-outDir' parameter usage :(");		
-				 return;
-				}
+			if(params.get("outDir").size()>0){
+			   outDir=params.get("outDir").get(0).trim();
+			   File f=new File(outDir);
+			   if(f.exists()){
+				  doOutput=true;
+				  f=null;
+			   }else if (outDir!=null){
+				  FileOperation.newFolder(outDir);
+				  doOutput=true;
+			   }			  
+			}else{
+			   System.err.println("Illegal '-outDir' parameter usage :(");		
+			   return;
+			}
 		 }		   
 		 if(!doOutput){			   
-				 outDir=homeDir+"/working";
-				 dir=new File(outDir);
-				 if(!dir.exists()) FileOperate.newFolder(outDir);	
-		         dir=null;
-				 doOutput=true;   			
+			outDir=homeDir+"/working";
+			dir=new File(outDir);
+			if(!dir.exists()) FileOperation.newFolder(outDir);	
+		    dir=null;
+			doOutput=true;   			
 		 }
 		   
 		   //####### count seq from given  fasta  
@@ -316,18 +405,18 @@ public class CallUtility extends GEAT{
 		 }
 		   
 		 //################Seq QC filter####################
-		 if(params.get("filter_seqQC")!=null){		
+		 if(params.get("seqQCFilter")!=null){		
 			   doSeqQCFilter=true;
 			   String subParams;
 			   String [] itemSplited;
-			   if(params.get("filter_seqQC").size()>0){
-				 subParams=params.get("filter_seqQC").get(0).trim();
+			   if(params.get("seqQCFilter").size()>0){
+				 subParams=params.get("seqQCFilter").get(0).trim();
 				 if(subParams!=null && subParams.equalsIgnoreCase("skip"))			    		  
 				    doSeqQCFilter=false;
 			     else{	
 				    List<String> seqQCOptList=new ArrayList<String>();
-				    for(int i=0;i<params.get("filter_seqQC").size();i++){				
-					  subParams=params.get("filter_seqQC").get(i).trim();
+				    for(int i=0;i<params.get("seqQCFilter").size();i++){				
+					  subParams=params.get("seqQCFilter").get(i).trim();
 					  itemSplited=subParams.split("=");
 					  if(itemSplited.length>1){
 						if(itemSplited[0].trim().equalsIgnoreCase("min_qual_mean")){
@@ -352,13 +441,13 @@ public class CallUtility extends GEAT{
 						 seqQCOpts[k]=seqQCOptList.get(k);
 					  }
 				    }else{
-					  System.out.println("Warning: Illegal '-filter_seqQC' parameter");
-					  System.out.println("Warning: The system uses default '-filter_seqQC' parameter.");
+					  System.out.println("Warning: Illegal '-seqQCFilter' parameter");
+					  System.out.println("Warning: The system uses default '-seqQCFilter' parameter.");
 					  doSeqQCFilter=true;
 				    }
 			      }
 			   }else{
-				  System.out.println("Warning: empty '-filter_seqQC' parameter,the system uses default '-filter_seqQC' parameter.");
+				  System.out.println("Warning: empty '-seqQCFilter' parameter, just uses the default.");
 				  doSeqQCFilter=true;
 			   }				
 		 } 
@@ -396,84 +485,73 @@ public class CallUtility extends GEAT{
 
 		     
 		 //####### split seq from given  fasta or fastq file########
-		 doSplitSeq=false;
-		 String splitedSeqOut=null;
-		 if(params.get("splitSeq")!=null){
-			 doSplitSeq=true;				
-			 String subParams;
-			 String [] itemSplited;
-			 if(params.get("splitSeq").size()>0){
-			   subParams=params.get("splitSeq").get(0).trim();
-			   if(subParams!=null && subParams.equalsIgnoreCase("skip")) doSplitSeq=false;						 
-			   else{
-				  for(int i=0;i<params.get("splitSeq").size();i++){				
-					 subParams=params.get("splitSeq").get(i).trim();
-					 itemSplited=subParams.split("=");
-					 if(itemSplited.length>1){
-						if(itemSplited[0].equalsIgnoreCase("step")){
-						   if(isInteger(itemSplited[1])){ 
-							 splitStep=Integer.parseInt(itemSplited[1]); 
-						   }else{
-							 System.out.println("Warning: '-splitSeq step' parameter is illeagl.");
-							 System.out.println("Warning: the system will use default '-splitSeq step' parameters.");
-							 doSplitSeq=true;
-						   }
-						}else if(itemSplited[0].equalsIgnoreCase("out")){
-						   splitedSeqOut=itemSplited[1];
-						}
-					 }
+		 //String splitedSeqOut=null;
+		 if(params.get("split")!=null){
+			doSplitSeq=true;				
+			String str;			
+			if(params.get("split").size()>0){
+			   str=params.get("split").get(0).trim();
+			   if(str.equalsIgnoreCase("no") || str.equalsIgnoreCase("n") 
+					   || str.equalsIgnoreCase("false") || str.equalsIgnoreCase("f")) {
+				  doSplitSeq=false;						 
+			   }else{
+				  if(NumberCheck.isPositiveInteger(str)){ 
+					splitStep=Integer.parseInt(str); 
+				  }else{
+					System.out.println("Warning: '-split' value you set is illeagl. The default '-split "+splitStep +"' is forcefully used!");
+					doSplitSeq=true;
 				  }
 			   }
-			 }else{
-			   System.out.println("Warning: the system will use default '-splitSeq' parameters.");
+			}else{
+			   System.out.println("Warning: You didn't set '-split' value. The default '-split "+splitStep +"' is forcefully used!");
 			   doSplitSeq=true;
-			 }
+		    }
 		 }
 		   
 		 //=======================start to split seq===========================
 		 if(doSplitSeq &&(isFastqOK || isFastaOK)){
-				splitedSeqFiles=null;
-				String inSeqFile="";
-				//Check seq format, and then split seq into multiple subfiles................
-				System.out.println(".........Spliting forward seq..........");
-				if(isFastqOK){
-					inSeqFile=fastq;
-				}else if(isFastaOK){	
-					inSeqFile=fasta;
-		    	}				
-				//System.out.println("Total Seq Num: "+SeqOperation.getSeqNum(inSeqFile));
-	      	    splitedSeqFiles=SeqOperation.splitSeqFile(inSeqFile,splitStep,
-	      	    		splitedSeqOut);
-		 				
-				if(splitedSeqFiles==null || splitedSeqFiles.size()==0){
-					System.err.println("Sorry, not working for sequences split!");
-				    return;
-				}
+			splitedSeqFiles=null;
+			String inSeqFile="";
+			//Check seq format, and then split seq into multiple subfiles................
+			System.out.println("###### Spliting forward seq..........");
+			if(isFastqOK){
+			  inSeqFile=fastq;
+			}else if(isFastaOK){	
+			  inSeqFile=fasta;
+		    }				
+		
+			if(outDir==null) outDir=inSeqFile.substring(0,inSeqFile.lastIndexOf("/"));
+			String splitedSeqOut=outDir+"/split_forward";
+			FileOperation.newFolder(splitedSeqOut);
+	      	splitedSeqFiles=SeqOperation.splitSeqFile(inSeqFile,splitStep,splitedSeqOut);		 				
+			if(splitedSeqFiles==null || splitedSeqFiles.size()==0){
+			   System.err.println("Sorry, fail to split forward sequences!");
+			   return;
+			}
 				
-				if(seqType.equalsIgnoreCase(SeqOperation.SEQTYPE_PAIREND)){				
-					splitedSeqFiles2=null;				
-					String inSeqFile2="";
-					//Check seq format, and then split seq into multiple subfiles................
-					System.out.println(".........Spliting pair-end reverse seq.........");
-				    if(isFastq2OK && fastq2!=null){
-					  inSeqFile2=fastq2;
-					}else if(isFasta2OK && fasta2!=null){	
-			    	  inSeqFile2=fasta2;
-			    	}					
-					//System.out.println("Total Seq Num(Pair-end reverse): "
-			    	//                    +SeqOperation.getSeqNum(inSeqFile2)
-			    	//                  );
-			        splitedSeqFiles2=SeqOperation.splitSeqFile(inSeqFile2,splitStep,
-			        		splitedSeqOut);			
-			    	
-			    	if(splitedSeqFiles==null || splitedSeqFiles.size()==0){
-					   System.err.println("Sorry, not working for sequences split!");
-				       return;
-				    }
-				}				
+			if(seqType.equalsIgnoreCase(SeqOperation.SEQTYPE_PAIREND)){				
+				splitedSeqFiles2=null;				
+				String inSeqFile2="";
+				//Check seq format, and then split seq into multiple subfiles................
+				System.out.println("###### Spliting pair-end reverse seq.........");
+				if(isFastq2OK && fastq2!=null){
+				  inSeqFile2=fastq2;
+				}else if(isFasta2OK && fasta2!=null){	
+			      inSeqFile2=fasta2;
+			    }		
+				    
+				if(outDir==null) outDir=inSeqFile2.substring(0,inSeqFile2.lastIndexOf("/"));
+				splitedSeqOut=outDir+"/split_reverse";
+				FileOperation.newFolder(splitedSeqOut);
+			    splitedSeqFiles2=SeqOperation.splitSeqFile(inSeqFile2,splitStep,splitedSeqOut);				    	
+			    if(splitedSeqFiles==null || splitedSeqFiles.size()==0){
+			       System.err.println("Sorry, fail to split reverse sequences!");
+				   return;
+				}
+			}				
 		 }			   
 		   
-		   //####### extract seq by given seq name in file(s) ########
+		 //####### extract seq by given seq name in file(s) ########
 		 if(params.get("extractSeq")!=null){
 			doSeqExtraction=false;
 			String seqFile = null;	
@@ -487,14 +565,18 @@ public class CallUtility extends GEAT{
 		    }
 		    System.out.println("Total seq num: "+SeqOperation.getSeqNum(seqFile));
 			if(outDir==null) outDir=seqFile.substring(0,seqFile.lastIndexOf("/"));
-		    String outSeqFile=outDir+"/"+seqFile.substring(
+			
+		    String outSeqFile;
+		    if(outName==null) outName=seqFile.substring(				    
 		    		   seqFile.lastIndexOf("/")+1,seqFile.lastIndexOf(".")
-		    		 )+".extracted."+format;
-		     
+		    		 )+".extracted."+format;		    	
+		    
+		    outSeqFile=outDir+"/"+outName;
+		    
 			if(params.get("seqName") !=null && params.get("seqName").size()>1 
 					 && (params.get("seqName").size() % 2 == 0)){
 			   
-			   System.out.println("================Extracting sub sequences according your -seqName parameter===================");
+			   System.out.println("================Extracting sub sequences from -seqName parameter===================");
 			   List<SeqInfo> seqObjList = new ArrayList<SeqInfo>();
 			   int k=0;
 			   int seqNum0=0;		
@@ -502,22 +584,20 @@ public class CallUtility extends GEAT{
 				 k++;
 				 seqNameFile=params.get("seqName").get(i).trim();
 				 seqNameCol=params.get("seqName").get(i+1).trim();
-			     if(seqNameFile!=null && isInteger(seqNameCol)){
+			     if(seqNameFile!=null && NumberCheck.isPositiveInteger(seqNameCol)){
 			    	doSeqExtraction=false;
 			    	File f=new File(seqNameFile);
 			    	if(f.exists()) doSeqExtraction=true;
 			    	f=null;
-			    	if(Integer.parseInt(seqNameCol)<=1) 
+			    	if(Integer.parseInt(seqNameCol)<=1) { 
 			    	  seqNameColIdx=0;
-			    	else
+			    	}else {
 			    	  seqNameColIdx=Integer.parseInt(seqNameCol)-1;
-
+			    	}
 			    	System.out.println("Extracting for No."+k+" ......");
 			    	if(doSeqExtraction){
-			    	  SeqOperation.extractSubSeq(seqFile,seqNameFile,0,outSeqFile);
-			    	  seqObjList=SeqOperation.combineSeqList(
-			    		 seqObjList, SeqOperation.getSeqObj(outSeqFile)
-			    	  );
+			    	  SeqOperation.extractSubSeq(seqFile,seqNameFile,seqNameColIdx,outSeqFile);
+			    	  seqObjList=SeqOperation.combineSeqList(seqObjList, SeqOperation.getSeqObj(outSeqFile));
 			    	  System.out.println("Extracted seq: "+(seqObjList.size()-seqNum0));
 			    	  System.out.println("+");
 			    	  seqNum0=seqObjList.size();
@@ -529,7 +609,7 @@ public class CallUtility extends GEAT{
 				 }
 			   }//for
 			   if(seqObjList.size()>0 && k>1){
-				 SeqOperation.saveSeqList(seqObjList, outSeqFile);			  
+				 SeqOperation.saveSeqObj(seqObjList, outSeqFile);			  
 			     System.out.println("Totally extracted seq: "+seqObjList.size());
 			     System.out.println("Be Combined and saved in ["+outSeqFile+"]");
 			     seqObjList=null;
@@ -538,9 +618,46 @@ public class CallUtility extends GEAT{
 				 return;
 			   }
 			}else{
-				System.out.println("Warning: '-seqName' parameter is illeagl. We skiped it!!!");
+			   System.out.println("Warning: '-seqName' parameter is illeagl. We skiped it!!!");
 			}
 		 }
+		 
+		 //####### extract seq name from given  fasta or fastq file########
+		 if(params.get("extractSeqName")!=null){			 
+			 System.out.println("================Extracting sequence name by parameter -extractSeqName===================");
+			 boolean isOK=false;				
+			 if(inSeqFiles!=null){				    		    	
+			    String outFile;			    	  
+				List<String> seqNameFiles = new ArrayList<String>();	
+			    for(String seqFile:inSeqFiles){
+			    	if(outDir==null) outDir=seqFile.substring(0,seqFile.lastIndexOf("/"));
+					outFile=outDir+"/"+seqFile.substring(
+					    		   seqFile.lastIndexOf("/")+1,seqFile.lastIndexOf(".")
+					    		 )+".seqName";
+			    		    		
+			    	isOK=SeqOperation.extratSeqName(seqFile,outFile);
+			    	if(isOK){
+			    	   seqNameFiles.add(outFile);
+			    	   System.out.println("Successfully extracted sequences name from ["+seqFile+"]");
+			    	}else{
+			    	   System.out.println("Error: failed to extract sequences name from ["+seqFile+"]");
+			    	}
+			    }
+			    	  
+			    if(outName!=null){
+			    	String outCombined=outDir+"/"+outName;
+					FileOperation.combineRowsOfFiles(seqNameFiles,outCombined);
+					seqNameFiles=null;
+					System.out.println("Combined sequences names and saved in ["+outCombined+"]");
+					outCombined=null;
+				}			  				    		    	
+			    
+			 }else {			    
+		    	  System.out.println("Error: illegal parameter -extractSeqName");
+		     }
+			
+		 }// -extractSeqName 
+
 		   
 		 //####### exclude seq by given seq name in file(s) ########
 		 if(params.get("excludeSeq")!=null){
@@ -555,20 +672,21 @@ public class CallUtility extends GEAT{
 			   for(int i=0;i<params.get("seqName").size();i=i+2){
 				 seqNameFile=params.get("seqName").get(i).trim();
 				 seqNameCol=params.get("seqName").get(i+1).trim();
-			     if(seqNameFile!=null && isInteger(seqNameCol)){
+			     if(seqNameFile!=null && NumberCheck.isPositiveInteger(seqNameCol)){
 			    	doSeqExclusion=false;
 			    	File f=new File(seqNameFile);
 			    	if(f.exists()) doSeqExclusion=true;
 			    	f=null;
-			    	if(Integer.parseInt(seqNameCol)<=1) 
+			    	if(Integer.parseInt(seqNameCol)<=1) {
 			    	  seqNameColIdx=0;
-			    	else
+			        }else {
 			    	  seqNameColIdx=Integer.parseInt(seqNameCol)-1;
-			    	
+			        }
+			     
 			        if(isFastaOK){
-			        	inSeqFile=fasta;
+			          inSeqFile=fasta;
 			    	}else if(isFastqOK){
-			    		inSeqFile=fastq;
+			    	  inSeqFile=fastq;
 			    	}
 			    	
 			    	if(doSeqExclusion){		   
@@ -588,7 +706,7 @@ public class CallUtility extends GEAT{
 			        String outSeqFile=outDir+"/"+inSeqFile.substring(
 			        		inSeqFile.lastIndexOf("/")+1,inSeqFile.lastIndexOf(".")
 			    		 )+".excluded.fna";
-			        SeqOperation.saveSeqList(seqObjList, outSeqFile);
+			        SeqOperation.saveSeqObj(seqObjList, outSeqFile);
 			        seqObjList=null;
 			        isFastaOK=true;
 			        fasta=outSeqFile;
@@ -604,31 +722,78 @@ public class CallUtility extends GEAT{
 			}			
 		 }
 		 
+		 if(params.get("excludeSeqAndDup")!=null){
+			 boolean doExcludeSeq=false;
+			 if(inSeqFiles==null) return;
+			 for(String seqFile:inSeqFiles){
+			   System.out.println("Total seq num: "+SeqOperation.getSeqNum(seqFile));
+			   if(outDir==null) outDir=seqFile.substring(0,seqFile.lastIndexOf("/"));			     
+			   if(params.get("excludeSeqAndDup").size()>1 && (params.get("excludeSeqAndDup").size() % 2 == 0)){
+				   
+				  System.out.println("================Removing sequences===================");				
+				  int k=0;	
+			      for(int i=0;i<params.get("excludeSeqAndDup").size();i=i+2){
+					 k++;
+					 seqNameFile=params.get("excludeSeqAndDup").get(i).trim();
+					 seqNameCol=params.get("excludeSeqAndDup").get(i+1).trim();
+				     if(seqNameFile!=null && NumberCheck.isPositiveInteger(seqNameCol)){
+				    	doExcludeSeq=false;
+				    	File f=new File(seqNameFile);
+				    	if(f.exists()) doExcludeSeq=true;
+				    	f=null;
+				    	if(Integer.parseInt(seqNameCol)<=1) { 
+				    	  seqNameColIdx=0;
+				    	}else {
+				    	  seqNameColIdx=Integer.parseInt(seqNameCol)-1;
+				    	}
+				    	System.out.println("Checking for No."+k+" ......");
+				    	if(doExcludeSeq){				    	
+				    	  System.out.println("Seq after removal: "
+				    	         +SeqFilter.removeSeqAndItsDup(seqFile,seqNameFile,seqNameColIdx));				    			   
+				    	}else{
+						  System.out.println("Warning: ["+seqNameFile+"] doesn't exist, we ignored it!!!");
+						}		    	
+				     }else{
+						System.out.println("Warning: '-excludeSeqAndDup' parameter is illeagl. We skiped it!!!");
+					 }
+				  }//for
+		
+			    }else{
+				  System.out.println("Warning: '-excludeSeqAndDup' parameter is illeagl. We skiped it!!!");
+			    }
+			  }
+				  
+			  if(!doExcludeSeq) System.out.println("Warning: '-excludeSeqAndDup' parameter is illeagl. We skiped it!!!");
+		 }
+
+		 
 		 //####### combined seq from given list of fasta or fastq files ########
 		 if(params.get("combineSeq")!=null){
 			 boolean doSeqCombine=false;		
 			 String files=null;				 
 			 List<String> seqFileList = null;
-			 if(params.get("listFile") !=null && params.get("listFile").size()>0){
-				files=params.get("seqFileList").get(0).trim();
+			 if(params.get("list") !=null && params.get("list").size()>0){
+				files=params.get("list").get(0).trim();
 				File f=new File(files);
 	    	    if(f.exists()){
 	    	      doSeqCombine=true;
-	    	      seqFileList= FileOperate.getRowListFromFile(files);
+	    	      seqFileList= FileOperation.getRowsOfFile(files);
 	    	    }else{
 	    	      System.out.println("Warning: listFile "+files+" doesn't exist.");
 			      f=null;
 				}				  
-			 }else if(params.get("seqFiles") !=null && params.get("seqFiles").size()>0){				
+			 }else if(params.get("files") !=null && params.get("files").size()>0){				
 				seqFileList=new ArrayList<String>();
-				for(int i=0;i<params.get("seqFiles").size();i++){				
-				  String file=params.get("seqFiles").get(i).trim();
+				for(int i=0;i<params.get("files").size();i++){				
+				  String file=params.get("files").get(i).trim();
 	              File f=new File(file);
 	    	      if(f.exists()){
 	    	    	doSeqCombine=true;
 	    	    	seqFileList.add(file);
-	    	      }else System.out.println("Warning:"+file+" doesn't exist.");
-			    	f=null;
+	    	      }else {
+	    	    	System.out.println("Warning:"+file+" doesn't exist.");
+	    	      }
+			      f=null;
 			    }
 			 }else{
 				System.out.println("Warning: '-combineSeq' parameter is illeagl.");
@@ -638,10 +803,10 @@ public class CallUtility extends GEAT{
 			 if(doSeqCombine){			   
 				if(seqFileList!=null && seqFileList.size()>0){
 				  String seqFile=seqFileList.get(0);
-				  String format=FileOperate.getFileFormat(seqFile);
+				  String format=FileOperation.getFileFormat(seqFile);
 				  if(outDir==null) 
 					 outDir=seqFile.substring(0,seqFile.lastIndexOf("/"))+"/combined";
-				  FileOperate.newFolder(outDir);
+				  FileOperation.newFolder(outDir);
 				  if(outName==null) {										
 					 outName=seqFile.substring(
 							 seqFile.lastIndexOf("/")+1,seqFile.lastIndexOf(".")
@@ -654,102 +819,15 @@ public class CallUtility extends GEAT{
 				}
 				seqFileList=null;
 			 }
-	     }
-		   
-		 //####### extract seq name from given  fasta or fastq file########
-		 if(params.get("extractSeqName")!=null){
-			 String inSeqFiles=null;
-			 List<String> seqFileList =new ArrayList<String>();
-			 String outCombinedFile=null;			 		
-			 
-			 if(params.get("extractSeqName").size()>0){
-				String subParams;
-				String [] itemSplited;
-				for(int i=0;i<params.get("extractSeqName").size();i++){
-				  subParams=params.get("extractSeqName").get(i).trim();
-				  itemSplited=subParams.split("=");
-				  if(itemSplited.length>1){
-					if(itemSplited[0].equalsIgnoreCase("seqFile")){
-						inSeqFiles=itemSplited[1];
-						File f=new File(inSeqFiles);
-				    	if(!f.exists()){
-				    	   System.err.println("Error: '-extractSeqName seqFile' doesn't exist.");
-						   return;
-				    	}
-				    	f=null;
-					}else if(itemSplited[0].equalsIgnoreCase("fileList")){
-						inSeqFiles=itemSplited[1];
-						File f=new File(inSeqFiles);
-				    	if(!f.exists()){
-				    	   System.err.println("Error: '-extractSeqName fileList' doesn't exist.");
-						   return;
-				    	}
-				    	f=null;
-						seqFileList=FileOperate.getRowListFromFile(inSeqFiles);
-					}else if(itemSplited[0].equalsIgnoreCase("combinedOut")){
-						outCombinedFile=itemSplited[1];
-				    }
-				  }else{
-					System.err.println("Error: '-extractSeqName' parameter is illeagl.");
-					return;
-				  }	
-				}
-			 }else{
-				System.err.println("Error: '-extractSeqName' parameter is illeagl.");
-			    return;
-			 }			  
-			 
-			 System.out.println("================Extracting sequence name by parameter -extractSeqName===================");
-			 boolean isOK=false;				
-			 if(inSeqFiles!=null || seqFileList.size()>0){	
-			     if(seqFileList.size()>0) {			    	
-			    	  String outFile;			    	  
-					  List<String> seqNameFiles = new ArrayList<String>();	
-			    	  for(String seqFile:seqFileList){
-			    		if(outDir==null) outDir=seqFile.substring(0,seqFile.lastIndexOf("/"));
-					    outFile=outDir+"/"+seqFile.substring(
-					    		   seqFile.lastIndexOf("/")+1,seqFile.lastIndexOf(".")
-					    		 )+".seqName";
-			    		    		
-			    		isOK=SeqOperation.extratSeqName(seqFile,outFile);
-			    		if(isOK){
-			    		   seqNameFiles.add(outFile);
-			    		   System.out.println(
-			    			 "Successfully extracted sequences name from ["+seqFile+"]");
-			    		}else{
-			    		   System.out.println(
-			    			 "Error: failed to extract sequences name from ["+seqFile+"]");
-			    		}
-			    	  }
-			    	  
-			    	  if(outCombinedFile!=null){
-						 FileOperate.combineRowListFromFiles(seqNameFiles,outCombinedFile);
-						 seqNameFiles=null;
-						 System.out.println("Successfully combined sequences name from ["
-						    		    +inSeqFiles+"], and saved in ["+outCombinedFile+"]");
-					  }	
-			     }else if(inSeqFiles!=null){			    	
-			    	  if(outDir==null) outDir=inSeqFiles.substring(0,inSeqFiles.lastIndexOf("/"));
-			    	  String seqNameFile=outDir+"/"+inSeqFiles.substring(
-							  inSeqFiles.lastIndexOf("/")+1,inSeqFiles.lastIndexOf(".")
-					    		 )+".seqName";
-			    	  isOK=SeqOperation.extratSeqName(inSeqFiles,seqNameFile);
-			    	  if(isOK){			    		
-			    		   System.out.println(
-			    			 "Successfully extracted sequences name from ["+inSeqFiles+"]");
-			    	  }else{
-			    		   System.out.println(
-			    			 "Error: failed to extract sequences name from ["+inSeqFiles+"]");
-			    	  }
-			     }  				    		    	
-			    
-			 }else {			    
-		    	  System.out.println("Error: illegal parameter -extractSeqName");
-		     }
-			 seqFileList=null;
-		 }// -extractSeqName 
+	     }		   
 		  
-	     FileOperate.delFolder(tmpDir);
+	     //FileOperation.delFolder(tmpDir);
+		 if(tmpFiles!=null){
+		   for(String tmpFile: tmpFiles){
+			  FileOperation.delFile(tmpFile);
+		   }
+		 }
+		 delTmpDir(tmpDir);	
     }
 
 }

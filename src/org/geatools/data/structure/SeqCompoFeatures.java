@@ -1,4 +1,3 @@
-package org.geatools.data.structure;
 /*******************************************************************************
  *  ========================================================================
  *  GEATools : a free Genomic Event Analysis Tools for the Java(tm) platform
@@ -31,49 +30,18 @@ package org.geatools.data.structure;
  *  Changes (from 1-Jan-2016)
  *  ---------------------------------------------------------------------------
  *******************************************************************************/
+package org.geatools.data.structure;
 
-import java.util.Comparator;
+import java.util.List;
 
-public class SeqChrAlignSite extends ChrSite{
-	 
-	 public int qSeqID;
-	 public String qName;
-	 public String sName;
-	 public float identity;
-	 public int alignLen;
-	 public int mismatchNum;
-	 public int gapNum;
-	 public int qStart;
-	 public int qEnd;
-	 public int sStart;
-	 public int sEnd;
-	 public double eValue;
-	 public double score;
-	    
-	 public static class CompScore implements Comparator<SeqChrAlignSite> {
-		
-		private int mod = 1;
-		public CompScore(boolean desc) {
-		  if (desc) mod =-1;
-		}
-		        
-		public int compare(SeqChrAlignSite  site1, SeqChrAlignSite  site2){
-		  return  mod*Double.valueOf(site1.score).compareTo(site2.score);
-		}
-		
-	 }
-	 
-	 public static class CompMismatch implements Comparator<SeqChrAlignSite> {
-			
-		private int mod = 1;
-		public CompMismatch(boolean desc) {
-		  if (desc) mod =-1;
-		}
-		        
-		public int compare(SeqChrAlignSite  site1, SeqChrAlignSite  site2){
-		  return  mod*Integer.valueOf(site1.mismatchNum).compareTo(site2.mismatchNum);
-		}
-		
-	 }
-
-}
+public class SeqCompoFeatures implements Cloneable{
+	   public List<String> compoNames;
+	   public List<String> compoColors; 
+	   
+	   @Override
+	   public Object clone() throws CloneNotSupportedException {
+		   SeqCompoFeatures cloned = (SeqCompoFeatures)super.clone();
+		   
+		   return cloned;
+	   }		    
+} 

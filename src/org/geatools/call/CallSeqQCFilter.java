@@ -33,46 +33,31 @@
 package org.geatools.call;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
 import org.geatools.GEAT;
-import org.geatools.operation.FileOperate;
-import org.geatools.seqprocess.SeqOperation;
+import org.geatools.operation.FileOperation;
+import org.geatools.operation.SeqOperation;
 import org.geatools.seqprocess.SeqQCFilter;
 
 
 public class CallSeqQCFilter extends GEAT{
 	
-	public static void setHomeDir(String dir){
-		homeDir=dir;
-	}
-	public static void setWorkingDir(String dir){
-		workingDir=dir;
-	}
-	public static void setTmpDir(String dir){
-		tmpDir=dir;
-	}
-	public static void delTmpDir(String dir){
-		FileOperate.delFolder(dir);
-	}
 	
 	public static void doWork(String[] args){		
 		 
-		 if(homeDir==null) homeDir=GEAT.getClassPath();			   
-		 if(tmpDir==null){
-		   String timeStamp=new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
-		   tmpDir=homeDir+"/tmp/"+timeStamp;
-		 } 
-		 if(workingDir==null) workingDir=homeDir+"/working";
-		 File dir=new File(tmpDir);
-		 if(!dir.exists()) FileOperate.newFolder(tmpDir);
-		 dir=null;
+		 if(homeDir==null) homeDir=GEAT.getHomeDir();			 
+		 if(fileSeparator==null) fileSeparator = GEAT.getfileSeparator();		 
+		 if(workingDir==null) workingDir=GEAT.getWorkingDir();	
+		 File dir=null;
 		 dir=new File(workingDir);
-		 if(!dir.exists()) FileOperate.newFolder(workingDir);
+		 if(!dir.exists()) FileOperation.newFolder(workingDir);
+		 
+		 if(tmpDir==null) tmpDir=GEAT.getTmpDir();			
+		 dir=new File(tmpDir);
+		 if(!dir.exists()) FileOperation.newFolder(tmpDir);
 		 dir=null;
 			
 		 Map<String, List<String>> params=getCommandLineParams(args);
@@ -137,7 +122,7 @@ public class CallSeqQCFilter extends GEAT{
 			 isFastqOK=false;
 		     if(params.get("fastqList").size()>0){
 				String fastqFiles=params.get("fastqList").get(0).trim();
-				fastqList=FileOperate.getRowListFromFile(fastqFiles);
+				fastqList=FileOperation.getRowsOfFile(fastqFiles);
 				if(SeqOperation.isFASTQSeq(fastqList)){					
 					isFastqOK=true;
 					seqType=SeqOperation.SEQTYPE_SINGLEEND;				
@@ -157,7 +142,7 @@ public class CallSeqQCFilter extends GEAT{
 			  isFastq2OK=false;
 		      if(params.get("fastqList2").size()>0){
 		    	 String fastqFiles=params.get("fastqList2").get(0).trim();					
-		    	 fastqList2=FileOperate.getRowListFromFile(fastqFiles);
+		    	 fastqList2=FileOperation.getRowsOfFile(fastqFiles);
 				 if(SeqOperation.isFASTQSeq(fastqList2)){
 					isFastq2OK=true;
 					seqType=SeqOperation.SEQTYPE_PAIREND;
@@ -201,7 +186,7 @@ public class CallSeqQCFilter extends GEAT{
 				   doOutput=true;
 				   f=null;
 				 }else if (outDir!=null){
-				   FileOperate.newFolder(outDir);
+				   FileOperation.newFolder(outDir);
 				   doOutput=true;
 				 }			   
 			   }else{
@@ -213,7 +198,7 @@ public class CallSeqQCFilter extends GEAT{
 		   if(!doOutput){			   
 				 outDir=homeDir+"/working";
 				 dir=new File(outDir);
-				 if(!dir.exists()) FileOperate.newFolder(outDir);	
+				 if(!dir.exists()) FileOperation.newFolder(outDir);	
 		         dir=null;
 				 doOutput=true;  		
 		   }
@@ -304,14 +289,14 @@ public class CallSeqQCFilter extends GEAT{
 				     }// for 
 				 }
 			  }//SEQTYPE_PAIREND
-		   }
-		   
-		   //delTmpDir(tmpDir);	
+		   }		   
+		  	
 		   if(tmpFiles!=null){
 			 for(String tmpFile: tmpFiles){
-			   FileOperate.delFile(tmpFile);
+			   FileOperation.delFile(tmpFile);
 			 }
 		   }
+		   delTmpDir(tmpDir);	
     }
 
 }

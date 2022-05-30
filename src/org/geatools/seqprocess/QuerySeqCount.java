@@ -42,21 +42,26 @@ import java.util.List;
 
 import org.geatools.data.structure.SeqCompoAlignInfo;
 import org.geatools.data.structure.SeqCompoRecognizer;
-import org.geatools.data.structure.SeqCompoType;
+import org.geatools.data.structure.SeqCompoFeatures;
 import org.geatools.data.structure.SeqInfo;
 import org.geatools.data.structure.SeqRocket;
-import org.geatools.operation.FileOperate;
+import org.geatools.operation.FileOperation;
+import org.geatools.operation.SeqOperation;
 
-public class  QuerySeqCount extends SeqRecognition{
+public class  QuerySeqCount extends SeqRocketRecognition{  
+  
+  int maxEncodeBaseLen=19;
+  int localExactEncodeLen=3;
+  //float nonexactRate=0.7f;
+  boolean doNonExact=true;
   
   int minQueryLen=2;  
   double queryMinAlignRatio=0.9d;
   double queryMaxMismatchRatio=0.1d;
   double queryMaxGapRatio=0.1d;
   String querySeqName="QuerySeq";
-  String querySeqColor="red";
+  String querySeqColor="red"; 
 
-  boolean doNonExact=true;
   
   final HashMap<Character, Integer> base2numMap =new HashMap<Character, Integer>();  
   
@@ -73,6 +78,18 @@ public class  QuerySeqCount extends SeqRecognition{
 	  doNonExact=action;
   }
   
+  public void setMaxEncodeBaseLen(int len){ 
+	  maxEncodeBaseLen=len;
+  }
+    
+  public int getMaxEncodeBaseLen(){ 
+	  return maxEncodeBaseLen;
+  }
+
+  public void setLocalExactEncodeLen(int len){
+	  localExactEncodeLen=len;
+  }
+  
   void configRecognizer( List<SeqRocket> rockets){
     
 	SeqCompoRecognizer query;
@@ -80,9 +97,9 @@ public class  QuerySeqCount extends SeqRecognition{
 	  query=null;	  
       SeqCompoRecognizer recognizer;
 	  String seqType="";
-	  for(int k=0;k<rockets.get(i).seqRecognizer.size();k++){
-	    recognizer=rockets.get(i).seqRecognizer.get(k);	
-	    seqType=rockets.get(i).seqTypeInfo.seqTypeName.get(recognizer.index);
+	  for(int k=0;k<rockets.get(i).seqRecognizers.size();k++){
+	    recognizer=rockets.get(i).seqRecognizers.get(k);	
+	    seqType=rockets.get(i).seqCompoFeatures.compoNames.get(recognizer.index);
 	    if(seqType.equals(querySeqName)) query=recognizer;
 	  }
 	  recognizer=null;
@@ -91,8 +108,8 @@ public class  QuerySeqCount extends SeqRecognition{
 
 		  query.seq=query.rawSeq;	
 		  query.seqLength=query.seq.length();
-		  query.territoryLen=query.seqLength+(int) Math.ceil(query.seqLength*extendTerritoryRatio);	
-		  query.maxExactStart=query.territoryLen-query.seqLength+1;
+		  query.territoryLen=query.seqLength+(int) Math.ceil(query.seqLength*territoryLeftExtendRatio);	
+		  query.exactMaxStart=query.territoryLen-query.seqLength+1;
 		  query.minAlignRatio=queryMinAlignRatio;
 		  query.maxMismatchRatio=queryMaxMismatchRatio;
 		  query.maxGapRatio=queryMaxGapRatio;			
@@ -129,19 +146,20 @@ public class  QuerySeqCount extends SeqRecognition{
         	  query.maxQStart=query.seqLength-query.minAlignLen+1;
         	  query.maxSStart=query.territoryLen-query.minAlignLen+1;
 		  }	   
-		  query.leftSubForBlast=false;
+		  query.leftSubForBLAST=false;
 		  query.leftShiftForNext=false;
-		  query.saveRecognizedSeq=false;  //ooooooooooooooo
-		  query.saveSeqAsFASTAFormat=false; //ooooooooooooooo		
+		  //query.saveRecognizedSeq=false;  //ooooooooooooooo
+		  query.saveAsFASTA=false; //ooooooooooooooo	
+		  query.saveAsFASTQ=false; //ooooooooooooooo	
 		  query.leftTrimSave=false;
 		  query.rightTrimSave=false;
 		  query.exactAlignedSeqFile=tmpDir+"/"+query.seqName+"_ExactAlignedSeq";
 		  query.seqFASTAFile=tmpDir+"/"+query.seqName+".fna";		  
 
-          rockets.get(i).seqRecognizer.set(query.index,query);	
+          rockets.get(i).seqRecognizers.set(query.index,query);	
 
       }else if(query.rawSeq==null || query.rawSeq.equals("")){
-    	  rockets.get(i).seqRecognizer.set(query.index,null);	
+    	  rockets.get(i).seqRecognizers.set(query.index,null);	
       }
 	 	  
 	  query=null;
@@ -188,8 +206,7 @@ public class  QuerySeqCount extends SeqRecognition{
   }
   */
   
-  void setExactAlignInfo(List<SeqCompoAlignInfo> sortedSeqList,List<SeqRocket> rockets,
-		  String seqType){		
+  void setExactAlignInfo(List<SeqCompoAlignInfo> sortedSeqList,List<SeqRocket> rockets,String seqCompName){		
 		 
 	     if(sortedSeqList==null || rockets==null || rockets.size()==0) return;		
 		 
@@ -200,20 +217,20 @@ public class  QuerySeqCount extends SeqRecognition{
 			 int trimSEndIndex=-1;
 			 int trimLeftShift=0;
 			 int trimSEnd=0;			
-			 for(int i=0;i<seqRocket.seqRecognizer.size();i++){
-			   if(seqRocket.seqRecognizer.get(i).done 
-					  && seqRocket.seqRecognizer.get(i).leftShiftForNext ){		 
+			 for(int i=0;i<seqRocket.seqRecognizers.size();i++){
+			   if(seqRocket.seqRecognizers.get(i).done 
+					  && seqRocket.seqRecognizers.get(i).leftShiftForNext ){		 
 					    
-				   trimSEndIndex=seqRocket.seqRecognizer.get(i).index;
-				   trimLeftShift=seqRocket.seqRecognizer.get(i).trimLeftShift;					  
+				   trimSEndIndex=seqRocket.seqRecognizers.get(i).index;
+				   trimLeftShift=seqRocket.seqRecognizers.get(i).trimLeftShift;					  
 			   }
 			 }					
-			 int alignSStartIndex=seqRocket.seqTypeInfo.seqTypeName.indexOf(seqType);		  
+			 int alignSStartIndex=seqRocket.seqCompoFeatures.compoNames.indexOf(seqCompName);		  
 			 int alignSEndIndex=alignSStartIndex;
 
-			 SeqCompoRecognizer querySeq=seqRocket.seqRecognizer.get(
-					 seqRocket.seqTypeInfo.seqTypeName.indexOf(seqType));	
-		     int leftMaxStartIndex=querySeq.maxExactStart-1;
+			 SeqCompoRecognizer querySeq=seqRocket.seqRecognizers.get(
+					 seqRocket.seqCompoFeatures.compoNames.indexOf(seqCompName));	
+		     int leftMaxStartIndex=querySeq.exactMaxStart-1;
 		     if (leftMaxStartIndex<0) leftMaxStartIndex=0;	
 			 int seqIdx = Collections.binarySearch(
 					 sortedSeqList,
@@ -301,8 +318,7 @@ public class  QuerySeqCount extends SeqRecognition{
 		 }
   }
   
-  List<SeqCompoAlignInfo> findQuerySeq(List<SeqCompoAlignInfo> sortedSeqList,
-		  SeqCompoRecognizer querySeq){
+  List<SeqCompoAlignInfo> findQuerySeq(List<SeqCompoAlignInfo> sortedSeqList,SeqCompoRecognizer querySeq){
 		 
 	     List<SeqCompoAlignInfo> querySeqList= new ArrayList<SeqCompoAlignInfo>();
 	     int seqIdx = Collections.binarySearch(
@@ -312,15 +328,21 @@ public class  QuerySeqCount extends SeqRecognition{
 		 );
 
 		 if(seqIdx>=0){		  
-			 // go backward......
+			 //go backward......
 			 for(int j=seqIdx;j>=0;j--){			   
 			   if(querySeq.seqNumEncode!=sortedSeqList.get(j).seqNumEncode) break;
+			  
+			   if(querySeq.seqNumEncode==sortedSeqList.get(j).seqNumEncode
+					&& querySeq.seqNumRevEncode==sortedSeqList.get(j).seqNumRevEncode)
 			   querySeqList.add(sortedSeqList.get(j));
 			 }
 			 //go forward......
 		     for(int j=seqIdx+1;j<sortedSeqList.size();j++){		     
-			   if(querySeq.seqNumEncode!=sortedSeqList.get(j).seqNumEncode) break;
-			   querySeqList.add(sortedSeqList.get(j));
+		       if(querySeq.seqNumEncode!=sortedSeqList.get(j).seqNumEncode) break;
+			   
+			   if(querySeq.seqNumEncode==sortedSeqList.get(j).seqNumEncode
+					&& querySeq.seqNumRevEncode==sortedSeqList.get(j).seqNumRevEncode)
+		       querySeqList.add(sortedSeqList.get(j));
 		     }
 		 }
 		 
@@ -347,7 +369,7 @@ public class  QuerySeqCount extends SeqRecognition{
 	  if(outDir==null){
 		 outDir=querySeqFile.substring(0, querySeqFile.lastIndexOf("/"))+"/RecognizedSeq";	
 	  }
-	  FileOperate.newFolder(outDir);
+	  FileOperation.newFolder(outDir);
 
 	  //Save query seq count ................................
 	  if(outTag!=null) outTag=outTag+"_";
@@ -369,7 +391,7 @@ public class  QuerySeqCount extends SeqRecognition{
 		 resOut.add(perRes);
 		 perRes=null;		 
 	  }// for Rocket
-  	  FileOperate.saveMatrixList(resOut, outFile);
+  	  FileOperation.saveMatrixList(resOut, outFile);
       resOut=null;
       
       //Save query seq RPM ................................
@@ -388,7 +410,7 @@ public class  QuerySeqCount extends SeqRecognition{
 		 resOut.add(perRes);
 		 perRes=null;		 
 	  }// for Rocket
-  	  FileOperate.saveMatrixList(resOut, outFile);
+  	  FileOperation.saveMatrixList(resOut, outFile);
       resOut=null;
   }
   
@@ -406,33 +428,38 @@ public class  QuerySeqCount extends SeqRecognition{
 		System.out.println("Counting for ["+inSeqFile+"]............");
 		//Setting and Checkpoint for forward Seq................
 		System.out.println("Total reads: "+SeqOperation.getSeqNum(inSeqFile));
+		
+		System.out.println("Checking reads......");
 		seqObjList=checkSeq(inSeqFile);
 		if(seqObjList==null || seqObjList.size()==0){
 		   System.out.println("Warning: Empty sequence for ["+inSeqFile+"]");
 		   return querySeqRockets;
 		}
-		System.out.println("Checked reads: "+seqObjList.size());	
+		System.out.println("Checked reads: "+seqObjList.size());
+		
 		System.out.println("Encoding reads......");
-		setSeqEncodeVal(seqObjList);		
+		setSeqNumEncode(seqObjList,maxEncodeBaseLen);		
 		System.out.println("Sorting reads......");
 		boolean desc=false;
 		Collections.sort(seqObjList, new SeqCompoAlignInfo.CompSeqEncode(desc));
-		System.out.println("Sort done!");	
-		initSeqAlignArray(seqObjList,querySeqRockets.get(0).seqTypeInfo.seqTypeName.size());
+        
+		//initialize seq align array
+		initSeqAlignArray(seqObjList,querySeqRockets.get(0).seqCompoFeatures.compoNames.size());
 
 		//Recognize and set exact query seq align information including counts,alignment position...............................................	        
-		setExactAlignInfo(seqObjList,querySeqRockets,querySeqName);
+		System.out.println("Identifying exact match......");	
+		setExactAlignInfo(seqObjList,querySeqRockets,querySeqName);		
 		
-		//Get and set non-exact query seq ...............................................
+		//Recognize and set non-exact query seq ...............................................
 		if(doNonExact){
+		  System.out.println("Identifying non-exact alignment......");
 		  //Get non-exact query seq ...............................................
-		  int compoIdx=querySeqRockets.get(0).seqTypeInfo.seqTypeName.indexOf(querySeqName);
+		  int compoIdx=querySeqRockets.get(0).seqCompoFeatures.compoNames.indexOf(querySeqName);
 		  List<SeqCompoAlignInfo> nonExactSeqList=getNoRecognizedSeq(seqObjList,compoIdx);		
 		  seqObjList=null;				
 			
 		  //Set non-exact query seq align info...............................................
-		  int seqEncodeLen=6;
-		  setNonExactAlignInfo(querySeqRockets,querySeqName,nonExactSeqList,seqEncodeLen);			
+		  setNonExactAlignInfo(querySeqRockets,querySeqName,nonExactSeqList,localExactEncodeLen);			
 	      nonExactSeqList=getNoRecognizedSeq(nonExactSeqList,compoIdx);	
 	      System.out.println("o>o "+nonExactSeqList.size());
 		  /*
@@ -442,7 +469,7 @@ public class  QuerySeqCount extends SeqRecognition{
 			setNonExactAlignInfo(querySeqRockets,querySeqName,nonExactSeqList,seqEncodeLen);
 		  }
 		  */
-		  nonExactSeqList=null;  
+		  nonExactSeqList=null;  		  
 		}
 		
 		//Set query seq count................................
@@ -459,14 +486,14 @@ public class  QuerySeqCount extends SeqRecognition{
 		
 		//System.out.println("Delete temporary files");
 	    for(String tmpFile: tmpFiles){
-	      FileOperate.delFile(tmpFile);
+	      FileOperation.delFile(tmpFile);
 		}
 	    	    
 	    if(saveRes){
 		   if(outDir==null){
 				outDir=inSeqFile.substring(0, inSeqFile.lastIndexOf("/"))+"/RecognizedSeq";	
 		   }
-		   FileOperate.newFolder(outDir);
+		   FileOperation.newFolder(outDir);
 
 		   if(outFile==null)
 				outFile=inSeqFile.substring(
@@ -480,7 +507,7 @@ public class  QuerySeqCount extends SeqRecognition{
 		   saveSeqCountInfo(querySeqRockets,outFile);		   
 	    }
 	    
-	    System.out.println("OK for ["+inSeqFile+"]");
+	    System.out.println("Done for ["+inSeqFile+"]");
 	    
 	    return querySeqRockets;
 	   
@@ -499,8 +526,8 @@ public class  QuerySeqCount extends SeqRecognition{
 		 return seqRockets;
   }
 	 
-  List<SeqRocket> splitLaunchQueryCount(List<String> splitedSeqFiles,
-			 String querySeqFile,String outDir,String outFile){
+  List<SeqRocket> splitLaunchQueryCount(List<String> splitedSeqFiles, String querySeqFile,
+		  String outDir,String outFile){
 
 		 List<SeqRocket> seqRockets=new ArrayList<SeqRocket>();
 		 
@@ -513,7 +540,7 @@ public class  QuerySeqCount extends SeqRecognition{
 		    try {
 		      splitOutDir=file.substring(0,file.lastIndexOf("/"));
 		      splitOutDir=splitOutDir+"/"+file.substring(file.lastIndexOf("/")+1,file.lastIndexOf("."));
-			  FileOperate.newFolder(splitOutDir);
+			  FileOperation.newFolder(splitOutDir);
 			   
 			  System.out.println("......Recognizing sequence for split "+s+" ......");
 
@@ -531,7 +558,7 @@ public class  QuerySeqCount extends SeqRecognition{
 		 if(splitedSeqFiles.size()>0){
 			 String file=splitedSeqFiles.get(0);
 			 if(outDir==null) outDir=file.substring(0,file.lastIndexOf("/"))+"/combined";
-			 FileOperate.newFolder(outDir);
+			 FileOperation.newFolder(outDir);
 			 System.out.println("......Combine splited sequences......");
 			 int seqCounts=0;		
 	         List<ArrayList<String>> res=new ArrayList<ArrayList<String>>();
@@ -558,7 +585,7 @@ public class  QuerySeqCount extends SeqRecognition{
 				  querySeqFile.lastIndexOf("/")+1,querySeqFile.lastIndexOf("."))+".counts.txt";
 			 
 			 outFile=outDir+"/"+outFile;
-			 FileOperate.saveMatrixList(res, outFile);
+			 FileOperation.saveMatrixList(res, outFile);
 		 }
 		 //*/
 		 splitedRockets=null;
@@ -582,7 +609,7 @@ public class  QuerySeqCount extends SeqRecognition{
 			  perRes=null;		 
 		}// for Rocket			
 				 
-		FileOperate.saveMatrixList(resOut, outFile);
+		FileOperation.saveMatrixList(resOut, outFile);
 		resOut=null;
   }
   
@@ -590,14 +617,12 @@ public class  QuerySeqCount extends SeqRecognition{
 		 
 	 List<SeqInfo> querySeqList = new ArrayList<SeqInfo>();
 	 SeqInfo seqInfo;
-	 List<ArrayList<String>> queryStrList=FileOperate.getMatrixFromFile(querySeqFile);
-	 long seqEncodeNum=0;
+	 List<ArrayList<String>> queryStrList=FileOperation.getMatrixFromFile(querySeqFile);
 	 for(int i=0;i<queryStrList.size();i++){
 		 seqInfo= new SeqInfo();
 		 seqInfo.seqName=queryStrList.get(i).get(0);
-		 seqInfo.seq=queryStrList.get(i).get(1).toUpperCase();	
-		 seqEncodeNum=SeqOperation.getSeqEncodeVal(seqInfo.seq);
-		 seqInfo.seqNumEncode=seqEncodeNum;
+		 seqInfo.seq=queryStrList.get(i).get(1).toUpperCase();		
+		 seqInfo.seqNumEncode=getSeqNumEncode(seqInfo.seq,maxEncodeBaseLen);
 		 querySeqList.add(seqInfo);
 		 seqInfo=null;
 	 }
@@ -627,27 +652,27 @@ public class  QuerySeqCount extends SeqRecognition{
 		    querySeqRocket.rocketName=rocketName;
 		    querySeqRocket.isActive=true;
 		
-		    querySeqRocket.seqRecognizer=new ArrayList<SeqCompoRecognizer> ();
-		    querySeqRocket.seqTypeInfo=new SeqCompoType();
-		    querySeqRocket.seqTypeInfo.seqTypeName=new ArrayList<String> ();	
-		    querySeqRocket.seqTypeInfo.seqColor=new ArrayList<String> ();
+		    querySeqRocket.seqRecognizers=new ArrayList<SeqCompoRecognizer> ();
+		    querySeqRocket.seqCompoFeatures=new SeqCompoFeatures();
+		    querySeqRocket.seqCompoFeatures.compoNames=new ArrayList<String> ();	
+		    querySeqRocket.seqCompoFeatures.compoColors=new ArrayList<String> ();
 		    querySeqRocket.exactSeqCount=0;
 		    querySeqRocket.nonExactSeqCount=0;
 		    querySeqRocket.recognizedSeqCount=0;
 		    
 		    querySeq=querySeqList.get(i).seq;	
 			if(querySeq!=null && querySeq.length()>0){			 		
-			  querySeqRocket.seqTypeInfo.seqTypeName.add(querySeqName);		
-			  querySeqRocket.seqTypeInfo.seqColor.add(querySeqColor);
+			  querySeqRocket.seqCompoFeatures.compoNames.add(querySeqName);		
+			  querySeqRocket.seqCompoFeatures.compoColors.add(querySeqColor);
 			  
 			  query=new SeqCompoRecognizer();	
-			  query.index=querySeqRocket.seqTypeInfo.seqTypeName.indexOf(querySeqName);				 
+			  query.index=querySeqRocket.seqCompoFeatures.compoNames.indexOf(querySeqName);				 
 			  query.seq=querySeq;
 			  query.rawSeq=querySeq;
 			  query.seqName=rocketName+".QuerySeq";	
 			  query.seqNumEncode=querySeqList.get(i).seqNumEncode;
 		
-			  querySeqRocket.seqRecognizer.add(query); 
+			  querySeqRocket.seqRecognizers.add(query); 
 			  query=null;
 			}			
 			
@@ -661,43 +686,46 @@ public class  QuerySeqCount extends SeqRecognition{
   
 
   void setNonExactAlignInfo(List<SeqRocket> querySeqRockets, String querySeqType,
-		  List<SeqCompoAlignInfo> nonExactSeqList, int seqEncodeLen){
+		  List<SeqCompoAlignInfo> nonExactSeqList, int localExactEncodeLen){
 		
 	    if(querySeqRockets==null || nonExactSeqList==null) return;
 	    
-	    System.out.println(">>>NoExact query size:"+nonExactSeqList.size());	
-		//initSeqAlignArray(nonExactSeqList,rockets.get(0).seqTypeInfo.seqTypeName.size());
-		setSeqEncodeVal(nonExactSeqList,seqEncodeLen);
+	    System.out.println(">>>Total reads of all NonExact matched query seq:"+nonExactSeqList.size());	
+		//set seq encode
+	    setSeqNumEncode(nonExactSeqList,localExactEncodeLen);
+	    setSeqNumRevEncode(nonExactSeqList,localExactEncodeLen);
 		Collections.sort(nonExactSeqList, new SeqCompoAlignInfo.CompSeqEncode(false));
-		int compoIdx=querySeqRockets.get(0).seqTypeInfo.seqTypeName.indexOf(querySeqName);
+		int compoIdx=querySeqRockets.get(0).seqCompoFeatures.compoNames.indexOf(querySeqName);
 		String queryNonExactSeqFile;
 		List<SeqCompoAlignInfo>queryNonExactSeqList;
 		
 		for(SeqRocket seqRocket:querySeqRockets){		
-		   SeqCompoRecognizer querySeq=seqRocket.seqRecognizer.get(
-					 seqRocket.seqTypeInfo.seqTypeName.indexOf(querySeqType));
-		   querySeq.seqNumEncode=getSeqEncodeVal(querySeq.seq,seqEncodeLen);
+		   SeqCompoRecognizer querySeq=seqRocket.seqRecognizers.get(
+			   seqRocket.seqCompoFeatures.compoNames.indexOf(querySeqType)
+		   );
+		   querySeq.seqNumEncode=getSeqNumEncode(querySeq.seq,localExactEncodeLen);
+		   querySeq.seqNumRevEncode=getSeqNumRevEncode(querySeq.seq,localExactEncodeLen);
 		   queryNonExactSeqList=findQuerySeq(nonExactSeqList,querySeq);		  
 		   queryNonExactSeqList=getNoRecognizedSeq(queryNonExactSeqList,compoIdx);
 	 	   querySeq=null;
-		   System.out.println(seqRocket.rocketName+" NonExact size:"+queryNonExactSeqList.size());
+		   System.out.println(seqRocket.rocketName+" NonExact reads:"+queryNonExactSeqList.size());
 		   queryNonExactSeqFile=tmpDir+"/QueryNonExactMatchSeq_forward.fna";        
 		   createBLASTTarSeq(queryNonExactSeqList,queryNonExactSeqFile);			
-		   setNonExactAlignInfo(seqRocket,queryNonExactSeqList,queryNonExactSeqFile,querySeqType);
+		   setNonExactBLASTInfo(seqRocket,queryNonExactSeqList,queryNonExactSeqFile,querySeqType);
 		   queryNonExactSeqList=null;
-		   FileOperate.delFile(queryNonExactSeqFile); 	
+		   FileOperation.delFile(queryNonExactSeqFile); 	
 		  
-		   System.out.println(seqRocket.rocketName+">> Successfully got recognized seq:"
+		   System.out.println(seqRocket.rocketName+">> Got recognized seq:"
 			      +" Exact:"+seqRocket.exactSeqCount  
 			      +" NoExact:"+seqRocket.nonExactSeqCount);
 
 		}// for seqRocket
   }
   
-  void setNonExactAlignInfo(SeqRocket seqRocket,List<SeqCompoAlignInfo>queryNonExactSeqList, 
+  void setNonExactBLASTInfo(SeqRocket seqRocket,List<SeqCompoAlignInfo>queryNonExactSeqList, 
 		String queryNoExactSeqFile, String querySeqType){			
 	      
-	      if(!seqRocket.seqTypeInfo.seqTypeName.contains(querySeqType)){
+	      if(!seqRocket.seqCompoFeatures.compoNames.contains(querySeqType)){
 			  System.out.println("Warning: You did not set query sequence for '"
 				       +seqRocket.rocketName+"', so no sequence extraction!!!");
 			  
@@ -722,36 +750,35 @@ public class  QuerySeqCount extends SeqRecognition{
 		  List<SeqCompoAlignInfo> tarBlastSeqObj;	
 		  
 		  if(seqRocket.isActive){	
-			for(int k=0;k<seqRocket.seqRecognizer.size();k++){			   
-			   recognizer=seqRocket.seqRecognizer.get(k);
+			for(int k=0;k<seqRocket.seqRecognizers.size();k++){			   
+			   recognizer=seqRocket.seqRecognizers.get(k);
 			   if(recognizer!=null){
-				  seqType=seqRocket.seqTypeInfo.seqTypeName.get(recognizer.index);
-				  if(seqType.equals(querySeqType)){  	
-					tarBlastSeqObj=new ArrayList<SeqCompoAlignInfo>(); 			  
-					if(doBlast){
-					   createFASTASeq(recognizer.seq,recognizer.seqName,recognizer.seqFASTAFile); 
-					   querySeqFile=recognizer.seqFASTAFile;
-					   blastWordSize=recognizer.blastWordSize;
-					   blastTask=recognizer.blastTask;			
-					   blastCMD="blastn -task "+blastTask+" "
+				 seqType=seqRocket.seqCompoFeatures.compoNames.get(recognizer.index);
+				 if(seqType.equals(querySeqType)){  	
+				   tarBlastSeqObj=new ArrayList<SeqCompoAlignInfo>(); 			  
+				   if(doBlast){
+					  SeqOperation.createFASTASeq(recognizer.seq,recognizer.seqName,recognizer.seqFASTAFile); 
+					  querySeqFile=recognizer.seqFASTAFile;
+					  blastWordSize=recognizer.blastWordSize;
+					  blastTask=recognizer.blastTask;			
+					  blastCMD="blastn -task "+blastTask+" "
 					          +tarBlastCMD+" -word_size="+blastWordSize
 					          +" -query "+querySeqFile
 					          +" -subject "+queryNoExactSeqFile
 					          +" -out "+blastOutFile+" -outfmt 6";				
-					   SeqOperation.runBLAST(blastCMD);			  
-					   tarBlastSeqObj=getLeftSideBLASTSeq(queryNonExactSeqList,recognizer,
+					  SeqOperation.runBLAST(blastCMD);			  
+					  tarBlastSeqObj=getLeftSideBLASTSeq(queryNonExactSeqList,recognizer,
 								  seqType,seqRocket,blastOutFile);		  
-					   FileOperate.delFile(blastOutFile);
-					   FileOperate.delFile(querySeqFile);
-					} 		              
-					seqRocket.nonExactSeqCount+=tarBlastSeqObj.size();
-					tarBlastSeqObj=null; //release memory space				 
-					 					 
-				   }
+					  FileOperation.delFile(blastOutFile);
+					  FileOperation.delFile(querySeqFile);
+				   } 		              
+				   seqRocket.nonExactSeqCount+=tarBlastSeqObj.size();
+				   tarBlastSeqObj=null; //release memory space						 					 
+				 }
 				  
-				   seqRocket.seqRecognizer.get(k).done=true;		
-				   recognizer=null;	 
-				   seqRocket.isDone=true;
+				 seqRocket.seqRecognizers.get(k).done=true;		
+				 recognizer=null;	 
+				 seqRocket.isDone=true;
 			   }
 			} // for seqRecognizer
 

@@ -43,7 +43,8 @@ import org.geatools.GEAT;
 import org.geatools.data.structure.SeqQual;
 
 public class SeqQCFilter {
-	String prinseqDir="utilities/prinseq";
+	 
+	String prinseqDir=GEAT.getHomeDir()+GEAT.getfileSeparator()+"utilities"+GEAT.getfileSeparator()+"prinseq";
 	String outDir;
 	String resFasta;
 	String resFasta2;
@@ -100,7 +101,7 @@ public class SeqQCFilter {
 	}
 	*/
 	public void setOpts(String[]opts){
-	   if(opts!=null){ 
+	   if(opts!=null && opts.length>0){ 
 		 Map<String, List<String>> params=GEAT.getCommandLineParams(opts);
 
 		 //####### set seq minmum length #######
@@ -239,26 +240,23 @@ public class SeqQCFilter {
 	
 	public void prinseqQC(String fastqFile){
 		   
-		   isOK=true;
+		isOK=true;
 		   
-		   File f=new File(fastqFile);
-		   if(!f.exists()){
-			  isOK=false;
-			  f=null; 
-			  return;
-		   }
+		File f=new File(fastqFile);
+		if(!f.exists()){
+		  isOK=false;
+		  f=null; 
+		  return;
+		}
 		   
-		   String seqFile=fastqFile;
-		   if(outDir==null) outDir=seqFile.substring(0,seqFile.lastIndexOf("/"));		   
+		String seqFile=fastqFile;
+		if(outDir==null) outDir=seqFile.substring(0,seqFile.lastIndexOf("/"));		   
 		   		 
-		   String seqName=seqFile.substring(
-				            seqFile.lastIndexOf("/")+1,seqFile.lastIndexOf(".")
-				          );
-		   String seqFullName=outDir+"/"+seqName;
-		   	   
+		String seqName=seqFile.substring(seqFile.lastIndexOf("/")+1,seqFile.lastIndexOf("."));
+		String seqFullName=outDir+"/"+seqName;		   	   
 		 
-		   Process process;
-		   try {
+		Process process;
+		try {
 			 List<String> cmdList=new ArrayList<String>();
 			 List<String> cmdStrList=new ArrayList<String>();		   	  
 		   	 
@@ -282,16 +280,13 @@ public class SeqQCFilter {
 			     else seqFile=seqFullName+".goodQual.fastq";
 			     
 			     //seqName=seqFile.substring(0,seqFile.lastIndexOf("."));
-			     seqName=seqFile.substring(
-				            seqFile.lastIndexOf("/")+1,seqFile.lastIndexOf(".")
-				          );
+			     seqName=seqFile.substring(seqFile.lastIndexOf("/")+1,seqFile.lastIndexOf("."));
 			     seqFullName=outDir+"/"+seqName;
 		   	 }
 		   	 
 		   	 if(removeExactDup){
 		   		
-		   		 String cmd="perl "+prinseqDir+"/prinseq-lite.pl -fastq "+seqFile
-		   	    		    +" -derep 14 -derep_min 2 ";
+		   		 String cmd="perl "+prinseqDir+"/prinseq-lite.pl -fastq "+seqFile+" -derep 14 -derep_min 2 ";
 			     if(outFormat>0) cmd=cmd+"-out_format "+outFormat;
 			     cmd=cmd+" -out_good "+seqFullName+".goodDup -out_bad "+seqFullName+".badDup";
 			  
@@ -302,9 +297,7 @@ public class SeqQCFilter {
 			     else if(outFormat<=5) seqFile=seqFullName+".goodDup.fastq";
 			     
 			     //seqName=seqFile.substring(0,seqFile.lastIndexOf("."));
-			     seqName=seqFile.substring(
-				            seqFile.lastIndexOf("/")+1,seqFile.lastIndexOf(".")
-				          );
+			     seqName=seqFile.substring(seqFile.lastIndexOf("/")+1,seqFile.lastIndexOf("."));
 			     seqFullName=outDir+"/"+seqName;
 		   	 }
 		   	 
@@ -323,48 +316,46 @@ public class SeqQCFilter {
 			     else if(outFormat<=5) seqFile=seqFullName+".Out.fastq";
 			     
 			     //seqName=seqFile.substring(0,seqFile.lastIndexOf("."));
-			     seqName=seqFile.substring(
-				            seqFile.lastIndexOf("/")+1,seqFile.lastIndexOf(".")
-				          );
+			     seqName=seqFile.substring(seqFile.lastIndexOf("/")+1,seqFile.lastIndexOf("."));
 			     seqFullName=outDir+"/"+seqName;
 		   	 }
 	
 			
 			 for(int i=0;i<cmdList.size();i++){
 			   
-			   System.out.println("Step "+(i+1)+": "+cmdStrList.get(i));
+			     System.out.println("Step "+(i+1)+": "+cmdStrList.get(i));
 			   
-			   process = Runtime.getRuntime().exec(cmdList.get(i));
-			   process.waitFor();
-			   if(process.exitValue() == 0) {
-			     System.out.println("Success!");
-			   }else {
-				 isOK=false;
-			     System.err.println("Failure!!!");
-			     return;
-			   }
+			     process = Runtime.getRuntime().exec(cmdList.get(i));
+			     process.waitFor();
+			     if(process.exitValue() == 0) {
+			      System.out.println("Success!");
+			     }else {
+				   isOK=false;
+			       System.err.println("Failure!!!");
+			       return;
+			     }
 			   
 			 }
 			 
 			 if(isOK){
-				if(outFormat==1 || outFormat==2 || outFormat==4 || outFormat==5){
+				 if(outFormat==1 || outFormat==2 || outFormat==4 || outFormat==5){
 			       resFasta=seqFullName+".fasta";
-				}
+				 }
 				
-				if(outFormat==3 || outFormat==4 || outFormat==5){
+				 if(outFormat==3 || outFormat==4 || outFormat==5){
 				   resFastq=seqFullName+".fastq";
-				}
+				 }
 				
-				if(outFormat==2 || outFormat==5){
+				 if(outFormat==2 || outFormat==5){
 				   resQual=seqFullName+".qual";
-				}
+				 }
 			 }else{
-			    resFasta=null;
-			    resFastq=null;
+			     resFasta=null;
+			     resFastq=null;
 			 }
-		   } catch(Exception e) {
-			    System.out.println("Exception: "+ e.toString());
-		   }
+		}catch(Exception e) {
+			 System.out.println("Exception: "+ e.toString());
+		}
 	}
 	
 }

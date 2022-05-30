@@ -36,9 +36,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public  class  FileOperate  {
+public  class  FileOperation {
   
-   public  FileOperate()  {  
+   public  FileOperation()  {  
    } 
    
    static public List<ArrayList <String>> getMatrixFromFile(String inFile){
@@ -194,7 +194,7 @@ public  class  FileOperate  {
 	    }     
    }
    
-   static public List<String> getRowListFromFile(String inFile){
+   static public List<String> getRowsOfFile(String inFile){
 		 
 	    List <String> lineList=new ArrayList <String> ();
 		try{    
@@ -218,13 +218,13 @@ public  class  FileOperate  {
 	  
    }
   
-   static public List<String> combineRowListFromFiles(String inFilesFile, String outFile){
+   static public List<String> combineRowsOfFiles(String filesFile, String outFile){
 		 
 	    List <String> lineList=new ArrayList <String> ();
 		try{    
 	      BufferedReader br;  
-	   	  List<String> seqFileList=FileOperate.getRowListFromFile(inFilesFile);
-	      if(outFile==null) outFile=inFilesFile+".rowCombine";
+	   	  List<String> seqFileList=getRowsOfFile(filesFile);
+	      if(outFile==null) outFile=filesFile+".rowCombine";
 	   	  BufferedWriter writer=null;
           writer=new BufferedWriter(new FileWriter(outFile));
    	      for(String seq:seqFileList){    		
@@ -248,8 +248,7 @@ public  class  FileOperate  {
 	  
    }
   
-   static public List<String> combineRowListFromFiles(List<String> seqFileList,
-		  String outFile){
+   static public List<String> combineRowsOfFiles(List<String> seqFileList,String outFile){
 		 
 	    List <String> lineList=new ArrayList <String> ();
 		try{    
@@ -278,15 +277,16 @@ public  class  FileOperate  {
 	    return lineList;	
 	  
    }
-
    
-   public static String getFileFormat(String file){
+   static public String getFileFormat(String file){
 		 
-	     if(file==null) return null;
-		 
-	     String format=file.substring(file.lastIndexOf(".")+1,file.length());
-		 
-		 return format;
+	    if(file==null) return null;
+	    String format="";
+	    if(file.lastIndexOf(".")+1<file.length()) {
+	       format=file.substring(file.lastIndexOf(".")+1,file.length());
+	    }
+		
+	    return format;
    }
 
    /**  
@@ -346,14 +346,14 @@ public  class  FileOperate  {
      *  @return  boolean  
    */  
    static public void  delFile(String  filePathAndName)  {  
-       try  {  
+      
+	   try  {  
            String  filePath  =  filePathAndName;  
            filePath  =  filePath.toString();  
-           java.io.File  myDelFile  =  new  java.io.File(filePath);  
-           myDelFile.delete();  
+           java.io.File  deletedFile  =  new  java.io.File(filePath);  
+           if(deletedFile.exists()) deletedFile.delete();  
 
-       }  
-       catch  (Exception  e)  {  
+       } catch  (Exception  e)  {  
            System.out.println("Fail to delete file");  
            e.printStackTrace();  
 
@@ -372,16 +372,14 @@ public  class  FileOperate  {
            delAllFile(folderPath);  //
            String  filePath  =  folderPath;  
            filePath  =  filePath.toString();  
-           java.io.File  myFilePath  =  new  java.io.File(filePath);  
-           myFilePath.delete();  //
-
+           java.io.File  deletedFilePath  =  new  java.io.File(filePath);  
+           if(deletedFilePath.exists()) deletedFilePath.delete();  //
        }  
        catch  (Exception  e)  {  
            System.out.println("Fail to delete folder");  
            e.printStackTrace();  
 
-       }  
-
+       } 
    }  
 
    /**  

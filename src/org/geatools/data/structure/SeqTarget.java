@@ -32,14 +32,10 @@
  *******************************************************************************/
 package org.geatools.data.structure;
 
-import java.util.List;
-
-public class ChrInfo {
-    
-	public int num;
-	public String name;
-	public int length;	
-    public String chrFaFile;
-    public List<ChrSite> siteList;	
+public class SeqTarget {
 	
+   public String tarSeq;
+   public int start;
+   public int end;
+   
 }

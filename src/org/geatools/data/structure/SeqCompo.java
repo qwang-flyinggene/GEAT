@@ -35,18 +35,23 @@ public class  SeqCompo implements Cloneable{
 	
 	public boolean isActive=true;
 	
-	public String name="";	
-	public String barName=null;
-	public String barSeq=null;	
+	public String expName="";	
+	public String barcodeName=null;
+	public String barcodeSeq=null;	
 	public String primerSeq=null;	
 	public String primerContSeq=null;	
 	public String baitTerritorySeq=null;
 	public String baitTerritoryArmSeq=null;	
-
+	public String rc3PrimerContSeq=null;
+	public String rc3PrimerSeq=null;	
+	public String rc3BarcodeSeq=null;	
+	public String rc3SeqLinkerSeq=null;	
+	
 	public String freqCutterSeq=null;
 	
 	  @Override
 	public Object clone() throws CloneNotSupportedException {
+		
 		SeqCompo cloned = (SeqCompo)super.clone();
 		
 		return cloned;

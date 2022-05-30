@@ -36,49 +36,53 @@ import java.util.List;
 
 public class SeqRocket implements Cloneable{
 	public String rocketName="";
+	public String expName="";
 	public boolean isActive=true;
-	public boolean isDone=false;
-	////public SeqCompo seqComponent;
-	public List<SeqCompoRecognizer> seqRecognizer;
-	public SeqCompoType seqTypeInfo;
-	public String barcodeRecognizedSeqFile;
-	public String recognizedMaskSeqFile;
-	public String recognizedTrimSeqFile;
+	public boolean isDone=false;	
+	public List<SeqCompoRecognizer> seqRecognizers;
+	public SeqCompoFeatures seqCompoFeatures;
+	public List<String> savedCompoAlignedSeqFiles;
+	public String finalSeqCompo;
+	public String outDir;
+	public String recognizedSeqFileMasked;
+	public String recognizedSeqFileTrimmed;
 	public String recognizedSeqFile;
+	public String recognizedSeqHTMLFile;
+	public String minLeftRecognizerSeq;
+	public String allRightRecognizerSeq;
 	public int recognizedSeqCount=0;
 	public int exactSeqCount=0;
 	public int nonExactSeqCount=0;
 	public double recognizedSeqRPM=0;
+	public boolean saveRecognizedSeq=true;
+	public boolean saveRecognizedSeqAsFASTA=true;
+	public boolean saveRecognizedSeqAsFASTQ=false;
+	public boolean saveRecognizedSeqAsHTML;
+	public boolean isRecognized=false;
+	public boolean isEndTrimmed=false;
+	public boolean isEndMasked=false;
 	
 	public void setSeqRecognizer(List<SeqCompoRecognizer> seqRecognizerList){
-		this.seqRecognizer=seqRecognizerList;
+		this.seqRecognizers=seqRecognizerList;
 	}
-	public void setSeqTypeInfo(SeqCompoType seqType){
-		this.seqTypeInfo=seqType;
-	}
-	
-	/*
-	public void setSeqComponent(SeqCompo seqCompo){
-		this.seqComponent=seqCompo;
-	}
-	*/	
+	public void setSeqCompoType(SeqCompoFeatures seqCompoFeatureList){
+		this.seqCompoFeatures=seqCompoFeatureList;
+	}	
+
 	
 	@Override
 	public Object clone() throws CloneNotSupportedException {
 		SeqRocket cloned = (SeqRocket)super.clone();
 		// deep copy of object field
 		List<SeqCompoRecognizer> clonedSeqRecognizer=new ArrayList<SeqCompoRecognizer>();
-		for(SeqCompoRecognizer seqRecognizer:cloned.seqRecognizer){
+		for(SeqCompoRecognizer seqRecognizer:cloned.seqRecognizers){
 		  SeqCompoRecognizer recognizer=(SeqCompoRecognizer) seqRecognizer.clone();
 		  clonedSeqRecognizer.add(recognizer);
 		}
 		cloned.setSeqRecognizer(clonedSeqRecognizer);
 		
-		//SeqCompo seqCompo=(SeqCompo) cloned.seqComponent.clone();
-		//cloned.setSeqComponent(seqCompo);
-		
-		SeqCompoType seqType=(SeqCompoType) cloned.seqTypeInfo.clone();
-		cloned.setSeqTypeInfo(seqType);
+		SeqCompoFeatures seqCompo=(SeqCompoFeatures) cloned.seqCompoFeatures.clone();
+		cloned.setSeqCompoType(seqCompo);
 		
 	    return cloned;
 	}

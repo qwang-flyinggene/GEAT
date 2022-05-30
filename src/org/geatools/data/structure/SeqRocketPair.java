@@ -33,6 +33,7 @@
 package org.geatools.data.structure;
 
 public class SeqRocketPair {
+  public String name;
   public SeqRocket forward;
   public SeqRocket reverse;
 }

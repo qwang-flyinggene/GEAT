@@ -40,16 +40,13 @@ import java.util.ArrayList;
 
 import org.geatools.data.structure.BlastInfo;
 import org.geatools.data.structure.ChrSite;
-import org.geatools.data.structure.SeqChrAlignSite;
+import org.geatools.data.structure.SeqAlignSite;
 import org.geatools.data.structure.SeqInfo;
-import org.geatools.operation.FileOperate;
-import org.geatools.seqprocess.SeqOperation;
+import org.geatools.operation.FileOperation;
+import org.geatools.operation.SeqOperation;
 
 public class SeqOffTarget{
 
-	 //int siteDownStreamSize=6;
-	 //int siteUpStreamSize=0;
-	    
 	 static String tmpDir="tmp";
 	 
 	 public SeqOffTarget(){
@@ -60,7 +57,7 @@ public class SeqOffTarget{
 		tmpDir=dir;
 	 }
 	 public void delTmpDir(String dir){
-		FileOperate.delFolder(dir);
+		FileOperation.delFolder(dir);
 	 }	 
 	 
 	 public List<ChrSite> getOffTargetSite(String targetSeqFile,String refGenomeFile, 
@@ -94,7 +91,7 @@ public class SeqOffTarget{
 		int targetSeqLen=targetSeqInfo.get(0).seq.length();
 		targetSeqInfo=null;		
 		
-	    List <ArrayList <String>> blastOut=FileOperate.getMatrixFromFile(blastOutFile);
+	    List <ArrayList <String>> blastOut=FileOperation.getMatrixFromFile(blastOutFile);
 		for(int n=0;n<blastOut.size();n++){
 	     
 		 offTargetChr=blastOut.get(n).get(BlastInfo.colSName);
@@ -138,12 +135,11 @@ public class SeqOffTarget{
 	 
 	  }
 	  
-	  public List<SeqChrAlignSite> getOffTargetSite(String targetSeqFile,String refGenomeFile, 
-			 float minIdentity,float minAlignLenRatio,float maxMismatchRatio,
-			 int maxGapNum){
+	  public List<SeqAlignSite> getOffTargetSite(String targetSeqFile,String refGenomeFile, 
+			 float minIdentity,float minAlignLenRatio,float maxMismatchRatio,int maxGapNum){
 	   
-	    List<SeqChrAlignSite> offTargetSite=new ArrayList<SeqChrAlignSite> ();
-	    SeqChrAlignSite perSite;
+	    List<SeqAlignSite> offTargetSite=new ArrayList<SeqAlignSite> ();
+	    SeqAlignSite perSite;
 	    String timeStamp=new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
 		String blastOutFile=tmpDir+"/"+refGenomeFile.substring(
 		    refGenomeFile.lastIndexOf("/"),refGenomeFile.lastIndexOf("."))
@@ -172,7 +168,7 @@ public class SeqOffTarget{
 		int mismatchNum=2;
 		int gapNum=2;
 		float bitScore=0.0f;	
-	    List <ArrayList <String>> blastOut=FileOperate.getMatrixFromFile(blastOutFile);
+	    List <ArrayList <String>> blastOut=FileOperation.getMatrixFromFile(blastOutFile);
 		for(int n=0;n<blastOut.size();n++){
 	     
 			 offTargetChr=blastOut.get(n).get(BlastInfo.colSName);
@@ -196,7 +192,7 @@ public class SeqOffTarget{
 			 if(identity>=minIdentity && alignLen>=minAlignLen && mismatchNum<=maxMismatchNum
 					 && gapNum<=maxGapNum){
 			    
-				perSite=new SeqChrAlignSite ();
+				perSite=new SeqAlignSite ();
 			    
 			    offTargetName="OffTarget";
 			    if(identity==100.0f && alignLen==targetSeqLen && mismatchNum==0 && gapNum==0)
@@ -224,15 +220,15 @@ public class SeqOffTarget{
 	 
 	  }
 	  
-	  public void sortSiteByScore(List <SeqChrAlignSite> siteList,boolean desc){
+	  public void sortSiteByScore(List <SeqAlignSite> siteList,boolean desc){
 	
-		 Collections.sort(siteList, new SeqChrAlignSite.CompScore(desc)); 
+		 Collections.sort(siteList, new SeqAlignSite.CompScore(desc)); 
 	
 	  }
 	  
-	  public void sortSiteByMismatchNum(List <SeqChrAlignSite> siteList,boolean desc){
+	  public void sortSiteByMismatchNum(List <SeqAlignSite> siteList,boolean desc){
 	
-		 Collections.sort(siteList, new SeqChrAlignSite.CompMismatch(desc)); 
+		 Collections.sort(siteList, new SeqAlignSite.CompMismatch(desc)); 
 	
 	  }
 	  
