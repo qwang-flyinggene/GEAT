@@ -57,9 +57,9 @@ import org.geatools.seqprocess.SeqQCFilter;
 import org.geatools.seqprocess.SeqRocketConsole;
 
 public class GEAT{
-  
-	 protected static String homeDir=getClassPath();
+	 
 	 protected static String fileSeparator = System.getProperties().getProperty("file.separator");
+	 protected static String homeDir=getClassPath();
 	 protected static String dataDir=homeDir+fileSeparator+"data";
 	 protected static String workingDir=homeDir+fileSeparator+"working";	
 	 protected static String tmpDir=homeDir+fileSeparator+"tmp";	
@@ -137,7 +137,7 @@ public class GEAT{
           return null;
       }
 
-      String absolutePath = decodedPath.substring(0, decodedPath.lastIndexOf(fileSeparator));
+      String absolutePath = decodedPath.substring(0, decodedPath.lastIndexOf(File.separator));
       return absolutePath;
   }
   
@@ -193,9 +193,9 @@ public class GEAT{
   }
 	 
   public static void main(String[] args) throws Exception {		  
-	 
-	 homeDir=getClassPath();
+	 	 
 	 fileSeparator = System.getProperties().getProperty("file.separator");
+	 homeDir=getClassPath();
 	 dataDir=homeDir+fileSeparator+"data";
 	 //String workDir = System.getProperties().getProperty("user.dir");
 	 workingDir=homeDir+fileSeparator+"working";
