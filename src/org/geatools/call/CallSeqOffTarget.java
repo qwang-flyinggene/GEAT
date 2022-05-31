@@ -103,7 +103,7 @@ public class CallSeqOffTarget extends GEAT{
 				  if(params.get("targetSeq").size()>0){
 					 targetSeqStr=params.get("targetSeq").get(0).trim();
 				     if(targetSeqStr==null){
-				    	targetSeqFile=tmpDir+"/YourTargetSeq.fna";
+				    	targetSeqFile=tmpDir+fileSeparator+"YourTargetSeq.fna";
 				    	SeqOperation.saveSeqAsFASTA(targetSeqStr,"YourTargetSeq",targetSeqFile);
 				     }else{
 				    	System.err.println("Illegal '-targetSeq' parameter usage :(");
@@ -272,9 +272,9 @@ public class CallSeqOffTarget extends GEAT{
 			 }	
 		     
 		 	 System.out.println("Loading Chr......");	
-		 	 String genomePath="data/genome_info/"+refGenome+"/";
-		 	 String chrInfoFile=genomePath+"/"+refGenome+"_chromInfo.txt";
-		 	 String chrSeqPath=genomePath+"/"+refGenome+"_chromfa/";
+		 	 String genomePath="data"+fileSeparator+"genome_info"+fileSeparator+refGenome+fileSeparator;
+		 	 String chrInfoFile=genomePath+fileSeparator+refGenome+"_chromInfo.txt";
+		 	 String chrSeqPath=genomePath+fileSeparator+refGenome+"_chromfa"+fileSeparator;
 		 	 List<ChrInfo> chrInfoList;
 		     chrInfoList=LoadChrInfo.getChrInfo(chrInfoFile);
 		     LoadChrInfo.sortChrByNum(chrInfoList);    
@@ -283,7 +283,7 @@ public class CallSeqOffTarget extends GEAT{
 		 	 String chrFile="";
 		 	 for(int i=0;i<chrInfoList.size(); i++){
 		 	   chrName=chrInfoList.get(i).name;
-		 	   chrFile=chrSeqPath+"/"+chrName+".fa";
+		 	   chrFile=chrSeqPath+fileSeparator+chrName+".fa";
 		 	   chrInfoList.get(i).chrFaFile=chrFile;
 		 	 }
 		 	 
@@ -354,7 +354,7 @@ public class CallSeqOffTarget extends GEAT{
 			 	   targetSiteIdx=null;
 			 	}
 			 	
-			 	String outFile=outDir+"/"+refGenome
+			 	String outFile=outDir+fileSeparator+refGenome
 			 			+targetSeq.seqName+".OffTargetSite_IP"+seqMinIdentity
 			 			+"LR"+seqMinAlignLenRatio+"MR"+seqMaxMismatchRatio
 			 			+"G"+maxGapNum+".bed";

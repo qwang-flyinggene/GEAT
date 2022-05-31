@@ -153,8 +153,8 @@ public class  QuerySeqCount extends SeqRocketRecognition{
 		  query.saveAsFASTQ=false; //ooooooooooooooo	
 		  query.leftTrimSave=false;
 		  query.rightTrimSave=false;
-		  query.exactAlignedSeqFile=tmpDir+"/"+query.seqName+"_ExactAlignedSeq";
-		  query.seqFASTAFile=tmpDir+"/"+query.seqName+".fna";		  
+		  query.exactAlignedSeqFile=tmpDir+File.separator+query.seqName+"_ExactAlignedSeq";
+		  query.seqFASTAFile=tmpDir+File.separator+query.seqName+".fna";		  
 
           rockets.get(i).seqRecognizers.set(query.index,query);	
 
@@ -367,7 +367,7 @@ public class  QuerySeqCount extends SeqRocketRecognition{
 	  if(expList.size()==0) return;
 	  
 	  if(outDir==null){
-		 outDir=querySeqFile.substring(0, querySeqFile.lastIndexOf("/"))+"/RecognizedSeq";	
+		 outDir=querySeqFile.substring(0, querySeqFile.lastIndexOf(File.separator))+File.separator+"RecognizedSeq";	
 	  }
 	  FileOperation.newFolder(outDir);
 
@@ -376,10 +376,10 @@ public class  QuerySeqCount extends SeqRocketRecognition{
 	  else outTag="";
 	  
 	  String outFile=outTag+querySeqFile.substring(
-					   querySeqFile.lastIndexOf("/")+1,querySeqFile.lastIndexOf(".")
+					   querySeqFile.lastIndexOf(File.separator)+1,querySeqFile.lastIndexOf(".")
 				    )+".Counts.txt";
       
-	  outFile=outDir+"/"+outFile;
+	  outFile=outDir+File.separator+outFile;
 	  List<ArrayList<String>> resOut=new ArrayList<ArrayList<String>>();
 	  ArrayList<String> perRes;
   	  for(int i=0;i<expList.get(0).size();i++){	
@@ -396,10 +396,10 @@ public class  QuerySeqCount extends SeqRocketRecognition{
       
       //Save query seq RPM ................................
 	  outFile=outTag+querySeqFile.substring(
-				querySeqFile.lastIndexOf("/")+1,querySeqFile.lastIndexOf(".")
+				querySeqFile.lastIndexOf(File.separator)+1,querySeqFile.lastIndexOf(".")
 			  )+".RPM.txt";
       
-	  outFile=outDir+"/"+outFile;
+	  outFile=outDir+File.separator+outFile;
 	  resOut=new ArrayList<ArrayList<String>>();	 
   	  for(int i=0;i<expList.get(0).size();i++){	
 		 perRes=new ArrayList<String>();
@@ -491,19 +491,19 @@ public class  QuerySeqCount extends SeqRocketRecognition{
 	    	    
 	    if(saveRes){
 		   if(outDir==null){
-				outDir=inSeqFile.substring(0, inSeqFile.lastIndexOf("/"))+"/RecognizedSeq";	
+				outDir=inSeqFile.substring(0, inSeqFile.lastIndexOf(File.separator))+File.separator+"RecognizedSeq";	
 		   }
 		   FileOperation.newFolder(outDir);
 
 		   if(outFile==null)
 				outFile=inSeqFile.substring(
-						   inSeqFile.lastIndexOf("/")+1,inSeqFile.lastIndexOf(".")
+						   inSeqFile.lastIndexOf(File.separator)+1,inSeqFile.lastIndexOf(".")
 					    )+"_"
 						+querySeqFile.substring(
-						   querySeqFile.lastIndexOf("/")+1,querySeqFile.lastIndexOf(".")
+						   querySeqFile.lastIndexOf(File.separator)+1,querySeqFile.lastIndexOf(".")
 					    )+".Counts.txt";
            
-		   outFile=outDir+"/"+outFile;
+		   outFile=outDir+File.separator+outFile;
 		   saveSeqCountInfo(querySeqRockets,outFile);		   
 	    }
 	    
@@ -538,8 +538,8 @@ public class  QuerySeqCount extends SeqRocketRecognition{
 		 int s=1;
 		 for(String file:splitedSeqFiles){
 		    try {
-		      splitOutDir=file.substring(0,file.lastIndexOf("/"));
-		      splitOutDir=splitOutDir+"/"+file.substring(file.lastIndexOf("/")+1,file.lastIndexOf("."));
+		      splitOutDir=file.substring(0,file.lastIndexOf(File.separator));
+		      splitOutDir=splitOutDir+File.separator+file.substring(file.lastIndexOf(File.separator)+1,file.lastIndexOf("."));
 			  FileOperation.newFolder(splitOutDir);
 			   
 			  System.out.println("......Recognizing sequence for split "+s+" ......");
@@ -557,7 +557,7 @@ public class  QuerySeqCount extends SeqRocketRecognition{
 		 ///*
 		 if(splitedSeqFiles.size()>0){
 			 String file=splitedSeqFiles.get(0);
-			 if(outDir==null) outDir=file.substring(0,file.lastIndexOf("/"))+"/combined";
+			 if(outDir==null) outDir=file.substring(0,file.lastIndexOf(File.separator))+File.separator+"combined";
 			 FileOperation.newFolder(outDir);
 			 System.out.println("......Combine splited sequences......");
 			 int seqCounts=0;		
@@ -582,9 +582,9 @@ public class  QuerySeqCount extends SeqRocketRecognition{
 		     }
 			 if(outFile==null)
 			    outFile=querySeqFile.substring(
-				  querySeqFile.lastIndexOf("/")+1,querySeqFile.lastIndexOf("."))+".counts.txt";
+				  querySeqFile.lastIndexOf(File.separator)+1,querySeqFile.lastIndexOf("."))+".counts.txt";
 			 
-			 outFile=outDir+"/"+outFile;
+			 outFile=outDir+File.separator+outFile;
 			 FileOperation.saveMatrixList(res, outFile);
 		 }
 		 //*/
@@ -709,7 +709,7 @@ public class  QuerySeqCount extends SeqRocketRecognition{
 		   queryNonExactSeqList=getNoRecognizedSeq(queryNonExactSeqList,compoIdx);
 	 	   querySeq=null;
 		   System.out.println(seqRocket.rocketName+" NonExact reads:"+queryNonExactSeqList.size());
-		   queryNonExactSeqFile=tmpDir+"/QueryNonExactMatchSeq_forward.fna";        
+		   queryNonExactSeqFile=tmpDir+File.separator+"QueryNonExactMatchSeq_forward.fna";        
 		   createBLASTTarSeq(queryNonExactSeqList,queryNonExactSeqFile);			
 		   setNonExactBLASTInfo(seqRocket,queryNonExactSeqList,queryNonExactSeqFile,querySeqType);
 		   queryNonExactSeqList=null;
@@ -736,7 +736,7 @@ public class  QuerySeqCount extends SeqRocketRecognition{
 		  String blastCMD="";	
 		  String querySeqFile="";		
 		  String timeStamp=new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
-		  String blastOutFile=tmpDir+"/Count.BlastOut."+timeStamp+".txt";
+		  String blastOutFile=tmpDir+File.separator+"Count.BlastOut."+timeStamp+".txt";
 		  //List<Integer> blastWordSizeList;		 	
 		  int blastWordSize=7;
 		  String blastTask="blastn-short";	

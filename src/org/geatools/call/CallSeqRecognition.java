@@ -352,7 +352,7 @@ public class CallSeqRecognition extends GEAT{
 			  }
 		   }		   
 		   if(!doOutput){			   
-			  outDir=homeDir+"/working";
+			  outDir=homeDir+fileSeparator+"working";
 			  dir=new File(outDir);
 			  if(!dir.exists()) FileOperation.newFolder(outDir);	
 		      dir=null;
@@ -704,7 +704,7 @@ public class CallSeqRecognition extends GEAT{
 		   if(doSplitSeq &&(isFastqOK || isFastaOK)){
 			  //Check seq format, and then split seq into multiple subfiles................
 			  System.out.println("###### Spliting forward seq..........");
-			  String splitedSeqOut=outDir+"/split_forward";
+			  String splitedSeqOut=outDir+fileSeparator+"split_forward";
 			  FileOperation.newFolder(splitedSeqOut);
 			  splitedSeqFiles=null;			
 	      	  splitedSeqFiles=SeqOperation.splitSeqFile(inSeqFile,splitStep,splitedSeqOut);		 				
@@ -716,7 +716,7 @@ public class CallSeqRecognition extends GEAT{
 			  if(seqType.equalsIgnoreCase(SeqOperation.SEQTYPE_PAIREND)){					
 				  //Check seq format, and then split seq into multiple subfiles................
 				 System.out.println("###### Spliting pair-end reverse seq.........");
-				 splitedSeqOut=outDir+"/split_reverse";
+				 splitedSeqOut=outDir+fileSeparator+"split_reverse";
 				 FileOperation.newFolder(splitedSeqOut);
 				 splitedSeqFiles2=null;
 			     splitedSeqFiles2=SeqOperation.splitSeqFile(inSeqFile2,splitStep,splitedSeqOut);			    	

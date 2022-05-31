@@ -358,7 +358,7 @@ public class CallUtility extends GEAT{
 			}
 		 }		   
 		 if(!doOutput){			   
-			outDir=homeDir+"/working";
+			outDir=homeDir+fileSeparator+"working";
 			dir=new File(outDir);
 			if(!dir.exists()) FileOperation.newFolder(outDir);	
 		    dir=null;
@@ -520,8 +520,8 @@ public class CallUtility extends GEAT{
 			  inSeqFile=fasta;
 		    }				
 		
-			if(outDir==null) outDir=inSeqFile.substring(0,inSeqFile.lastIndexOf("/"));
-			String splitedSeqOut=outDir+"/split_forward";
+			if(outDir==null) outDir=inSeqFile.substring(0,inSeqFile.lastIndexOf(fileSeparator));
+			String splitedSeqOut=outDir+fileSeparator+"split_forward";
 			FileOperation.newFolder(splitedSeqOut);
 	      	splitedSeqFiles=SeqOperation.splitSeqFile(inSeqFile,splitStep,splitedSeqOut);		 				
 			if(splitedSeqFiles==null || splitedSeqFiles.size()==0){
@@ -540,8 +540,8 @@ public class CallUtility extends GEAT{
 			      inSeqFile2=fasta2;
 			    }		
 				    
-				if(outDir==null) outDir=inSeqFile2.substring(0,inSeqFile2.lastIndexOf("/"));
-				splitedSeqOut=outDir+"/split_reverse";
+				if(outDir==null) outDir=inSeqFile2.substring(0,inSeqFile2.lastIndexOf(fileSeparator));
+				splitedSeqOut=outDir+fileSeparator+"split_reverse";
 				FileOperation.newFolder(splitedSeqOut);
 			    splitedSeqFiles2=SeqOperation.splitSeqFile(inSeqFile2,splitStep,splitedSeqOut);				    	
 			    if(splitedSeqFiles==null || splitedSeqFiles.size()==0){
@@ -564,14 +564,14 @@ public class CallUtility extends GEAT{
 		       format="fastq";
 		    }
 		    System.out.println("Total seq num: "+SeqOperation.getSeqNum(seqFile));
-			if(outDir==null) outDir=seqFile.substring(0,seqFile.lastIndexOf("/"));
+			if(outDir==null) outDir=seqFile.substring(0,seqFile.lastIndexOf(fileSeparator));
 			
 		    String outSeqFile;
 		    if(outName==null) outName=seqFile.substring(				    
-		    		   seqFile.lastIndexOf("/")+1,seqFile.lastIndexOf(".")
+		    		   seqFile.lastIndexOf(fileSeparator)+1,seqFile.lastIndexOf(".")
 		    		 )+".extracted."+format;		    	
 		    
-		    outSeqFile=outDir+"/"+outName;
+		    outSeqFile=outDir+fileSeparator+outName;
 		    
 			if(params.get("seqName") !=null && params.get("seqName").size()>1 
 					 && (params.get("seqName").size() % 2 == 0)){
@@ -630,9 +630,9 @@ public class CallUtility extends GEAT{
 			    String outFile;			    	  
 				List<String> seqNameFiles = new ArrayList<String>();	
 			    for(String seqFile:inSeqFiles){
-			    	if(outDir==null) outDir=seqFile.substring(0,seqFile.lastIndexOf("/"));
-					outFile=outDir+"/"+seqFile.substring(
-					    		   seqFile.lastIndexOf("/")+1,seqFile.lastIndexOf(".")
+			    	if(outDir==null) outDir=seqFile.substring(0,seqFile.lastIndexOf(fileSeparator));
+					outFile=outDir+fileSeparator+seqFile.substring(
+					    		   seqFile.lastIndexOf(fileSeparator)+1,seqFile.lastIndexOf(".")
 					    		 )+".seqName";
 			    		    		
 			    	isOK=SeqOperation.extratSeqName(seqFile,outFile);
@@ -645,7 +645,7 @@ public class CallUtility extends GEAT{
 			    }
 			    	  
 			    if(outName!=null){
-			    	String outCombined=outDir+"/"+outName;
+			    	String outCombined=outDir+fileSeparator+outName;
 					FileOperation.combineRowsOfFiles(seqNameFiles,outCombined);
 					seqNameFiles=null;
 					System.out.println("Combined sequences names and saved in ["+outCombined+"]");
@@ -702,9 +702,9 @@ public class CallUtility extends GEAT{
 		    	    System.out.println("Successfully excluded "+seqObjList.size()+
 		    	    		" sequences in ["+seqNameFile+"] from ["+inSeqFile+"]");
 			     
-			   	    if(outDir==null) outDir=inSeqFile.substring(0,inSeqFile.lastIndexOf("/"));
-			        String outSeqFile=outDir+"/"+inSeqFile.substring(
-			        		inSeqFile.lastIndexOf("/")+1,inSeqFile.lastIndexOf(".")
+			   	    if(outDir==null) outDir=inSeqFile.substring(0,inSeqFile.lastIndexOf(fileSeparator));
+			        String outSeqFile=outDir+fileSeparator+inSeqFile.substring(
+			        		inSeqFile.lastIndexOf(fileSeparator)+1,inSeqFile.lastIndexOf(".")
 			    		 )+".excluded.fna";
 			        SeqOperation.saveSeqObj(seqObjList, outSeqFile);
 			        seqObjList=null;
@@ -727,7 +727,7 @@ public class CallUtility extends GEAT{
 			 if(inSeqFiles==null) return;
 			 for(String seqFile:inSeqFiles){
 			   System.out.println("Total seq num: "+SeqOperation.getSeqNum(seqFile));
-			   if(outDir==null) outDir=seqFile.substring(0,seqFile.lastIndexOf("/"));			     
+			   if(outDir==null) outDir=seqFile.substring(0,seqFile.lastIndexOf(fileSeparator));			     
 			   if(params.get("excludeSeqAndDup").size()>1 && (params.get("excludeSeqAndDup").size() % 2 == 0)){
 				   
 				  System.out.println("================Removing sequences===================");				
@@ -805,15 +805,15 @@ public class CallUtility extends GEAT{
 				  String seqFile=seqFileList.get(0);
 				  String format=FileOperation.getFileFormat(seqFile);
 				  if(outDir==null) 
-					 outDir=seqFile.substring(0,seqFile.lastIndexOf("/"))+"/combined";
+					 outDir=seqFile.substring(0,seqFile.lastIndexOf(fileSeparator))+fileSeparator+"combined";
 				  FileOperation.newFolder(outDir);
 				  if(outName==null) {										
 					 outName=seqFile.substring(
-							 seqFile.lastIndexOf("/")+1,seqFile.lastIndexOf(".")
+							 seqFile.lastIndexOf(fileSeparator)+1,seqFile.lastIndexOf(".")
 					         )+"_combined."+format;					
 				  }
 				  
-				  outName=outDir+"/"+outName;		
+				  outName=outDir+fileSeparator+outName;		
 
 				  SeqOperation.combineSeqFile(seqFileList, outName);
 				}

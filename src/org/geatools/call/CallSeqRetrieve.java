@@ -322,9 +322,9 @@ public class CallSeqRetrieve extends GEAT{
 				System.err.println("Error! You did not set '-ref' parameter, please set it and run again!");
 				return;
 			 }
-		 	 String genomePath="data/genome_info/"+genomeRef+"/";
-		 	 String chrInfoFile=genomePath+"/"+genomeRef+"_chromInfo.txt";
-		 	 String chrSeqPath=genomePath+"/"+genomeRef+"_chromfa/";
+		 	 String genomePath="data"+fileSeparator+"genome_info"+fileSeparator+genomeRef+fileSeparator;
+		 	 String chrInfoFile=genomePath+fileSeparator+genomeRef+"_chromInfo.txt";
+		 	 String chrSeqPath=genomePath+fileSeparator+genomeRef+"_chromfa"+fileSeparator;
 		 	 
 		 	 if(!new File(chrInfoFile).exists()) {
 				System.err.println("Error! The 'chromInfo' file ["+chrInfoFile+"] does not exist, please check it!");
@@ -343,7 +343,7 @@ public class CallSeqRetrieve extends GEAT{
 		 	 String chrFile="";
 		 	 for(int i=0;i<chrInfoList.size(); i++){
 		 	   chrName=chrInfoList.get(i).name;
-		 	   chrFile=chrSeqPath+"/"+chrName+".fa";
+		 	   chrFile=chrSeqPath+fileSeparator+chrName+".fa";
 		 	   chrInfoList.get(i).chrFaFile=chrFile;
 		 	 }
 		 	 
@@ -372,12 +372,12 @@ public class CallSeqRetrieve extends GEAT{
 		 	   System.out.println("Working on chr sites file ["+chrSiteFile+"]......");	
 		 	   if(outTag==null) outTag="chrSiteList";
 		 	   if(outName==null) { 
-		 		  outName=chrSiteFile.substring(chrSiteFile.lastIndexOf("/")+1,chrSiteFile.lastIndexOf("."))
+		 		  outName=chrSiteFile.substring(chrSiteFile.lastIndexOf(fileSeparator)+1,chrSiteFile.lastIndexOf("."))
 		 		       +".RetrievedSeq.fna";
 		 	   }
-		 	   if(outDir==null) outDir=chrSiteFile.substring(0,chrSiteFile.lastIndexOf("/"));
+		 	   if(outDir==null) outDir=chrSiteFile.substring(0,chrSiteFile.lastIndexOf(fileSeparator));
 		 	   
-		 	   String outFile=outDir+"/"+outName;
+		 	   String outFile=outDir+fileSeparator+outName;
 		 	   String outChrFile;
 		 	   LoadChrSite.setChrSites(chrSiteFile,chrInfoList);		 	 
 			   for(ChrInfo chrInfo:chrInfoList){
@@ -405,12 +405,12 @@ public class CallSeqRetrieve extends GEAT{
 		 		   i++;
 		 		   System.out.println("Working on No. "+i+" chr sites file ["+siteFile+"]......");	
 			 	  
-			 	   outName=siteFile.substring(siteFile.lastIndexOf("/")+1,siteFile.lastIndexOf("."))
+			 	   outName=siteFile.substring(siteFile.lastIndexOf(fileSeparator)+1,siteFile.lastIndexOf("."))
 			 		       +".RetrievedSeq.fna";
 			 	   
-			 	   if(outDir==null) outDir=siteFile.substring(0,siteFile.lastIndexOf("/"));
+			 	   if(outDir==null) outDir=siteFile.substring(0,siteFile.lastIndexOf(fileSeparator));
 			 	   
-			 	   String outFile=outDir+"/"+outName;
+			 	   String outFile=outDir+fileSeparator+outName;
 			 	   String outChrFile;
 			 	   LoadChrSite.setChrSites(siteFile,chrInfoList);		 	 
 				   for(ChrInfo chrInfo:chrInfoList){

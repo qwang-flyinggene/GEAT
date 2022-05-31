@@ -417,15 +417,15 @@ public class SeqOperation{
 		
 		List<String> dividedFiles=new ArrayList<String>();
 	    List<SeqInfo> seqObjList;	
-		if(outDir==null) outDir=inSeqFile.substring(0,inSeqFile.lastIndexOf("/"))+"/"
-		                   +inSeqFile.substring(inSeqFile.lastIndexOf("/")+1,inSeqFile.lastIndexOf("."))
+		if(outDir==null) outDir=inSeqFile.substring(0,inSeqFile.lastIndexOf(File.separator))+File.separator
+		                   +inSeqFile.substring(inSeqFile.lastIndexOf(File.separator)+1,inSeqFile.lastIndexOf("."))
 		                   +"_EncodeDivided";
 		FileOperation.newFolder(outDir);
 		int total=SeqOperation.getFASTASeqNum(inSeqFile);
 		System.out.println("Total reads to be dispatched: "+total);  		
 		
 		try{
-		  String dividedFileTag=inSeqFile.substring(inSeqFile.lastIndexOf("/")+1,inSeqFile.lastIndexOf("."));
+		  String dividedFileTag=inSeqFile.substring(inSeqFile.lastIndexOf(File.separator)+1,inSeqFile.lastIndexOf("."));
 		  List<Long> numEncode1List=new ArrayList<Long>();
 		  List<Long> numEncode2List=new ArrayList<Long>();
 		  List<BufferedWriter> writerList=new ArrayList<BufferedWriter>();
@@ -438,14 +438,14 @@ public class SeqOperation{
 			if(items.length>2) {
 			  numEncode1List.add(Long.parseLong(items[0]));
 			  numEncode2List.add(Long.parseLong(items[1]));
-			  String outFile=outDir+"/"+dividedFileTag+"."+items[2]+".fna";			 
+			  String outFile=outDir+File.separator+dividedFileTag+"."+items[2]+".fna";			 
 			  writer=new BufferedWriter(new FileWriter(outFile));
 			  writerList.add(writer);
 			  writer=null;
 			  dividedFiles.add(outFile);
 			  outFile=null;
 			  
-			  outFile=outDir+"/"+dividedFileTag+"."+items[2]+".encode";			 
+			  outFile=outDir+File.separator+dividedFileTag+"."+items[2]+".encode";			 
 			  writer=new BufferedWriter(new FileWriter(outFile));
 			  writerEncodeList.add(writer);
 			  writer=null;		
@@ -519,15 +519,15 @@ public class SeqOperation{
 		
 		List<String> dividedFiles=new ArrayList<String>();
 	    List<SeqInfo> seqObjList;	
-		if(outDir==null) outDir=inSeqFile.substring(0,inSeqFile.lastIndexOf("/"))+"/"
-		                   +inSeqFile.substring(inSeqFile.lastIndexOf("/")+1,inSeqFile.lastIndexOf("."))
+		if(outDir==null) outDir=inSeqFile.substring(0,inSeqFile.lastIndexOf(File.separator))+File.separator
+		                   +inSeqFile.substring(inSeqFile.lastIndexOf(File.separator)+1,inSeqFile.lastIndexOf("."))
 		                   +"_EncodeDivided";
 		FileOperation.newFolder(outDir);
 		int total=SeqOperation.getFASTQSeqNum(inSeqFile);
 		System.out.println("Total reads to be dispatched: "+total);  		
 		
 		try{
-		  String dividedFileTag=inSeqFile.substring(inSeqFile.lastIndexOf("/")+1,inSeqFile.lastIndexOf("."));
+		  String dividedFileTag=inSeqFile.substring(inSeqFile.lastIndexOf(File.separator)+1,inSeqFile.lastIndexOf("."));
 		  List<Long> numEncode1List=new ArrayList<Long>();
 		  List<Long> numEncode2List=new ArrayList<Long>();
 		  List<BufferedWriter> writerList=new ArrayList<BufferedWriter>();
@@ -540,14 +540,14 @@ public class SeqOperation{
 			if(items.length>2) {
 			  numEncode1List.add(Long.parseLong(items[0]));
 			  numEncode2List.add(Long.parseLong(items[1]));
-			  String outFile=outDir+"/"+dividedFileTag+"."+items[2]+".fastq";			 
+			  String outFile=outDir+File.separator+dividedFileTag+"."+items[2]+".fastq";			 
 			  writer=new BufferedWriter(new FileWriter(outFile));
 			  writerList.add(writer);
 			  writer=null;
 			  dividedFiles.add(outFile);
 			  outFile=null;
 			  
-			  outFile=outDir+"/"+dividedFileTag+"."+items[2]+".encode";			 
+			  outFile=outDir+File.separator+dividedFileTag+"."+items[2]+".encode";			 
 			  writer=new BufferedWriter(new FileWriter(outFile));
 			  writerEncodeList.add(writer);
 			  writer=null;		
@@ -650,16 +650,16 @@ public class SeqOperation{
 		ArrayList<String> dividedFiles2=new ArrayList<String>();
 		List<SeqInfo> seqObjList;	
 		List<SeqInfo> seqObjList2;
-		if(outDir==null) outDir=inSeqFile.substring(0,inSeqFile.lastIndexOf("/"))+"/"
-			                   +inSeqFile.substring(inSeqFile.lastIndexOf("/")+1,inSeqFile.lastIndexOf("."))
+		if(outDir==null) outDir=inSeqFile.substring(0,inSeqFile.lastIndexOf(File.separator))+File.separator
+			                   +inSeqFile.substring(inSeqFile.lastIndexOf(File.separator)+1,inSeqFile.lastIndexOf("."))
 			                   +"_EncodeDivided";
 		FileOperation.newFolder(outDir);
 		int total=SeqOperation.getFASTASeqNum(inSeqFile);
 		System.out.println("Total reads to be dispatched: "+total);  		
 			
 		try{
-			String dividedFileTag=inSeqFile.substring(inSeqFile.lastIndexOf("/")+1,inSeqFile.lastIndexOf("."));
-			String dividedFileTag2=inSeqFile2.substring(inSeqFile2.lastIndexOf("/")+1,inSeqFile2.lastIndexOf("."));
+			String dividedFileTag=inSeqFile.substring(inSeqFile.lastIndexOf(File.separator)+1,inSeqFile.lastIndexOf("."));
+			String dividedFileTag2=inSeqFile2.substring(inSeqFile2.lastIndexOf(File.separator)+1,inSeqFile2.lastIndexOf("."));
 			List<Long> numEncode1List=new ArrayList<Long>();
 			List<Long> numEncode2List=new ArrayList<Long>();
 			List<BufferedWriter> writerList=new ArrayList<BufferedWriter>();
@@ -674,21 +674,21 @@ public class SeqOperation{
 				  numEncode1List.add(Long.parseLong(items[0]));
 				  numEncode2List.add(Long.parseLong(items[1]));
 				  //forward
-				  String outFile=outDir+"/"+dividedFileTag+"."+items[2]+".fna";			 
+				  String outFile=outDir+File.separator+dividedFileTag+"."+items[2]+".fna";			 
 				  writer=new BufferedWriter(new FileWriter(outFile));
 				  writerList.add(writer);
 				  writer=null;
 				  dividedFiles.add(outFile);
 				  outFile=null;
 				  
-				  outFile=outDir+"/"+dividedFileTag+"."+items[2]+".encode";			 
+				  outFile=outDir+File.separator+dividedFileTag+"."+items[2]+".encode";			 
 				  writer=new BufferedWriter(new FileWriter(outFile));
 				  writerEncodeList.add(writer);
 				  writer=null;		
 				  outFile=null;	
 				  
 				  //reverse
-				  outFile=outDir+"/"+dividedFileTag2+"."+items[2]+".fna";			 
+				  outFile=outDir+File.separator+dividedFileTag2+"."+items[2]+".fna";			 
 				  writer=new BufferedWriter(new FileWriter(outFile));
 				  writerList2.add(writer);
 				  writer=null;
@@ -794,16 +794,16 @@ public class SeqOperation{
 		List<SeqInfo> seqObjList;	
 		List<SeqInfo> seqObjList2;
 		  
-		if(outDir==null) outDir=inSeqFile.substring(0,inSeqFile.lastIndexOf("/"))+"/"
-			                   +inSeqFile.substring(inSeqFile.lastIndexOf("/")+1,inSeqFile.lastIndexOf("."))
+		if(outDir==null) outDir=inSeqFile.substring(0,inSeqFile.lastIndexOf(File.separator))+File.separator
+			                   +inSeqFile.substring(inSeqFile.lastIndexOf(File.separator)+1,inSeqFile.lastIndexOf("."))
 			                   +"_EncodeDivided";
 		FileOperation.newFolder(outDir);
 		int total=SeqOperation.getFASTQSeqNum(inSeqFile);
 		System.out.println("Total reads to be dispatched: "+total);  		
 			
 		try{
-			String dividedFileTag=inSeqFile.substring(inSeqFile.lastIndexOf("/")+1,inSeqFile.lastIndexOf("."));
-			String dividedFileTag2=inSeqFile2.substring(inSeqFile2.lastIndexOf("/")+1,inSeqFile2.lastIndexOf("."));
+			String dividedFileTag=inSeqFile.substring(inSeqFile.lastIndexOf(File.separator)+1,inSeqFile.lastIndexOf("."));
+			String dividedFileTag2=inSeqFile2.substring(inSeqFile2.lastIndexOf(File.separator)+1,inSeqFile2.lastIndexOf("."));
 			List<Long> numEncode1List=new ArrayList<Long>();
 			List<Long> numEncode2List=new ArrayList<Long>();
 			List<BufferedWriter> writerList=new ArrayList<BufferedWriter>();
@@ -819,21 +819,21 @@ public class SeqOperation{
 				  numEncode2List.add(Long.parseLong(items[1]));
 				  
 				  //forward
-				  String outFile=outDir+"/"+dividedFileTag+"."+items[2]+".fastq";			 
+				  String outFile=outDir+File.separator+dividedFileTag+"."+items[2]+".fastq";			 
 				  writer=new BufferedWriter(new FileWriter(outFile));
 				  writerList.add(writer);
 				  writer=null;
 				  dividedFiles.add(outFile);
 				  outFile=null;
 				  
-				  outFile=outDir+"/"+dividedFileTag+"."+items[2]+".encode";			 
+				  outFile=outDir+File.separator+dividedFileTag+"."+items[2]+".encode";			 
 				  writer=new BufferedWriter(new FileWriter(outFile));
 				  writerEncodeList.add(writer);
 				  writer=null;		
 				  outFile=null;	
 				  
 				  //reverse
-				  outFile=outDir+"/"+dividedFileTag2+"."+items[2]+".fastq";			 
+				  outFile=outDir+File.separator+dividedFileTag2+"."+items[2]+".fastq";			 
 				  writer=new BufferedWriter(new FileWriter(outFile));
 				  writerList2.add(writer);
 				  writer=null;
@@ -1696,11 +1696,11 @@ public class SeqOperation{
    public static List<String> splitFASTAFile(String inSeqFile, int step, String outDir){
 	    	   
 		List<String> splitedFiles=new ArrayList<String>();
-	    String outTag=inSeqFile.substring(inSeqFile.lastIndexOf("/")+1, inSeqFile.lastIndexOf("."));
+	    String outTag=inSeqFile.substring(inSeqFile.lastIndexOf(File.separator)+1, inSeqFile.lastIndexOf("."));
 		if(step<0) step=500000;
 		if(outDir==null) 
-		  outDir=inSeqFile.substring(0,inSeqFile.lastIndexOf("/"))+"/"
-		       +inSeqFile.substring(inSeqFile.lastIndexOf("/")+1,inSeqFile.lastIndexOf("."))
+		  outDir=inSeqFile.substring(0,inSeqFile.lastIndexOf(File.separator))+File.separator
+		       +inSeqFile.substring(inSeqFile.lastIndexOf(File.separator)+1,inSeqFile.lastIndexOf("."))
 		       +"_Splited";
 		FileOperation.newFolder(outDir);
 		int total=SeqOperation.getFASTASeqNum(inSeqFile);
@@ -1713,7 +1713,7 @@ public class SeqOperation{
 	         String seq;	      
 	         stopPos=Math.min(total, (f+step));
 	         List<SeqInfo> seqObjList=getFASTASeqObj(inSeqFile,f,stopPos);
-	         String outSeqFile=outDir+"/"+outTag+".split."+step+"_"+(f+1)+"-"+stopPos+".fna";	 
+	         String outSeqFile=outDir+File.separator+outTag+".split."+step+"_"+(f+1)+"-"+stopPos+".fna";	 
 	         writer=new BufferedWriter(new FileWriter(outSeqFile));		         	
 	         for(int i=0;i<seqObjList.size();i++){	
 	        	seqIdentifier=seqObjList.get(i).seqIdentifier;
@@ -1744,11 +1744,11 @@ public class SeqOperation{
    public static List<String> splitFASTQFile(String inSeqFile, int step, String outDir){
 	    	   
 		List<String> splitedFiles=new ArrayList<String>();
-		String outTag=inSeqFile.substring(inSeqFile.lastIndexOf("/")+1, inSeqFile.lastIndexOf("."));
+		String outTag=inSeqFile.substring(inSeqFile.lastIndexOf(File.separator)+1, inSeqFile.lastIndexOf("."));
 		if(step<0) step=500000;
 		if(outDir==null) 
-			outDir=inSeqFile.substring(0,inSeqFile.lastIndexOf("/"))+"/"
-		           +inSeqFile.substring(inSeqFile.lastIndexOf("/")+1,inSeqFile.lastIndexOf("."))
+			outDir=inSeqFile.substring(0,inSeqFile.lastIndexOf(File.separator))+File.separator
+		           +inSeqFile.substring(inSeqFile.lastIndexOf(File.separator)+1,inSeqFile.lastIndexOf("."))
 		           +"_Splited";
 		FileOperation.newFolder(outDir);
 		int total=SeqOperation.getFASTQSeqNum(inSeqFile);
@@ -1762,7 +1762,7 @@ public class SeqOperation{
 	         String seqQuality;
 	         stopPos=Math.min(total, (f+step));
 	         List<SeqInfo> seqObjList=getFASTQSeqObj(inSeqFile,f,stopPos);
-	         String outSeqFile=outDir+"/"+outTag+".split."+step+"_"+(f+1)+"-"+stopPos+".fastq";	  
+	         String outSeqFile=outDir+File.separator+outTag+".split."+step+"_"+(f+1)+"-"+stopPos+".fastq";	  
 		     writer=new BufferedWriter(new FileWriter(outSeqFile));		         	
 	         for(int i=0;i<seqObjList.size();i++){	
 	        	seqIdentifier=seqObjList.get(i).seqIdentifier;
@@ -1814,7 +1814,7 @@ public class SeqOperation{
    public static String filterFASTAFile(String inSeqFile, int step, int minSeqLen, String outDir){		
 	   	
 		if(step<0) step=1000000;
-		if(outDir==null) outDir=inSeqFile.substring(0,inSeqFile.lastIndexOf("/"))+"/filtered";
+		if(outDir==null) outDir=inSeqFile.substring(0,inSeqFile.lastIndexOf(File.separator))+File.separator+"filtered";
 		FileOperation.newFolder(outDir);
 		int total=SeqOperation.getFASTASeqNum(inSeqFile);
 		System.out.println("Total Seq to be filtered: "+total); 
@@ -1822,8 +1822,8 @@ public class SeqOperation{
 		String outSeqFile = null;
 		try{
 		  BufferedWriter writer=null;
-	      outSeqFile=outDir+"/"
-		       +inSeqFile.substring(inSeqFile.lastIndexOf("/")+1,inSeqFile.lastIndexOf("."))
+	      outSeqFile=outDir+File.separator
+		       +inSeqFile.substring(inSeqFile.lastIndexOf(File.separator)+1,inSeqFile.lastIndexOf("."))
 		       +".minSeqLen"+minSeqLen+"bp."+timeStamp+".fna";	 
 	      writer=new BufferedWriter(new FileWriter(outSeqFile));
 		  int stopPos=0;		 
@@ -1867,7 +1867,7 @@ public class SeqOperation{
    public static String filterFASTQFile(String inSeqFile, int step, int minSeqLen, String outDir){	    	   
 	    
 		if(step<0) step=1000000;
-		if(outDir==null) outDir=inSeqFile.substring(0,inSeqFile.lastIndexOf("/"))+"/filtered";
+		if(outDir==null) outDir=inSeqFile.substring(0,inSeqFile.lastIndexOf(File.separator))+File.separator+"filtered";
 		FileOperation.newFolder(outDir);
 		int total=SeqOperation.getFASTQSeqNum(inSeqFile);
 		System.out.println("Total Seq to be filtered: "+total);    	
@@ -1875,8 +1875,8 @@ public class SeqOperation{
 		String outSeqFile=null;
 		try{
 		  BufferedWriter writer=null;
-	      outSeqFile=outDir+"/"
-			       +inSeqFile.substring(inSeqFile.lastIndexOf("/")+1,inSeqFile.lastIndexOf("."))
+	      outSeqFile=outDir+File.separator
+			       +inSeqFile.substring(inSeqFile.lastIndexOf(File.separator)+1,inSeqFile.lastIndexOf("."))
 			       +".minSeqLen"+minSeqLen+"bp."+timeStamp+".fastq";	
 	      writer=new BufferedWriter(new FileWriter(outSeqFile));
 		  int stopPos=0;	
@@ -1940,7 +1940,7 @@ public class SeqOperation{
    public static String[] filterFASTAFile(String inSeqFile, String inSeqFile2, int step, int minSeqLen, String outDir){		
 	   	
 		if(step<0) step=1000000;
-		if(outDir==null) outDir=inSeqFile.substring(0,inSeqFile.lastIndexOf("/"))+"/filtered";
+		if(outDir==null) outDir=inSeqFile.substring(0,inSeqFile.lastIndexOf(File.separator))+File.separator+"filtered";
 		FileOperation.newFolder(outDir);
 		int total=SeqOperation.getFASTASeqNum(inSeqFile);
 		System.out.println("Total Seq to be filtered: "+total); 
@@ -1948,14 +1948,14 @@ public class SeqOperation{
 		String[] outSeqFile12=new String[2];
 		try{
 		  BufferedWriter writer=null;
-	      String outSeqFile=outDir+"/"
-		       +inSeqFile.substring(inSeqFile.lastIndexOf("/")+1,inSeqFile.lastIndexOf("."))
+	      String outSeqFile=outDir+File.separator
+		       +inSeqFile.substring(inSeqFile.lastIndexOf(File.separator)+1,inSeqFile.lastIndexOf("."))
 		       +".minSeqLen"+minSeqLen+"bp."+timeStamp+".fna";	 
 	      writer=new BufferedWriter(new FileWriter(outSeqFile));
 	      
 		  BufferedWriter writer2=null;
-	      String outSeqFile2=outDir+"/"
-		       +inSeqFile2.substring(inSeqFile2.lastIndexOf("/")+1,inSeqFile2.lastIndexOf("."))
+	      String outSeqFile2=outDir+File.separator
+		       +inSeqFile2.substring(inSeqFile2.lastIndexOf(File.separator)+1,inSeqFile2.lastIndexOf("."))
 		       +".minSeqLen"+minSeqLen+"bp."+timeStamp+".fna";	 
 	      writer2=new BufferedWriter(new FileWriter(outSeqFile2));
 	      
@@ -2026,7 +2026,7 @@ public class SeqOperation{
    public static String[] filterFASTQFile(String inSeqFile, String inSeqFile2, int step, int minSeqLen, String outDir){	    	   
 	    
 		if(step<0) step=1000000;
-		if(outDir==null) outDir=inSeqFile.substring(0,inSeqFile.lastIndexOf("/"))+"/filtered";
+		if(outDir==null) outDir=inSeqFile.substring(0,inSeqFile.lastIndexOf(File.separator))+File.separator+"filtered";
 		FileOperation.newFolder(outDir);
 		int total=SeqOperation.getFASTQSeqNum(inSeqFile);
 		System.out.println("Total Seq to be filtered: "+total);    	
@@ -2035,14 +2035,14 @@ public class SeqOperation{
 		
 		try{
 		  BufferedWriter writer=null;
-	      String outSeqFile=outDir+"/"
-			       +inSeqFile.substring(inSeqFile.lastIndexOf("/")+1,inSeqFile.lastIndexOf("."))
+	      String outSeqFile=outDir+File.separator
+			       +inSeqFile.substring(inSeqFile.lastIndexOf(File.separator)+1,inSeqFile.lastIndexOf("."))
 			       +".minSeqLen"+minSeqLen+"bp."+timeStamp+".fastq";	
 	      writer=new BufferedWriter(new FileWriter(outSeqFile));
 	      
 		  BufferedWriter writer2=null;
-	      String outSeqFile2=outDir+"/"
-			       +inSeqFile2.substring(inSeqFile2.lastIndexOf("/")+1,inSeqFile2.lastIndexOf("."))
+	      String outSeqFile2=outDir+File.separator
+			       +inSeqFile2.substring(inSeqFile2.lastIndexOf(File.separator)+1,inSeqFile2.lastIndexOf("."))
 			       +".minSeqLen"+minSeqLen+"bp."+timeStamp+".fastq";	
 	      writer2=new BufferedWriter(new FileWriter(outSeqFile2));
 	      
@@ -2181,9 +2181,9 @@ public class SeqOperation{
 	   
 		if(outFile==null){
 			String fastaFile=splitedFiles.get(0);
-			String outDir=fastaFile.substring(0,fastaFile.lastIndexOf("/"))+"/combined";
-			outFile=outDir+"/"
-			        +fastaFile.substring(fastaFile.lastIndexOf("/"),fastaFile.lastIndexOf("."))
+			String outDir=fastaFile.substring(0,fastaFile.lastIndexOf(File.separator))+File.separator+"combined";
+			outFile=outDir+File.separator
+			        +fastaFile.substring(fastaFile.lastIndexOf(File.separator),fastaFile.lastIndexOf("."))
 			        +"_combined.fna";
 			FileOperation.newFolder(outDir);
 		}		
@@ -2225,9 +2225,9 @@ public class SeqOperation{
 	    if(splitedFiles==null || splitedFiles.size()==0) return null;
 		if(outFile==null) {
 		   String fastqFile=splitedFiles.get(0);
-		   String outDir=fastqFile.substring(0,fastqFile.lastIndexOf("/"))+"/combined";
-		   outFile=outDir+"/"
-				        +fastqFile.substring(fastqFile.lastIndexOf("/"),fastqFile.lastIndexOf("."))
+		   String outDir=fastqFile.substring(0,fastqFile.lastIndexOf(File.separator))+File.separator+"combined";
+		   outFile=outDir+File.separator
+				        +fastqFile.substring(fastqFile.lastIndexOf(File.separator),fastqFile.lastIndexOf("."))
 				        +"_combined.fastq";
 		   FileOperation.newFolder(outDir);
 		}

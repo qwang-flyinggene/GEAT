@@ -250,10 +250,10 @@ public class SeqQCFilter {
 		}
 		   
 		String seqFile=fastqFile;
-		if(outDir==null) outDir=seqFile.substring(0,seqFile.lastIndexOf("/"));		   
+		if(outDir==null) outDir=seqFile.substring(0,seqFile.lastIndexOf(File.separator));		   
 		   		 
-		String seqName=seqFile.substring(seqFile.lastIndexOf("/")+1,seqFile.lastIndexOf("."));
-		String seqFullName=outDir+"/"+seqName;		   	   
+		String seqName=seqFile.substring(seqFile.lastIndexOf(File.separator)+1,seqFile.lastIndexOf("."));
+		String seqFullName=outDir+File.separator+seqName;		   	   
 		 
 		Process process;
 		try {
@@ -262,7 +262,7 @@ public class SeqQCFilter {
 		   	 
 		   	 if(minQualMean>0 || minLen>0){
 		   		 
-		   		 String cmd="perl "+prinseqDir+"/prinseq-lite.pl -fastq "+seqFile;
+		   		 String cmd="perl "+prinseqDir+File.separator+"prinseq-lite.pl -fastq "+seqFile;
 			   	 
 			   	 if(minQualMean>0) cmd=cmd+" -min_qual_mean "+minQualMean;
 			   	 
@@ -280,13 +280,13 @@ public class SeqQCFilter {
 			     else seqFile=seqFullName+".goodQual.fastq";
 			     
 			     //seqName=seqFile.substring(0,seqFile.lastIndexOf("."));
-			     seqName=seqFile.substring(seqFile.lastIndexOf("/")+1,seqFile.lastIndexOf("."));
-			     seqFullName=outDir+"/"+seqName;
+			     seqName=seqFile.substring(seqFile.lastIndexOf(File.separator)+1,seqFile.lastIndexOf("."));
+			     seqFullName=outDir+File.separator+seqName;
 		   	 }
 		   	 
 		   	 if(removeExactDup){
 		   		
-		   		 String cmd="perl "+prinseqDir+"/prinseq-lite.pl -fastq "+seqFile+" -derep 14 -derep_min 2 ";
+		   		 String cmd="perl "+prinseqDir+File.separator+"prinseq-lite.pl -fastq "+seqFile+" -derep 14 -derep_min 2 ";
 			     if(outFormat>0) cmd=cmd+"-out_format "+outFormat;
 			     cmd=cmd+" -out_good "+seqFullName+".goodDup -out_bad "+seqFullName+".badDup";
 			  
@@ -297,13 +297,13 @@ public class SeqQCFilter {
 			     else if(outFormat<=5) seqFile=seqFullName+".goodDup.fastq";
 			     
 			     //seqName=seqFile.substring(0,seqFile.lastIndexOf("."));
-			     seqName=seqFile.substring(seqFile.lastIndexOf("/")+1,seqFile.lastIndexOf("."));
-			     seqFullName=outDir+"/"+seqName;
+			     seqName=seqFile.substring(seqFile.lastIndexOf(File.separator)+1,seqFile.lastIndexOf("."));
+			     seqFullName=outDir+File.separator+seqName;
 		   	 }
 		   	 
 		  	 if(outFormat>0 && minQualMean<0 && minLen<0 && !removeExactDup){
 		  	
-		  		 String cmd="perl "+prinseqDir+"/prinseq-lite.pl -fastq "+seqFile;
+		  		 String cmd="perl "+prinseqDir+File.separator+"prinseq-lite.pl -fastq "+seqFile;
 			   	 
 			   	 cmd=cmd+" -out_format "+outFormat;			   	 
 			
@@ -316,8 +316,8 @@ public class SeqQCFilter {
 			     else if(outFormat<=5) seqFile=seqFullName+".Out.fastq";
 			     
 			     //seqName=seqFile.substring(0,seqFile.lastIndexOf("."));
-			     seqName=seqFile.substring(seqFile.lastIndexOf("/")+1,seqFile.lastIndexOf("."));
-			     seqFullName=outDir+"/"+seqName;
+			     seqName=seqFile.substring(seqFile.lastIndexOf(File.separator)+1,seqFile.lastIndexOf("."));
+			     seqFullName=outDir+File.separator+seqName;
 		   	 }
 	
 			

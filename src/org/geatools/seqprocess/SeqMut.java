@@ -227,8 +227,8 @@ public class SeqMut {
 		if(doSNPCheck) snpList=new ArrayList<BaseSNP>();
 		boolean isBLASTErr=false;
 		String timeStamp=new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
-		String blastOutFile=tmpDir+"/Mut.BlastOut."+timeStamp+".txt";
-		String blastOutXMLFile=tmpDir+"/Mut.BlastOut."+timeStamp+".xml";
+		String blastOutFile=tmpDir+File.separator+"Mut.BlastOut."+timeStamp+".txt";
+		String blastOutXMLFile=tmpDir+File.separator+"Mut.BlastOut."+timeStamp+".xml";
 		tmpFiles.add(blastOutFile);
 		tmpFiles.add(blastOutXMLFile);
 		String blastCMD="blastn -task "+blastTask
@@ -1124,7 +1124,7 @@ public class SeqMut {
 		
 		String outFile;
 		if(outDir!=null && new File(outDir).exists())
-		  outFile=outDir+"/BaseMutInfo-"+outTag+".txt";
+		  outFile=outDir+File.separator+"BaseMutInfo-"+outTag+".txt";
 		else
 		  outFile="BaseMutInfo-"+outTag+".txt";
 		
@@ -1145,7 +1145,7 @@ public class SeqMut {
 		perRow.add("Pos");
 		perRow.add("Base");	
 	    for(SeqMutInfo mut:mutList){
-	      perRow.add(mut.expName.substring(mut.expName.lastIndexOf("/")+1,mut.expName.length()));		
+	      perRow.add(mut.expName.substring(mut.expName.lastIndexOf(File.separator)+1,mut.expName.length()));		
 		}
 	    out.add(perRow);
 		perRow=null;
@@ -1166,7 +1166,7 @@ public class SeqMut {
 		}
 		String outFile;	
 		if(outDir!=null && new File(outDir).exists())
-		  outFile=outDir+"/BaseMutFrequency_"+outTag+".txt";
+		  outFile=outDir+File.separator+"BaseMutFrequency_"+outTag+".txt";
 		else
 		  outFile="BaseMutFrequency_"+outTag+".txt";
 		
@@ -1181,7 +1181,7 @@ public class SeqMut {
 			perRow.add("Pos");
 			perRow.add("Base");	
 		    for(SeqMutInfo mut:mutList){		    
-			  perRow.add(mut.expName.substring(mut.expName.lastIndexOf("/"),mut.expName.length()));	
+			  perRow.add(mut.expName.substring(mut.expName.lastIndexOf(File.separator),mut.expName.length()));	
 			}
 		    out.add(perRow);
 			perRow=null;
@@ -1202,7 +1202,7 @@ public class SeqMut {
 			}
 					
 			if(outDir!=null && new File(outDir).exists())
-			  outFile=outDir+"/TargetBaseMutFrequency_"+outTag+".txt";
+			  outFile=outDir+File.separator+"TargetBaseMutFrequency_"+outTag+".txt";
 			else
 			  outFile="TargetBaseMutFrequency_"+outTag+".txt";
 			
@@ -1215,7 +1215,7 @@ public class SeqMut {
 			perRow.add("Pos");
 			perRow.add("Base");	
 		    for(SeqMutInfo mut:mutList){		    
-			  perRow.add(mut.expName.substring(mut.expName.lastIndexOf("/"),mut.expName.length()));	
+			  perRow.add(mut.expName.substring(mut.expName.lastIndexOf(File.separator),mut.expName.length()));	
 			}
 		    out.add(perRow);
 			perRow=null;
@@ -1236,7 +1236,7 @@ public class SeqMut {
 			}
 					
 			if(outDir!=null && new File(outDir).exists())
-			  outFile=outDir+"/OtherBaseMutFrequency_"+outTag+".txt";
+			  outFile=outDir+File.separator+"OtherBaseMutFrequency_"+outTag+".txt";
 			else
 			  outFile="OtherBaseMutFrequency_"+outTag+".txt";
 			
@@ -1256,7 +1256,7 @@ public class SeqMut {
 		perRow=new ArrayList<String>();
 		perRow.add("Item");	
 	    for(SeqMutInfo mut:mutList){	
-	      perRow.add(mut.expName.substring(mut.expName.lastIndexOf("/")+1,mut.expName.length()));		
+	      perRow.add(mut.expName.substring(mut.expName.lastIndexOf(File.separator)+1,mut.expName.length()));		
 		}
 	    out.add(perRow);
 		perRow=null;
@@ -1306,7 +1306,7 @@ public class SeqMut {
 		if(outTag==null) outTag="profile";
 				
 		if(outDir!=null && new File(outDir).exists())
-		  outFile=outDir+"/AverageBaseMutFrequency-"+outTag+".txt";
+		  outFile=outDir+File.separator+"AverageBaseMutFrequency-"+outTag+".txt";
 		else
 		  outFile="AverageBaseMutFrequency-"+outTag+".txt";
 		
@@ -1330,7 +1330,7 @@ public class SeqMut {
 		perRow=new ArrayList<String>();
 		perRow.add("Item");	
 	    for(SeqMutInfo mut:mutList){	
-	      perRow.add(mut.expName.substring(mut.expName.lastIndexOf("/")+1,mut.expName.length()));		
+	      perRow.add(mut.expName.substring(mut.expName.lastIndexOf(File.separator)+1,mut.expName.length()));		
 		}
 	    out.add(perRow);
 		perRow=null;
@@ -1466,7 +1466,7 @@ public class SeqMut {
 		if(outTag==null) outTag="profile";
 				
 		if(outDir!=null && new File(outDir).exists())
-		  outFile=outDir+"/AverageBaseMutFrequency-"+outTag+".txt";
+		  outFile=outDir+File.separator+"AverageBaseMutFrequency-"+outTag+".txt";
 		else
 		  outFile="AverageBaseMutFrequency-"+outTag+".txt";
 		
@@ -1510,7 +1510,7 @@ public class SeqMut {
 		if(outTag==null) outTag="";
 				
 		if(outDir!=null)
-		  outFile=outDir+"/SeqSNPs-"+outTag+".txt";
+		  outFile=outDir+File.separator+"SeqSNPs-"+outTag+".txt";
 		else
 		  outFile="SeqSNPs-"+outTag+".txt";
 		

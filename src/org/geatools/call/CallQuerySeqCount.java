@@ -355,7 +355,7 @@ public class CallQuerySeqCount extends GEAT{
 			 }
 		  }		   
 		  if(!doOutput){			   
-			 outDir=homeDir+"/working";
+			 outDir=homeDir+fileSeparator+"working";
 			 dir=new File(outDir);
 			 if(!dir.exists()) FileOperation.newFolder(outDir);	
 		     dir=null;
@@ -503,7 +503,7 @@ public class CallQuerySeqCount extends GEAT{
 		  if(doSplitSeq &&(isFastqOK || isFastaOK)){
 			  System.out.println("###### Spliting forward seq..........");
 			  splitedSeqFiles=null;			
-			  String splitedSeqOut=outDir+"/split_forward";
+			  String splitedSeqOut=outDir+fileSeparator+"split_forward";
 			  FileOperation.newFolder(splitedSeqOut);
 	      	  splitedSeqFiles=SeqOperation.splitSeqFile(inSeqFile,splitStep,splitedSeqOut);		 				
 			  if(splitedSeqFiles==null || splitedSeqFiles.size()==0){
@@ -514,7 +514,7 @@ public class CallQuerySeqCount extends GEAT{
 			  if(seqType.equalsIgnoreCase(SeqOperation.SEQTYPE_PAIREND)){				
 				 System.out.println("###### Spliting pair-end reverse seq.........");
 				 splitedSeqFiles2=null;				
-				 splitedSeqOut=outDir+"/split_reverse";
+				 splitedSeqOut=outDir+fileSeparator+"split_reverse";
 				 FileOperation.newFolder(splitedSeqOut);
 			     splitedSeqFiles2=SeqOperation.splitSeqFile(inSeqFile2,splitStep,splitedSeqOut);			    	
 			     if(splitedSeqFiles==null || splitedSeqFiles.size()==0){

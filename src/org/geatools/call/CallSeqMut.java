@@ -372,7 +372,7 @@ public class CallSeqMut extends GEAT{
 				}
 		   }		   
 		   if(!doOutput){			   
-				 outDir=homeDir+"/working";
+				 outDir=homeDir+fileSeparator+"working";
 				 dir=new File(outDir);
 				 if(!dir.exists()) FileOperation.newFolder(outDir);	
 		         dir=null;
@@ -762,9 +762,9 @@ public class CallSeqMut extends GEAT{
 		   //=======================start to split seq===========================
 		   if(doSplitSeq &&(isFastqOK || isFastaOK)){
 			  splitedSeqFiles=null;
-			   //Check seq format, and then split seq into multiple subfiles................
+			  //Check seq format, and then split seq into multiple subfiles................
 			  System.out.println("###### Spliting forward seq..........");
-			  String splitedSeqOut=outDir+"/split_forward";
+			  String splitedSeqOut=outDir+fileSeparator+"split_forward";
 			  FileOperation.newFolder(splitedSeqOut);
 	      	  splitedSeqFiles=SeqOperation.splitSeqFile(inSeqFile,splitStep,splitedSeqOut);		 				
 			  if(splitedSeqFiles==null || splitedSeqFiles.size()==0){
@@ -776,7 +776,7 @@ public class CallSeqMut extends GEAT{
 					
 				  //Check seq format, and then split seq into multiple subfiles................
 				  System.out.println("###### Spliting pair-end reverse seq.........");
-				  splitedSeqOut=outDir+"/split_reverse";
+				  splitedSeqOut=outDir+fileSeparator+"split_reverse";
 				  FileOperation.newFolder(splitedSeqOut);
 				  splitedSeqFiles2=null;	
 			      splitedSeqFiles2=SeqOperation.splitSeqFile(inSeqFile2,splitStep,splitedSeqOut);			    	
@@ -835,7 +835,7 @@ public class CallSeqMut extends GEAT{
 		    	  }   
 		    	  isSeqPairRocketOK=seqRC.isSeqRocketsOK();
 		    	   
-		    	 //set querySeqList by demultiplexing samples,querySeqList2 for reverse
+		    	  //set querySeqList by demultiplexing samples,querySeqList2 for reverse
 				  if(isSeqPairRocketOK){
 					 querySeqList=new ArrayList<String>();
 					 querySeqList2=new ArrayList<String>();
@@ -874,7 +874,7 @@ public class CallSeqMut extends GEAT{
 				   if(SeqOperation.isFASTQSeq(querySeqFile) || SeqOperation.isFASTASeq(querySeqFile)){
 					    
 				      fileTag=querySeqFile.substring(
-						   querySeqFile.lastIndexOf("/")+1,
+						   querySeqFile.lastIndexOf(fileSeparator)+1,
 						   (querySeqFile.lastIndexOf(".")>0) ? querySeqFile.lastIndexOf("."):querySeqFile.length()
 					  );	
 					  
@@ -946,7 +946,7 @@ public class CallSeqMut extends GEAT{
 				   if(SeqOperation.isFASTQSeq(querySeqFile) || SeqOperation.isFASTASeq(querySeqFile)){
 					     
 					  fileTag=querySeqFile.substring(
-					       querySeqFile.lastIndexOf("/")+1,
+					       querySeqFile.lastIndexOf(fileSeparator)+1,
 					       (querySeqFile.lastIndexOf(".")>0) ? querySeqFile.lastIndexOf("."):querySeqFile.length()
 					  );
 						 
@@ -1002,7 +1002,7 @@ public class CallSeqMut extends GEAT{
 				   if(SeqOperation.isFASTQSeq(querySeqFile2) || SeqOperation.isFASTASeq(querySeqFile2)){
 						 
 					  fileTag2=querySeqFile2.substring(
-						    querySeqFile2.lastIndexOf("/")+1,
+						    querySeqFile2.lastIndexOf(fileSeparator)+1,
 						    (querySeqFile2.lastIndexOf(".")>0) ? querySeqFile2.lastIndexOf("."):querySeqFile2.length()
 					  );	
 						 

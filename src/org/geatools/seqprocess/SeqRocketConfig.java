@@ -1,5 +1,6 @@
 package org.geatools.seqprocess;
 
+import java.io.File;
 import java.util.List;
 
 import org.geatools.data.structure.SeqCompoRecognizer;
@@ -501,8 +502,8 @@ public class SeqRocketConfig extends SeqRocketRecognition {
 			  barcode.leftMaskSave=mask_left_barcode;	
 			  barcode.leftTrimSave=trim_left_barcode;	
 
-			  barcode.exactAlignedSeqFile=tmpDir+"/"+barcode.seqName+"_ExactAlignedSeq";
-			  barcode.seqFASTAFile=tmpDir+"/recognizer/"+barcode.seqName+".fna";	
+			  barcode.exactAlignedSeqFile=tmpDir+File.separator+barcode.seqName+"_ExactAlignedSeq";
+			  barcode.seqFASTAFile=tmpDir+File.separator+"recognizer"+File.separator+barcode.seqName+".fna";	
 			  SeqOperation.createFASTASeq(barcode.seq,barcode.seqName,barcode.seqFASTAFile); 
 
 	          rockets.get(i).seqRecognizers.set(barcode.index,barcode);	
@@ -556,7 +557,7 @@ public class SeqRocketConfig extends SeqRocketRecognition {
 			  primer.leftMaskSave=mask_left_primer;	
 			  primer.leftTrimSave=trim_left_primer;
 
-			  primer.seqFASTAFile=tmpDir+"/recognizer/"+primer.seqName+".fna";
+			  primer.seqFASTAFile=tmpDir+File.separator+"recognizer"+File.separator+primer.seqName+".fna";
 			  SeqOperation.createFASTASeq(primer.seq,primer.seqName,primer.seqFASTAFile);
 			  
 			  rockets.get(i).seqRecognizers.set(primer.index,primer);
@@ -620,7 +621,7 @@ public class SeqRocketConfig extends SeqRocketRecognition {
 	    	  primerCont.leftMaskSave=mask_left_primerCont;
 	    	  primerCont.leftTrimSave=trim_left_primerCont;
 
-			  primerCont.seqFASTAFile=tmpDir+"/recognizer/"+primerCont.seqName+".fna";
+			  primerCont.seqFASTAFile=tmpDir+File.separator+"recognizer"+File.separator+primerCont.seqName+".fna";
 			  SeqOperation.createFASTASeq(primerCont.seq,primerCont.seqName,primerCont.seqFASTAFile);
 			 
 			  rockets.get(i).seqRecognizers.set(primerCont.index,primerCont);
@@ -667,7 +668,7 @@ public class SeqRocketConfig extends SeqRocketRecognition {
 			  bait.leftMaskSave=mask_left_bait;
 			  bait.leftTrimSave=trim_left_bait;	
 
-		      bait.seqFASTAFile=tmpDir+"/recognizer/"+bait.seqName+".fna";	
+		      bait.seqFASTAFile=tmpDir+File.separator+"recognizer"+File.separator+bait.seqName+".fna";	
 		      SeqOperation.createFASTASeq(bait.seq,bait.seqName,bait.seqFASTAFile);
 			  
 			  rockets.get(i).seqRecognizers.set(bait.index,bait);
@@ -711,7 +712,7 @@ public class SeqRocketConfig extends SeqRocketRecognition {
 			  baitBrk.leftMaskSave=mask_left_baitBrk;
 			  baitBrk.leftTrimSave=trim_left_baitBrk;
 
-		      baitBrk.seqFASTAFile=tmpDir+"/recognizer/"+baitBrk.seqName+".fna";	
+		      baitBrk.seqFASTAFile=tmpDir+File.separator+"recognizer"+File.separator+baitBrk.seqName+".fna";	
 		      SeqOperation.createFASTASeq(baitBrk.seq,baitBrk.seqName,baitBrk.seqFASTAFile);
 			  
 			  rockets.get(i).seqRecognizers.set(baitBrk.index,baitBrk);
@@ -751,7 +752,7 @@ public class SeqRocketConfig extends SeqRocketRecognition {
 			  baitArm.leftMaskSave=mask_left_baitArm;
 		      baitArm.leftTrimSave=trim_left_baitArm;
 			
-		      baitArm.seqFASTAFile=tmpDir+"/recognizer/"+baitArm.seqName+".fna";	
+		      baitArm.seqFASTAFile=tmpDir+File.separator+"recognizer"+File.separator+baitArm.seqName+".fna";	
 		      SeqOperation.createFASTASeq(baitArm.seq,baitArm.seqName,baitArm.seqFASTAFile);
 			  
 			  rockets.get(i).seqRecognizers.set(baitArm.index,baitArm);
@@ -798,7 +799,7 @@ public class SeqRocketConfig extends SeqRocketRecognition {
 			  rc3together.rightMaskSave=mask_right_rc3together;        
 			  rc3together.rightTrimSave=trim_right_rc3together;  
 			 		  
-			  rc3together.seqFASTAFile=tmpDir+"/recognizer/"+rc3together.seqName+".fna";
+			  rc3together.seqFASTAFile=tmpDir+File.separator+"recognizer"+File.separator+rc3together.seqName+".fna";
 			  SeqOperation.createFASTASeq(rc3together.seq,rc3together.seqName,rc3together.seqFASTAFile);
 			 
 			  rockets.get(i).seqRecognizers.set(rc3together.index,rc3together);

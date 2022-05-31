@@ -137,7 +137,7 @@ public class GEAT{
           return null;
       }
 
-      String absolutePath = decodedPath.substring(0, decodedPath.lastIndexOf("/"));
+      String absolutePath = decodedPath.substring(0, decodedPath.lastIndexOf(fileSeparator));
       return absolutePath;
   }
   

@@ -32,6 +32,7 @@
  *******************************************************************************/
 package org.geatools.seqprocess;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
@@ -66,8 +67,8 @@ public class SeqOffTarget{
 	    List<ChrSite> offTargetSites=new ArrayList<ChrSite> ();
 		ChrSite perSite;
 		String timeStamp=new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
-		String blastOutFile=tmpDir+"/"+refGenomeFile.substring(
-		         refGenomeFile.lastIndexOf("/")+1,refGenomeFile.lastIndexOf("."))
+		String blastOutFile=tmpDir+File.separator+refGenomeFile.substring(
+		         refGenomeFile.lastIndexOf(File.separator)+1,refGenomeFile.lastIndexOf("."))
 		         +"."+timeStamp+".blastOut";
 		
 		String blastCMD="blastn -task blastn-short -word_size=7 -evalue 10000";	
@@ -141,8 +142,8 @@ public class SeqOffTarget{
 	    List<SeqAlignSite> offTargetSite=new ArrayList<SeqAlignSite> ();
 	    SeqAlignSite perSite;
 	    String timeStamp=new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
-		String blastOutFile=tmpDir+"/"+refGenomeFile.substring(
-		    refGenomeFile.lastIndexOf("/"),refGenomeFile.lastIndexOf("."))
+		String blastOutFile=tmpDir+File.separator+refGenomeFile.substring(
+		    refGenomeFile.lastIndexOf(File.separator),refGenomeFile.lastIndexOf("."))
 		    +"."+timeStamp+".blastOut";
 		String blastCMD="blastn -task blastn-short -word_size=7 -evalue 10000";	
 	    blastCMD=blastCMD+" -query "+targetSeqFile+" -subject "+refGenomeFile

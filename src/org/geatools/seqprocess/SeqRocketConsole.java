@@ -65,14 +65,14 @@ public class SeqRocketConsole extends SeqRocketRecognition{
   public List<SeqRocket> launchSingleEnd(String inSeqFile,String libSeqInfoFile, 
 			 SeqRocketConfig rocketConfig, String seqOutDir){	    
 			
-	  FileOperation.newFolder(tmpDir+"/recognizer");		
+	  FileOperation.newFolder(tmpDir+File.separator+"recognizer");		
 	  List<String> tmpFiles=new  ArrayList<String>();
 					
 	  if(seqOutDir==null){
-		 seqOutDir=inSeqFile.substring(0, inSeqFile.lastIndexOf("/"))+"/RecognizedSeq";	
+		 seqOutDir=inSeqFile.substring(0, inSeqFile.lastIndexOf(File.separator))+File.separator+"RecognizedSeq";	
    	  }
       FileOperation.newFolder(seqOutDir);
-	  seqOutDir=seqOutDir+"/";
+	  seqOutDir=seqOutDir+File.separator;
 
 	  // forward seq(Single-end)
 	  List<SeqRocket> rockets =buildRockets(libSeqInfoFile,rocketConfig);		
@@ -91,7 +91,7 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 			       =getNonExactAndSaveExactSeq(seqObjList,rockets,BARCODE_NAME_DEFINITION,inSeqFileFormat);
 	  tmpFiles.addAll(getCompoExactAlignedFiles(rockets,BARCODE_NAME_DEFINITION));
 	  seqObjList=null;		
-	  String barNonExactLeftSubSeqFile=tmpDir+"/AllBarNoExactMatchSeq_forward.leftsub.fna";
+	  String barNonExactLeftSubSeqFile=tmpDir+File.separator+"AllBarNoExactMatchSeq_forward.leftsub.fna";
 	  tmpFiles.add(barNonExactLeftSubSeqFile);
 	  barcodeMaxTerritoryLen=getSeqCompoMaxTerritoryLen(rockets, BARCODE_NAME_DEFINITION);
 	  createLeftSubBLASTTarSeq(barNonExactSeqObj,barcodeMaxTerritoryLen,barNonExactLeftSubSeqFile);	
@@ -145,10 +145,10 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 	 int s=1;
 	 for(String file:splitedSeqFiles){
 	    try {
-		   splitDir=file.substring(0,file.lastIndexOf("/"));
-		   outDir=combinedSeqOut+"/splits";
+		   splitDir=file.substring(0,file.lastIndexOf(File.separator));
+		   outDir=combinedSeqOut+File.separator+"splits";
 		   FileOperation.newFolder(outDir);
-		   outDir=outDir+"/"+file.substring(file.lastIndexOf("/")+1,file.lastIndexOf("."));
+		   outDir=outDir+File.separator+file.substring(file.lastIndexOf(File.separator)+1,file.lastIndexOf("."));
 		   FileOperation.newFolder(outDir);
 		   
 		   System.out.println("......Recognizing sequence for split "+s+" ......");
@@ -226,8 +226,8 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 					}
 				 }
 				 seqFormat=FileOperation.getFileFormat(file);
-				 outName=combinedSeqOut+"/"
-				         +file.substring(file.lastIndexOf("/")+1,file.lastIndexOf("."))
+				 outName=combinedSeqOut+File.separator
+				         +file.substring(file.lastIndexOf(File.separator)+1,file.lastIndexOf("."))
 			             +".final."+seqFormat;
 				 SeqOperation.combineSeqFile(splitedSeqFiles,outName);
 				 rocket.recognizedSeqFile=outName;
@@ -254,8 +254,8 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 					}
 				 }
 			     seqFormat=FileOperation.getFileFormat(file);
-			     outName=combinedSeqOut+"/"
-			          +file.substring(file.lastIndexOf("/")+1,file.lastIndexOf("."))
+			     outName=combinedSeqOut+File.separator
+			          +file.substring(file.lastIndexOf(File.separator)+1,file.lastIndexOf("."))
 		              +".final."+seqFormat;
 			     SeqOperation.combineSeqFile(splitedSeqFiles,outName);
 			     rocket.recognizedSeqFileTrimmed=outName;
@@ -280,8 +280,8 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 					}
 				 }
 			     seqFormat=FileOperation.getFileFormat(file);
-			     outName=combinedSeqOut+"/"
-			          +file.substring(file.lastIndexOf("/")+1,file.lastIndexOf("."))
+			     outName=combinedSeqOut+File.separator
+			          +file.substring(file.lastIndexOf(File.separator)+1,file.lastIndexOf("."))
 		              +".final."+seqFormat;
 			     SeqOperation.combineSeqFile(splitedSeqFiles,outName);
 			     rocket.recognizedSeqFileMasked=outName;
@@ -305,8 +305,8 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 					}
 				  }
 				  seqFormat=FileOperation.getFileFormat(file);
-				  outName=combinedSeqOut+"/"
-				         +file.substring(file.lastIndexOf("/")+1,file.lastIndexOf("."))
+				  outName=combinedSeqOut+File.separator
+				         +file.substring(file.lastIndexOf(File.separator)+1,file.lastIndexOf("."))
 			             +".required."+seqFormat;
 				  SeqOperation.combineSeqFile(splitedSeqFiles,outName);
 				  rocket.savedCompoAlignedSeqFiles.set(c,outName);
@@ -317,7 +317,7 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 			 rocket=null;
 	     }
 	     
-	     String fileListOut=combinedSeqOut+"/fileList.txt";
+	     String fileListOut=combinedSeqOut+File.separator+"fileList.txt";
 		 FileOperation.saveList(fileList, null, fileListOut);
 
 	 }else{
@@ -382,14 +382,14 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 		   SeqRocketConfig rocketConfig, SeqRocketConfig rocketConfig2, 
 		   String seqOutDir) {	    
 		
-		FileOperation.newFolder(tmpDir+"/recognizer");		
+		FileOperation.newFolder(tmpDir+File.separator+"recognizer");		
 		List<String>tmpFiles=new  ArrayList<String>();
 				
 		if(seqOutDir==null){
-		   seqOutDir=inSeqFile.substring(0, inSeqFile.lastIndexOf("/"))+"/RecognizedSeq";	
+		   seqOutDir=inSeqFile.substring(0, inSeqFile.lastIndexOf(File.separator))+File.separator+"RecognizedSeq";	
 		}
 		FileOperation.newFolder(seqOutDir);
-		seqOutDir=seqOutDir+"/";
+		seqOutDir=seqOutDir+File.separator;
 				
 		List<SeqCompoAlignInfo> seqObjList=null; //pair-end forward
 		List<SeqCompoAlignInfo> seqObjList2=null; //pair-end reversed
@@ -427,7 +427,7 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 		        =getNonExactAndSaveExactSeq(seqObjList,rockets,BARCODE_NAME_DEFINITION,inSeqFileFormat);
 		tmpFiles.addAll(getCompoExactAlignedFiles(rockets,BARCODE_NAME_DEFINITION));
 		seqObjList=null;
-        String barNonExactLeftSubSeqFile=tmpDir+"/AllBarNoExactMatchSeq_forward.leftsub.fna";
+        String barNonExactLeftSubSeqFile=tmpDir+File.separator+"AllBarNoExactMatchSeq_forward.leftsub.fna";
         tmpFiles.add(barNonExactLeftSubSeqFile);
         barcodeMaxTerritoryLen=getSeqCompoMaxTerritoryLen(rockets, BARCODE_NAME_DEFINITION);
         createLeftSubBLASTTarSeq(barNonExactSeqObj,barcodeMaxTerritoryLen,barNonExactLeftSubSeqFile);       
@@ -449,8 +449,8 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 			}
 			
 			String forwardSeqFormat=FileOperation.getFileFormat(forwardSeqFile);
-			String forwardSeqNameFile=tmpDir+"/"+forwardSeqFile.substring(
-					 forwardSeqFile.lastIndexOf("/")+1,forwardSeqFile.lastIndexOf(".")
+			String forwardSeqNameFile=tmpDir+File.separator+forwardSeqFile.substring(
+					 forwardSeqFile.lastIndexOf(File.separator)+1,forwardSeqFile.lastIndexOf(".")
 			    	)+".seqName";
 		    tmpFiles.add(forwardSeqNameFile);
 		    tmpFiles.add(forwardSeqFile);
@@ -482,7 +482,7 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 			    =getNonExactAndSaveExactSeq(seqObjList2,rockets2,BARCODE_NAME_DEFINITION,inSeqFileFormat2);
 			tmpFiles.addAll(getCompoExactAlignedFiles(rockets2,BARCODE_NAME_DEFINITION));	
 			seqObjList2=null;
-			String barNonExactLeftSubSeqFile2=tmpDir+"/AllBarNoExactMatchSeq_reverse.leftsub.fna";
+			String barNonExactLeftSubSeqFile2=tmpDir+File.separator+"AllBarNoExactMatchSeq_reverse.leftsub.fna";
 		    tmpFiles.add(barNonExactLeftSubSeqFile2);	
 		    barcodeMaxTerritoryLen=getSeqCompoMaxTerritoryLen(rockets2, BARCODE_NAME_DEFINITION);
 		    createLeftSubBLASTTarSeq(barNonExactSeqObj2,barcodeMaxTerritoryLen,barNonExactLeftSubSeqFile2);	
@@ -500,8 +500,8 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 			String reverseSeqOut2=null;		
 			String forwardSeqOut = null;			
 			if(reverseSeqOut!=null && new File(reverseSeqOut).exists()) {
-			   reverseSeqNameFile=tmpDir+"/"+reverseSeqOut.substring(
-						  reverseSeqOut.lastIndexOf("/")+1,reverseSeqOut.lastIndexOf(".")
+			   reverseSeqNameFile=tmpDir+File.separator+reverseSeqOut.substring(
+						  reverseSeqOut.lastIndexOf(File.separator)+1,reverseSeqOut.lastIndexOf(".")
 				     )+".seqName";	
 			   tmpFiles.add(reverseSeqNameFile);			       
 			   SeqOperation.extratSeqName(reverseSeqOut,reverseSeqNameFile);					
@@ -537,8 +537,8 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 			   if(revSavedSeqOut.equals(reverseSeqOut)){
 				  rocket_forward.savedCompoAlignedSeqFiles.add(forwardSeqOut);
 			   }else{	
-				  String revSavedSeqNameFile=tmpDir+"/"+revSavedSeqOut.substring(
-						  revSavedSeqOut.lastIndexOf("/")+1,revSavedSeqOut.lastIndexOf(".")
+				  String revSavedSeqNameFile=tmpDir+File.separator+revSavedSeqOut.substring(
+						  revSavedSeqOut.lastIndexOf(File.separator)+1,revSavedSeqOut.lastIndexOf(".")
 				      )+".seqName";	
 				  tmpFiles.add(revSavedSeqNameFile);			       
 				  SeqOperation.extratSeqName(revSavedSeqOut,revSavedSeqNameFile);					
@@ -570,8 +570,8 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 				String reverseTrimSeqOut2;
 				 
 				if(reverseSeqNameFile==null || !new File(reverseSeqNameFile).exists()) {				  
-				   reverseSeqNameFile=tmpDir+"/"+reverseTrimSeqOut.substring(
-						   reverseTrimSeqOut.lastIndexOf("/")+1,reverseTrimSeqOut.lastIndexOf(".")
+				   reverseSeqNameFile=tmpDir+File.separator+reverseTrimSeqOut.substring(
+						   reverseTrimSeqOut.lastIndexOf(File.separator)+1,reverseTrimSeqOut.lastIndexOf(".")
 				      )+".seqName";	
 			       if(new File(reverseTrimSeqOut).exists()) {
 					  tmpFiles.add(reverseSeqNameFile);				      
@@ -604,8 +604,8 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 				String reverseMaskSeqFormat=FileOperation.getFileFormat(reverseMaskSeqOut);
 				String reverseMaskSeqOut2;
 			    if(reverseSeqNameFile==null || !new File(reverseSeqNameFile).exists()) {				
-					reverseSeqNameFile=tmpDir+"/"+reverseMaskSeqOut.substring(
-							reverseMaskSeqOut.lastIndexOf("/")+1,reverseMaskSeqOut.lastIndexOf(".")
+					reverseSeqNameFile=tmpDir+File.separator+reverseMaskSeqOut.substring(
+							reverseMaskSeqOut.lastIndexOf(File.separator)+1,reverseMaskSeqOut.lastIndexOf(".")
 					      )+".seqName";	
 					if(new File(reverseMaskSeqOut).exists()) {
 					   tmpFiles.add(reverseSeqNameFile);				      
@@ -679,14 +679,14 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 		   SeqRocketConfig rocketConfig, SeqRocketConfig rocketConfig2, 
 		   String seqOutDir) {	    
 		
-		FileOperation.newFolder(tmpDir+"/recognizer");		
+		FileOperation.newFolder(tmpDir+File.separator+"recognizer");		
 		List<String>tmpFiles=new  ArrayList<String>();
 				
 		if(seqOutDir==null){
-		   seqOutDir=inSeqFile.substring(0, inSeqFile.lastIndexOf("/"))+"/RecognizedSeq";	
+		   seqOutDir=inSeqFile.substring(0, inSeqFile.lastIndexOf(File.separator))+File.separator+"RecognizedSeq";	
 		}
 		FileOperation.newFolder(seqOutDir);
-		seqOutDir=seqOutDir+"/";
+		seqOutDir=seqOutDir+File.separator;
 				
 		List<SeqCompoAlignInfo> seqObjList=null; //pair-end forward
 		List<SeqCompoAlignInfo> seqObjList2=null; //pair-end reversed
@@ -720,7 +720,7 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 		        =getNonExactAndSaveExactSeq(seqObjList,rockets,BARCODE_NAME_DEFINITION,inSeqFileFormat);
 		tmpFiles.addAll(getCompoExactAlignedFiles(rockets,BARCODE_NAME_DEFINITION));
 		seqObjList=null;
-       String barNonExactLeftSubSeqFile=tmpDir+"/AllBarNoExactMatchSeq_forward.leftsub.fna";
+       String barNonExactLeftSubSeqFile=tmpDir+File.separator+"AllBarNoExactMatchSeq_forward.leftsub.fna";
        tmpFiles.add(barNonExactLeftSubSeqFile);
        barcodeMaxTerritoryLen=getSeqCompoMaxTerritoryLen(rockets, BARCODE_NAME_DEFINITION);
        createLeftSubBLASTTarSeq(barNonExactSeqObj,barcodeMaxTerritoryLen,barNonExactLeftSubSeqFile);	
@@ -739,8 +739,8 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 			}
 			
 			String forwardSeqFormat=FileOperation.getFileFormat(forwardSeqFile);
-			String forwardSeqNameFile=tmpDir+"/"+forwardSeqFile.substring(
-					 forwardSeqFile.lastIndexOf("/")+1,forwardSeqFile.lastIndexOf(".")
+			String forwardSeqNameFile=tmpDir+File.separator+forwardSeqFile.substring(
+					 forwardSeqFile.lastIndexOf(File.separator)+1,forwardSeqFile.lastIndexOf(".")
 			    	)+".seqName";
 		    tmpFiles.add(forwardSeqNameFile);
 		    tmpFiles.add(forwardSeqFile);
@@ -772,7 +772,7 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 			    =getNonExactAndSaveExactSeq(seqObjList2,rockets2,BARCODE_NAME_DEFINITION,inSeqFileFormat2);
 			tmpFiles.addAll(getCompoExactAlignedFiles(rockets2,BARCODE_NAME_DEFINITION));	
 			seqObjList2=null;
-			String barNonExactLeftSubSeqFile2=tmpDir+"/AllBarNoExactMatchSeq_reverse.leftsub.fna";
+			String barNonExactLeftSubSeqFile2=tmpDir+File.separator+"AllBarNoExactMatchSeq_reverse.leftsub.fna";
 		    tmpFiles.add(barNonExactLeftSubSeqFile2);	
 		    barcodeMaxTerritoryLen=getSeqCompoMaxTerritoryLen(rockets2, BARCODE_NAME_DEFINITION);
 		    createLeftSubBLASTTarSeq(barNonExactSeqObj2,barcodeMaxTerritoryLen,barNonExactLeftSubSeqFile2);	
@@ -798,8 +798,8 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 					String reverseSeqOut2=null;		
 					String forwardSeqOut = null;			
 					if(reverseSeqOut!=null && new File(reverseSeqOut).exists()) {
-					   reverseSeqNameFile=tmpDir+"/"+reverseSeqOut.substring(
-								  reverseSeqOut.lastIndexOf("/")+1,reverseSeqOut.lastIndexOf(".")
+					   reverseSeqNameFile=tmpDir+File.separator+reverseSeqOut.substring(
+								  reverseSeqOut.lastIndexOf(File.separator)+1,reverseSeqOut.lastIndexOf(".")
 						     )+".seqName";	
 					   tmpFiles.add(reverseSeqNameFile);			       
 					   SeqOperation.extratSeqName(reverseSeqOut,reverseSeqNameFile);					
@@ -835,8 +835,8 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 					   if(revSavedSeqOut.equals(reverseSeqOut)){
 						  rocket_forward.savedCompoAlignedSeqFiles.add(forwardSeqOut);
 					   }else{	
-						  String revSavedSeqNameFile=tmpDir+"/"+revSavedSeqOut.substring(
-								  revSavedSeqOut.lastIndexOf("/")+1,revSavedSeqOut.lastIndexOf(".")
+						  String revSavedSeqNameFile=tmpDir+File.separator+revSavedSeqOut.substring(
+								  revSavedSeqOut.lastIndexOf(File.separator)+1,revSavedSeqOut.lastIndexOf(".")
 						      )+".seqName";	
 						  tmpFiles.add(revSavedSeqNameFile);			       
 						  SeqOperation.extratSeqName(revSavedSeqOut,revSavedSeqNameFile);					
@@ -868,8 +868,8 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 						String reverseTrimSeqOut2;
 						 
 						if(reverseSeqNameFile==null || !new File(reverseSeqNameFile).exists()) {				  
-						   reverseSeqNameFile=tmpDir+"/"+reverseTrimSeqOut.substring(
-								   reverseTrimSeqOut.lastIndexOf("/")+1,reverseTrimSeqOut.lastIndexOf(".")
+						   reverseSeqNameFile=tmpDir+File.separator+reverseTrimSeqOut.substring(
+								   reverseTrimSeqOut.lastIndexOf(File.separator)+1,reverseTrimSeqOut.lastIndexOf(".")
 						      )+".seqName";	
 					       if(new File(reverseTrimSeqOut).exists()) {
 							  tmpFiles.add(reverseSeqNameFile);				      
@@ -902,8 +902,8 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 						String reverseMaskSeqFormat=FileOperation.getFileFormat(reverseMaskSeqOut);
 						String reverseMaskSeqOut2;
 					    if(reverseSeqNameFile==null || !new File(reverseSeqNameFile).exists()) {				
-							reverseSeqNameFile=tmpDir+"/"+reverseMaskSeqOut.substring(
-									reverseMaskSeqOut.lastIndexOf("/")+1,reverseMaskSeqOut.lastIndexOf(".")
+							reverseSeqNameFile=tmpDir+File.separator+reverseMaskSeqOut.substring(
+									reverseMaskSeqOut.lastIndexOf(File.separator)+1,reverseMaskSeqOut.lastIndexOf(".")
 							      )+".seqName";	
 							if(new File(reverseMaskSeqOut).exists()) {
 							   tmpFiles.add(reverseSeqNameFile);				      
@@ -1027,12 +1027,12 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 	       file=splitedSeqFiles.get(s);
 	       file2=splitedSeqFiles2.get(s);
 	       
-	       forSplitDir=file.substring(0,file.lastIndexOf("/"));
-	       revSplitDir=file2.substring(0,file2.lastIndexOf("/"));
+	       forSplitDir=file.substring(0,file.lastIndexOf(File.separator));
+	       revSplitDir=file2.substring(0,file2.lastIndexOf(File.separator));
 	       
-	       outDir = combinedSeqOut+"/splits";
+	       outDir = combinedSeqOut+File.separator+"splits";
 	       FileOperation.newFolder(outDir);
-		   outDir=outDir+"/"+file.substring(file.lastIndexOf("/")+1,file.lastIndexOf("."));
+		   outDir=outDir+File.separator+file.substring(file.lastIndexOf(File.separator)+1,file.lastIndexOf("."));
 		   FileOperation.newFolder(outDir);
 		   
 		   System.out.println("......Recognizing sequence for split "+(s+1)+" ......");
@@ -1155,8 +1155,8 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 					 }
 				 }				
 				 seqFormat=FileOperation.getFileFormat(file);
-				 outName=combinedSeqOut+"/"
-				         +file.substring(file.lastIndexOf("/")+1,file.lastIndexOf("."))
+				 outName=combinedSeqOut+File.separator
+				         +file.substring(file.lastIndexOf(File.separator)+1,file.lastIndexOf("."))
 			             +".final."+seqFormat;
 				 SeqOperation.combineSeqFile(splitedSeqFiles_F,outName);
 				 rocketPair.forward.recognizedSeqFile=outName;
@@ -1170,8 +1170,8 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 					 }
 				 }			
 				 seqFormat=FileOperation.getFileFormat(file2);
-				 outName2=combinedSeqOut+"/"
-				         +file2.substring(file2.lastIndexOf("/")+1,file2.lastIndexOf("."))
+				 outName2=combinedSeqOut+File.separator
+				         +file2.substring(file2.lastIndexOf(File.separator)+1,file2.lastIndexOf("."))
 			             +".final."+seqFormat;
 				 SeqOperation.combineSeqFile(splitedSeqFiles_R,outName2);
 				 rocketPair.reverse.recognizedSeqFile=outName2;
@@ -1205,8 +1205,8 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 					 }
 				 }
 				 seqFormat=FileOperation.getFileFormat(file);
-				 outName=combinedSeqOut+"/"
-				         +file.substring(file.lastIndexOf("/")+1,file.lastIndexOf("."))
+				 outName=combinedSeqOut+File.separator
+				         +file.substring(file.lastIndexOf(File.separator)+1,file.lastIndexOf("."))
 			             +".final."+seqFormat;
 				 SeqOperation.combineSeqFile(splitedSeqFiles_F,outName);
 				 rocketPair.forward.recognizedSeqFileTrimmed=outName;
@@ -1219,8 +1219,8 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 					 }
 				 }
 				 seqFormat=FileOperation.getFileFormat(file2);
-				 outName2=combinedSeqOut+"/"
-				         +file2.substring(file2.lastIndexOf("/")+1,file2.lastIndexOf("."))
+				 outName2=combinedSeqOut+File.separator
+				         +file2.substring(file2.lastIndexOf(File.separator)+1,file2.lastIndexOf("."))
 			             +".final."+seqFormat;
 				 SeqOperation.combineSeqFile(splitedSeqFiles_R,outName2);
 				 rocketPair.reverse.recognizedSeqFileTrimmed=outName2;
@@ -1251,8 +1251,8 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 					 }
 				 }
 				 seqFormat=FileOperation.getFileFormat(file);
-				 outName=combinedSeqOut+"/"
-				         +file.substring(file.lastIndexOf("/")+1,file.lastIndexOf("."))
+				 outName=combinedSeqOut+File.separator
+				         +file.substring(file.lastIndexOf(File.separator)+1,file.lastIndexOf("."))
 			             +".final."+seqFormat;
 				 SeqOperation.combineSeqFile(splitedSeqFiles_F,outName);
 				 rocketPair.forward.recognizedSeqFileMasked=outName;
@@ -1265,8 +1265,8 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 					 }
 				 }				 	
 				 seqFormat=FileOperation.getFileFormat(file2);
-				 outName2=combinedSeqOut+"/"
-				         +file2.substring(file2.lastIndexOf("/")+1,file2.lastIndexOf("."))
+				 outName2=combinedSeqOut+File.separator
+				         +file2.substring(file2.lastIndexOf(File.separator)+1,file2.lastIndexOf("."))
 			             +".final."+seqFormat;
 				 SeqOperation.combineSeqFile(splitedSeqFiles_R,outName2);
 				 rocketPair.reverse.recognizedSeqFileMasked=outName2;
@@ -1297,8 +1297,8 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 				    }
 				  }
 				  seqFormat=FileOperation.getFileFormat(file);
-				  outName=combinedSeqOut+"/"
-				         +file.substring(file.lastIndexOf("/")+1,file.lastIndexOf("."))
+				  outName=combinedSeqOut+File.separator
+				         +file.substring(file.lastIndexOf(File.separator)+1,file.lastIndexOf("."))
 			             +".required."+seqFormat;
 				  SeqOperation.combineSeqFile(splitedSeqFiles_F,outName);
 				  rocketPair.forward.savedCompoAlignedSeqFiles.set(c,outName);
@@ -1311,8 +1311,8 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 				    }
 				  }
 				  seqFormat=FileOperation.getFileFormat(file2);
-				  outName2=combinedSeqOut+"/"
-				         +file2.substring(file2.lastIndexOf("/")+1,file2.lastIndexOf("."))
+				  outName2=combinedSeqOut+File.separator
+				         +file2.substring(file2.lastIndexOf(File.separator)+1,file2.lastIndexOf("."))
 			             +".required."+seqFormat;
 				  SeqOperation.combineSeqFile(splitedSeqFiles_R,outName2);
 				  rocketPair.reverse.savedCompoAlignedSeqFiles.set(c,outName2);
@@ -1325,9 +1325,9 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 			 splitedSeqFiles_R=null;
 	     }	
 		 
-		 String fileListOut_forward=combinedSeqOut+"/fileList_forward.txt";
+		 String fileListOut_forward=combinedSeqOut+File.separator+"fileList_forward.txt";
 		 FileOperation.saveList(fileList_forward, null, fileListOut_forward);
-		 String fileListOut_reverse=combinedSeqOut+"/fileList_reverse.txt";
+		 String fileListOut_reverse=combinedSeqOut+File.separator+"fileList_reverse.txt";
 		 FileOperation.saveList(fileList_reverse, null, fileListOut_reverse);
 		 fileList_forward=null;
 		 fileList_reverse=null;
@@ -1385,7 +1385,7 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 		String tarBaitSeqFile="";
 		String querySeqFile="";
 		String timeStamp=new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
-		String blastOutFile=tmpDir+"/SeqRocket.BlastOut."+timeStamp+".txt";
+		String blastOutFile=tmpDir+File.separator+"SeqRocket.BlastOut."+timeStamp+".txt";
 		  
 		List<SeqCompoAlignInfo> tarSeqObj = null;		
 		List<SeqCompoAlignInfo> tarExactSeqObj=null;
@@ -1492,13 +1492,13 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 						 recognizer.seqFASTAFile=primerCont.seqFASTAFile;
 					  }
 					  if(recognizer.leftSubForBLAST && leftTrim){
-						tarBaitSeqFile=tmpDir+"/"+seqCompoName+".LeftTrim.LeftSub.ForBLAST."+c+".fna";	   
+						tarBaitSeqFile=tmpDir+File.separator+seqCompoName+".LeftTrim.LeftSub.ForBLAST."+c+".fna";	   
 					  }else if(recognizer.leftSubForBLAST){
-						tarBaitSeqFile=tmpDir+"/"+seqCompoName+".LeftSub.ForBLAST."+c+".fna";	   
+						tarBaitSeqFile=tmpDir+File.separator+seqCompoName+".LeftSub.ForBLAST."+c+".fna";	   
 					  }if(leftTrim){
-					    tarBaitSeqFile=tmpDir+"/"+seqCompoName+".LeftTrim.ForBLAST."+c+".fna";	   
+					    tarBaitSeqFile=tmpDir+File.separator+seqCompoName+".LeftTrim.ForBLAST."+c+".fna";	   
 					  }else{
-						tarBaitSeqFile=tmpDir+"/"+seqCompoName+".ForBLAST."+c+".fna";	   
+						tarBaitSeqFile=tmpDir+File.separator+seqCompoName+".ForBLAST."+c+".fna";	   
 					  }
 					  createLeftRecognizerSeq(tarNoBLASTSeqObj,seqRocket,recognizer,tarBaitSeqFile);
 	                  tmpFiles.add(tarBaitSeqFile);				  
@@ -1541,7 +1541,7 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 				    }
 				    
 				    System.out.println(seqRocket.rocketName+">>>Seq harbouring portion of "+seqCompoName
-					   +" / totally recognized seq: "+combinedTarBLASTSeqObj.size() +"/"+tarSeqObj.size());
+					   +" / totally recognized seq: "+combinedTarBLASTSeqObj.size() +File.separator+tarSeqObj.size());
 				    
 				    tarBLASTSeqObj=null;
 				    combinedTarBLASTSeqObj=null;
@@ -1556,13 +1556,13 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 				    tarSeqObj=null;		
 				    tarBLASTSeqObj=new ArrayList<SeqCompoAlignInfo> ();
 				    if(recognizer.leftSubForBLAST && leftTrim){
-					  tarSeqFile=tmpDir+"/"+seqCompoName+".Trim.leftsub.ForBLAST.fna";	   
+					  tarSeqFile=tmpDir+File.separator+seqCompoName+".Trim.leftsub.ForBLAST.fna";	   
 				    }else if(recognizer.leftSubForBLAST){
-					  tarSeqFile=tmpDir+"/"+seqCompoName+".LeftSub.ForBLAST.fna";	   
+					  tarSeqFile=tmpDir+File.separator+seqCompoName+".LeftSub.ForBLAST.fna";	   
 				    }else if(leftTrim){
-				      tarSeqFile=tmpDir+"/"+seqCompoName+".Trim.ForBLAST.fna";	
+				      tarSeqFile=tmpDir+File.separator+seqCompoName+".Trim.ForBLAST.fna";	
 				    }else{
-					  tarSeqFile=tmpDir+"/"+seqCompoName+".ForBLAST.fna";	    
+					  tarSeqFile=tmpDir+File.separator+seqCompoName+".ForBLAST.fna";	    
 				    }	
 				    createLeftRecognizerSeq(tarNoExactSeqObj,seqRocket,recognizer,tarSeqFile);	
 	                tmpFiles.add(tarSeqFile);		  
@@ -1658,13 +1658,13 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 					   recognizer.blastWordSize=blastWordSizeList.get(c);
 					   //recognizer.minAlignLen=recognizer.blastWordSize;
 					   if(recognizer.rightSubForBLAST && rightTrim){
-						  tarSeqFile=tmpDir+"/"+seqCompoName+".Trim.RightSub.ForBLAST."+c+".fna";	   
+						  tarSeqFile=tmpDir+File.separator+seqCompoName+".Trim.RightSub.ForBLAST."+c+".fna";	   
 					   }else if(recognizer.rightSubForBLAST){
-						  tarSeqFile=tmpDir+"/"+seqCompoName+".RightSub.ForBLAST."+c+".fna";	     
+						  tarSeqFile=tmpDir+File.separator+seqCompoName+".RightSub.ForBLAST."+c+".fna";	     
 					   }else if(rightTrim){
-						  tarSeqFile=tmpDir+"/"+seqCompoName+".Trim.ForBLAST."+c+".fna";	   
+						  tarSeqFile=tmpDir+File.separator+seqCompoName+".Trim.ForBLAST."+c+".fna";	   
 					   }else{
-						  tarSeqFile=tmpDir+"/"+seqCompoName+".ForBLAST."+c+".fna";
+						  tarSeqFile=tmpDir+File.separator+seqCompoName+".ForBLAST."+c+".fna";
 					   }	
 					   createRightRecognizerSeq(tarNoBLASTSeqObj,seqRocket,recognizer,tarSeqFile);	
 			           tmpFiles.add(tarSeqFile);				  
@@ -1712,7 +1712,7 @@ public class SeqRocketConsole extends SeqRocketRecognition{
 			          
 					System.out.println(seqRocket.rocketName+" >>> Seq harbouring portion of "+seqCompoName
 							+" / totally recognized seq: "
-							+(tarExactSeqObj.size()+combinedTarBLASTSeqObj.size()) +"/"+tarSeqObj.size());
+							+(tarExactSeqObj.size()+combinedTarBLASTSeqObj.size()) +File.separator+tarSeqObj.size());
 					   
 					tarBLASTSeqObj=null;
 					combinedTarBLASTSeqObj=null;					 

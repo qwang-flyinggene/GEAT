@@ -33,6 +33,7 @@
 package org.geatools.seqprocess;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -122,7 +123,7 @@ public class SeqFilter{
 		System.out.println("Totally encoded reads: "+seqEncodeObjList.size()+"[time: "+timeStamp+"]");	
 		
 		System.out.println("Dispatching reads (pair-end)......");
-		String outTmpDir=GEAT.getTmpDir()+"/"+timeStamp;
+		String outTmpDir=GEAT.getTmpDir()+File.separator+timeStamp;
 		FileOperation.newFolder(outTmpDir);
 		List<String>dividedSeqFiles=SeqOperation.dispatchSeqByNumEncode(inSeqFile,seqSplitStep,
 				seqEncodeObjList,encodeIntervalNum,outTmpDir);
@@ -237,7 +238,7 @@ public class SeqFilter{
 		System.out.println("Totally Encoded reads: "+seqEncodeObjList.size()+"[time: "+timeStamp+"]");	
 	
 		System.out.println("Dispatching reads(pair-end)......");
-		String outTmpDir=GEAT.getTmpDir()+"/"+timeStamp;
+		String outTmpDir=GEAT.getTmpDir()+File.separator+timeStamp;
 		FileOperation.newFolder(outTmpDir);
 		List<ArrayList<String>> dividedSeqFiles12=SeqOperation.dispatchSeqByNumEncode(inSeqFile,inSeqFile2,
 				seqSplitStep,seqEncodeObjList,encodeIntervalNum,outTmpDir);

@@ -407,8 +407,8 @@ public  class  FileOperation {
                temp.delete();  
            }  
            if  (temp.isDirectory())  {  
-               delAllFile(path+"/"+  tempList[i]);//
-               delFolder(path+"/"+  tempList[i]);//
+               delAllFile(path + File.separator + tempList[i]);//
+               delFolder(path + File.separator + tempList[i]);//
            }  
        }  
    }  
@@ -469,7 +469,7 @@ public  class  FileOperation {
 
                if(temp.isFile()){  
                    FileInputStream  input  =  new  FileInputStream(temp);  
-                   FileOutputStream  output  =  new  FileOutputStream(newPath  +  "/"  + 
+                   FileOutputStream  output  =  new  FileOutputStream(newPath  +  File.separator  + 
                             (temp.getName()).toString());  
                    byte[]  b  =  new  byte[1024  *  5];  
                    int  len;  
@@ -481,7 +481,7 @@ public  class  FileOperation {
                    input.close();  
                }  
                if(temp.isDirectory()){//
-                   copyFolder(oldPath+"/"+file[i],newPath+"/"+file[i]);  
+                   copyFolder(oldPath+File.separator+file[i],newPath+File.separator+file[i]);  
                }  
            }  
        }

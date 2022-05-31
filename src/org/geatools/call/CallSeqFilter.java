@@ -284,7 +284,7 @@ public class CallSeqFilter extends GEAT{
 			 }
 		   }		   
 		   if(!doOutput){			   
-			 outDir=homeDir+"/working";
+			 outDir=homeDir+fileSeparator+"working";
 			 dir=new File(outDir);
 			 if(!dir.exists()) FileOperation.newFolder(outDir);	
 		     dir=null;
